@@ -1,5 +1,5 @@
 # 人工测试指南
-> 文件：`test-results/manual-test-guide.md`
+> 文件：`.claude/iterations/{sprint-name}/test-results/manual-test-guide.md`
 
 ## 1. 功能清单 [必填]
 | 功能 | 对应文件路径 | 开发者 |

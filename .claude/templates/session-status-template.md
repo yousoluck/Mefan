@@ -1,6 +1,6 @@
 # Session Status Template
 
-> 文件路径：`iterations/{sprint-name}/session-status.md`
+> 文件路径：`.claude/iterations/{sprint-name}/session-status.md`
 > 更新时机：每个阶段完成后由 PM 更新
 > **iteration name = sprint name**，统一使用 `{sprint-name}` 格式（如 `sprint-2026-05-14`）
 
@@ -76,7 +76,7 @@
 | 03 | sprint-status.md | `.claude/iterations/{sprint-name}/` | ✅ | |
 | 04 | task-summary/T{NNN}.md | `.claude/iterations/{sprint-name}/task-summary/` | ⏳ | |
 | 05 | quality-report.md | `.claude/iterations/{sprint-name}/test-results/` | ✅ | |
-| 06 | retrospective.md | `.claude/iterations/{sprint-name}/` | ✅ | |
+| 06 | iteration-retrospective.md | `.claude/iterations/{sprint-name}/` | ✅ | |
 
 ---
 

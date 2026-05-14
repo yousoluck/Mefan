@@ -1,5 +1,5 @@
 # 质量报告
-> 文件：`quality-report.md`
+> 文件：`.claude/iterations/{sprint-name}/test-results/quality-report.md`
 
 ## 1. 测试覆盖统计 [必填]
 | 测试类型 | 总数 | 通过 | 失败 | 跳过 | 通过率 |

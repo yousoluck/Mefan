@@ -1,5 +1,5 @@
 # 技术栈档案
-> 文件路径：`context/tech-stack-profile.md`
+> 文件路径：`.claude/context/tech-stack-profile.md`
 
 ## 前端
 - **框架**：

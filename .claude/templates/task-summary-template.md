@@ -1,5 +1,5 @@
 # 任务总结
-> 文件：`task-summary/<task-id>.md`
+> 文件：`.claude/iterations/{sprint-name}/task-summary/<task-id>.md`
 > 必填项不可留空。
 
 ## 任务信息

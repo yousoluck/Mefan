@@ -68,7 +68,7 @@
 
 | 文件名 | 完整路径 | 模板 | 被依赖阶段 |
 |--------|----------|------|-----------|
-| retrospective.md | `.claude/iterations/{sprint-name}/retrospective.md` | `.claude/templates/iteration-retrospective-template.md` | 下一 iteration 的 00-init（输入上下文）、06-retrospect §4.4（进化分析参考） |
+| iteration-retrospective.md | `.claude/iterations/{sprint-name}/iteration-retrospective.md` | `.claude/templates/iteration-retrospective-template.md` | 下一 iteration 的 00-init（输入上下文）、06-retrospect §4.4（进化分析参考） |
 | evolution-proposal.md | `.claude/evolution-proposals/upgrade-YYYY-MM-DD-title.md` | `.claude/templates/evolution-proposal-template.md` | 06-retrospect §4.4 采纳后写入 rules-proposed/ 或 skills-proposed/ → 下一 iteration 的 00-init §2.2/§2.4 加载 |
 | rules-proposed/*.md | `.claude/rules-proposed/` | - | 下一 iteration 的 00-init §2.2 加载为实验规则 |
 | skills-proposed/*.md | `.claude/skills-proposed/` | - | 下一 iteration 的 00-init §2.4 加载为实验技能 |

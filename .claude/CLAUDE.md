@@ -10,7 +10,7 @@ Skills 路径：.claude/skills/
 
 - **日志文件**：`../logs/conversation-log.md`
 - **执行时机**：对话结束时（即 AI 回复用户后）
-- **执行命令**：
+- **执行命令**：j 
   ```bash
   bash .claude/hooks/conversation-log.sh "assistant" "<用户输入>" "<AI回复摘要>" "<执行的操作>"
   ```

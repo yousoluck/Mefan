@@ -1,5 +1,5 @@
 # 一致性基线
-> 文件路径：`context/consistency-baseline.md`
+> 文件路径：`.claude/context/consistency-baseline.md`
 
 ## 设计模式约定
 1. 【规则】描述（证据：文件路径）

@@ -1,5 +1,5 @@
 # 进化提案
-> 文件：`evolution-proposals/upgrade-YYYY-MM-DD.md`
+> 文件：`.claude/evolution-proposals/upgrade-YYYY-MM-DD.md`
 
 ## 提案 1
 - **触发数据**：违规 X 次 / 缺陷 Y 个 / 债务 Z 项

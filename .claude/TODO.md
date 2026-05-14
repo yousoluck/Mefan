@@ -25,7 +25,7 @@
 
 ### T1: 开源框架集成规划
 
-**目标**：将 Mefan 与 OpenSpec/Gstack/SStack 集成融合，打造完整的 AI 工程化开发栈。
+**目标**：将 Mefan 与 OpenSpec/Gstack/SStack/superpowers 集成融合，打造完整的 AI 工程化开发栈。
 
 **集成架构**：
 
