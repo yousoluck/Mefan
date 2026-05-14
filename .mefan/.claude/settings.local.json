@@ -14,7 +14,9 @@
       "Bash(ls *.md)",
       "Bash(for f:*)",
       "Bash(do mv:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(mkdir -p /mnt/d/PycharmProjects/Mefan/.claude/templates)",
+      "Bash(cp /mnt/d/PycharmProjects/Mefan/.mefan/templates/*.md /mnt/d/PycharmProjects/Mefan/.claude/templates/)"
     ]
   },
   "hooks": {

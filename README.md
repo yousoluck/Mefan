@@ -1,160 +1,156 @@
 1. 目录结构
    1. 项目根目录/
-    ├── .harness/                       # 【框架专属根目录，与 .claude 解耦】
-    │   ├── CLAUDE.md                   # 项目宪法（含 SCENARIO 变量）
-    │   ├── HARNESS_VERSION.md          # 框架版本
-    │   ├── agents/                     # Agent 角色提示词
-    │   │   ├── pm.md
-    │   │   ├── architect.md
-    │   │   ├── analyst.md
-    │   │   ├── developer.md
-    │   │   ├── qa.md
-    │   │   └── guardian.md
-    │   ├── commands/                   # Command 入口文件
-    │   │   ├── project-upgrade/
-    │   │   │   ├── 00-init.md
-    │   │   │   ├── 01-requirements.md
-    │   │   │   ├── 02-arch-qa.md
-    │   │   │   ├── 03-plan.md
-    │   │   │   ├── 04-implement.md
-    │   │   │   ├── 05-quality.md
-    │   │   │   ├── 06-retrospect.md
-    │   │   │   └── auto.md
-    │   │   ├── project-refactor/
-    │   │   └── project-new/
-    │   ├── knowledge/                  # Rules 和 Skills 统一存储
-    │   │   ├── global/                 # 全局通用
-    │   │   │   ├── session-init.md
-    │   │   │   ├── quality-gates.md
-    │   │   │   ├── exception-handling.md
-    │   │   │   ├── tech-debt-management.md
-    │   │   │   └── harness-version-control.md
-    │   │   ├── scenario-upgrade/       # 二次开发场景专用
-    │   │   │   ├── consistency-first.md
-    │   │   │   ├── api-compatibility.md
-    │   │   │   └── reuse-before-build.md
-    │   │   └── scenario-refactor/      # 重构专用
-    │   │       ├── behavior-freeze.md
-    │   │       └── ...
-    │   ├── skills/                     # 能力库
-    │   │   ├── graphify-query-cheatsheet.md
-    │   │   ├── query-third-party-docs.md
-    │   │   ├── git-workflow.md
-    │   │   ├── tdd-red-green-refactor.md
-    │   │   ├── code-review-checklist.md
-    │   │   ├── write-manual-test-guide.md
-    │   │   ├── ug-triage-classification.md
-    │   │   ├── root-cause-analysis.md
-    │   │   └── pattern-extraction-from-logs.md
-    │   ├── hooks/                      # 自动化检查脚本
-    │   │   ├── check-consistency.py
-    │   │   └── log-event.sh
-    │   ├── templates/                  # 所有产出物的标准模板
-    │   │   ├── session-status-template.md
-    │   │   ├── tech-stack-profile-template.md
-    │   │   ├── consistency-baseline-template.md
-    │   │   ├── requirements-template.md
-    │   │   ├── adr-template.md
-    │   │   ├── test-plan-template.md
-    │   │   ├── iteration-plan-template.md
-    │   │   ├── sprint-status-template.md
-    │   │   ├── task-summary-template.md
-    │   │   ├── quality-report-template.md
-    │   │   ├── manual-test-guide-template.md
-    │   │   ├── bug-log-template.md
-    │   │   ├── iteration-retrospective-template.md
-    │   │   └── evolution-proposal-template.md
-    │   ├── settings.json                      # Hook/MCP 配置
-    │   ├── context/                           # 全局技术上下文（跨迭代共享）
-    │   │   ├── tech-stack-profile.md
-    │   │   └── consistency-baseline.md
-    │   ├── iterations/                        # 迭代总目录
-    │   │   ├── mefan-log.md                   # 全局日志
-    │   │   ├── sprint-2026-05-14/             # 单个迭代
-    │   │   │   ├── session-status.md
-    │   │   │   ├── requirements/
-    │   │   │   │   └── upgrade-2026-05-14-xxx.md
-    │   │   │   ├── adr/
-    │   │   │   │   └── upgrade-2026-05-14-xxx.md
-    │   │   │   ├── test-plan/
-    │   │   │   │   └── upgrade-2026-05-14-xxx.md
-    │   │   │   ├── sprint-status.md
-    │   │   │   ├── iteration-plan.md
-    │   │   │   ├── task-summary/
-    │   │   │   │   ├── T001.md
-    │   │   │   │   └── ...
-    │   │   │   ├── test-results/
-    │   │   │   │   ├── regression-2026-05-14.log
-    │   │   │   │   ├── manual-test-guide.md
-    │   │   │   │   └── unit-T001.log
-    │   │   │   ├── bug-log/
-    │   │   │   │   ├── auto-2026-05-14.md
-    │   │   │   │   └── manual-2026-05-14.md
-    │   │   │   └── retrospective.md
-    │   │   └── sprint-2026-05-28/
-    │   │       └── ...
-    │   ├── evolution-proposals/               # 进化提案
-    │   │   └── upgrade-2026-05-14.md
-    │   └── reports/                           # 人类可读报告
-    │       └── PROJECT_STATUS.md
-    └── graphify-out/                          # 知识图谱（由工具生成，非框架文件）
+   ├── .claude/                          # 【Claude Code 标准结构，安装时生成】
+   │   ├── commands/                     # Command 入口文件（场景前缀命名）
+   │   │   ├── mf-upgrade:00-init.md     → /mf-upgrade:00-init
+   │   │   ├── mf-upgrade:01-requirements.md
+   │   │   ├── mf-upgrade:02-arch-qa.md
+   │   │   ├── mf-upgrade:03-plan.md
+   │   │   ├── mf-upgrade:04-implement.md
+   │   │   ├── mf-upgrade:05-quality.md
+   │   │   ├── mf-upgrade:06-retrospect.md
+   │   │   ├── mf-upgrade:auto.md
+   │   │   └── mf-refactor:*/            → /mf-refactor:*
+   │   ├── agents/                       # Agent 角色提示词（从 .mefan/ 复制）
+   │   │   ├── pm.md
+   │   │   ├── architect.md
+   │   │   ├── analyst.md
+   │   │   ├── developer.md
+   │   │   ├── qa.md
+   │   │   ├── guardian.md
+   │   │   └── coach.md
+   │   ├── rules/                        # Rules（从 .mefan/knowledge/ 重命名）
+   │   │   ├── global/
+   │   │   │   ├── session-init.md
+   │   │   │   ├── quality-gates.md
+   │   │   │   ├── exception-handling.md
+   │   │   │   ├── tech-debt-management.md
+   │   │   │   ├── harness-version-control.md
+   │   │   │   ├── conflict-resolution.md
+   │   │   │   ├── hook-vs-guardian.md
+   │   │   │   └── logging.md
+   │   │   ├── scenario-upgrade/         # 二次开发场景专用
+   │   │   │   ├── consistency-first.md
+   │   │   │   ├── api-compatibility.md
+   │   │   │   └── reuse-before-build.md
+   │   │   └── scenario-refactor/
+   │   │       └── behavior-freeze.md
+   │   └── skills/                       # 能力库（从 .mefan/skills/ 复制）
+   │       ├── graphify-query-cheatsheet.md
+   │       ├── query-third-party-docs.md
+   │       ├── git-workflow.md
+   │       ├── tdd-red-green-refactor.md
+   │       ├── code-review-checklist.md
+   │       ├── write-manual-test-guide.md
+   │       ├── ug-triage-classification.md
+   │   └── templates/                    # 模板（从 .claude/templates/ 复制）
+   │       ├── session-status-template.md
+   │       ├── tech-stack-profile-template.md
+   │       └── ...
+   │
+   ├── .mefan/                           # 【框架自身存储位置】
+   │   ├── CLAUDE.md                     # 项目宪法（含 SCENARIO 变量）
+   │   ├── HARNESS_VERSION.md            # 框架版本
+   │   ├── templates/                    # 模板源文件（安装时复制到 .claude/）
+   │   ├── hooks/                        # 自动化检查脚本
+   │   ├── hooks/                        # 自动化检查脚本
+   │   │   ├── check-consistency.py
+   │   │   ├── log-event.sh
+   │   │   └── conversation-log.sh
+   │   ├── context/                      # 全局技术上下文（跨迭代共享）
+   │   │   ├── tech-stack-profile.md
+   │   │   └── consistency-baseline.md
+   │   ├── iterations/                   # 迭代总目录
+   │   │   ├── mefan-log.md              # 全局日志
+   │   │   ├── sprint-2026-05-14/        # 单个迭代
+   │   │   │   ├── session-status.md
+   │   │   │   ├── requirements/
+   │   │   │   │   └── upgrade-2026-05-14-xxx.md
+   │   │   │   ├── adr/
+   │   │   │   │   └── upgrade-2026-05-14-xxx.md
+   │   │   │   ├── test-plan/
+   │   │   │   │   └── upgrade-2026-05-14-xxx.md
+   │   │   │   ├── sprint-status.md
+   │   │   │   ├── iteration-plan.md
+   │   │   │   ├── task-summary/
+   │   │   │   │   ├── T001.md
+   │   │   │   │   └── ...
+   │   │   │   ├── test-results/
+   │   │   │   │   ├── regression-2026-05-14.log
+   │   │   │   │   ├── manual-test-guide.md
+   │   │   │   │   └── unit-T001.log
+   │   │   │   ├── bug-log/
+   │   │   │   │   ├── auto-2026-05-14.md
+   │   │   │   │   └── manual-2026-05-14.md
+   │   │   │   └── retrospective.md
+   │   │   └── sprint-2026-05-28/
+   │   │       └── ...
+   │   ├── evolution-proposals/          # 进化提案
+   │   │   └── upgrade-2026-05-14.md
+   │   ├── reports/                      # 人类可读报告
+   │   │   └── PROJECT_STATUS.md
+   │   └── .claude/                      # Claude Code 配置（本地）
+   │       └── settings.local.json
+   │
+   └── graphify-out/                    # 知识图谱（由工具生成）
 
 2. 框架文件
 层级	                 文件	               状态
-Agent	           agents/pm.md	        ✅ 已加固
-                   agents/architect.md	✅ 已加固
-                   agents/analyst.md	✅ 已加固
-                   agents/developer.md	✅ 已加固
-                   agents/qa.md	        ✅ 已加固
-                   agents/guardian.md	✅ 已加固
-                   agents/coach.md	    ✅ 已加固
-Command	           commands/project-upgrade/00-init.md	✅ 已加固
-                   commands/project-upgrade/01-requirements.md	✅ 已加固
-                   commands/project-upgrade/02-arch-qa.md	✅ 已加固
-                   commands/project-upgrade/03-plan.md	✅ 已加固
-                   commands/project-upgrade/04-implement.md	✅ 已加固
-                   commands/project-upgrade/05-quality.md	✅ 已加固
-                   commands/project-upgrade/06-retrospect.md	✅ 已加固
-                   commands/project-upgrade/auto.md	✅ 已加固
-Template	       templates/session-status-template.md	✅
-                   templates/tech-stack-profile-template.md	✅
-                   templates/consistency-baseline-template.md	✅
-                   templates/requirements-template.md	✅ 已加固
-                   templates/adr-template.md	✅ 已加固
-                   templates/test-plan-template.md	✅ 已加固
-                   templates/iteration-plan-template.md	✅ 已加固
-                   templates/sprint-status-template.md	✅ 已加固
-                   templates/task-summary-template.md	✅ 已加固
-                   templates/quality-report-template.md	✅ 已加固
-                   templates/manual-test-guide-template.md	✅ 已加固
-                   templates/bug-log-template.md	✅ 已加固
-                   templates/iteration-retrospective-template.md	✅ 已加固
-                   templates/evolution-proposal-template.md	✅ 已加固
-                   templates/log-entry-template.md	✅ 已加固
-                   templates/project-status-template.md	✅ 已加固
-Rule	           knowledge/global/session-init.md	✅
-                   knowledge/scenario-upgrade/consistency-first.md	✅
-                   knowledge/scenario-upgrade/api-compatibility.md	✅
-                   knowledge/scenario-upgrade/reuse-before-build.md	✅
-                   knowledge/global/conflict-resolution.md	✅ 已加固
-                   knowledge/global/exception-handling.md	✅ 已加固
-                   knowledge/global/tech-debt-management.md	✅ 已加固
-                   knowledge/global/hook-vs-guardian.md	✅ 已加固
-                   knowledge/global/harness-version-control.md	✅ 已加固
-                   knowledge/global/quality-gates.md	✅ 已加固
-                   knowledge/global/logging.md	✅ 已加固
-Skill	           skills/graphify-query-cheatsheet.md	✅ 核心
-                   skills/git-workflow.md	✅ 已加固
-                   skills/query-third-party-docs.md	✅ 已加固
-                   skills/tdd-red-green-refactor.md	✅ 已加固
-                   skills/code-review-checklist.md	✅ 已加固
-                   skills/write-manual-test-guide.md	✅ 已加固
-                   skills/ug-triage-classification.md	✅ 已加固
-                   skills/root-cause-analysis.md	✅ 已加固
-                   skills/pattern-extraction-from-logs.md	✅ 已加固
-Hook	           hooks/check-consistency.py	✅ 已提供
-                   hooks/log-event.sh	✅ 已提供
-初始化	           init-mefan-harness.sh	✅ 已提供
+Agent	           .claude/agents/pm.md	        ✅ 已加固
+                   .claude/agents/architect.md	✅ 已加固
+                   .claude/agents/analyst.md	✅ 已加固
+                   .claude/agents/developer.md	✅ 已加固
+                   .claude/agents/qa.md	        ✅ 已加固
+                   .claude/agents/guardian.md	✅ 已加固
+                   .claude/agents/coach.md	    ✅ 已加固
+Command	           .claude/commands/mf-upgrade:00-init.md	✅ 可用 /mf-upgrade:00-init
+                   .claude/commands/mf-upgrade:01-requirements.md	✅ 可用 /mf-upgrade:01-requirements
+                   .claude/commands/mf-upgrade:02-arch-qa.md	✅ 可用 /mf-upgrade:02-arch-qa
+                   .claude/commands/mf-upgrade:03-plan.md	✅ 可用 /mf-upgrade:03-plan
+                   .claude/commands/mf-upgrade:04-implement.md	✅ 可用 /mf-upgrade:04-implement
+                   .claude/commands/mf-upgrade:05-quality.md	✅ 可用 /mf-upgrade:05-quality
+                   .claude/commands/mf-upgrade:06-retrospect.md	✅ 可用 /mf-upgrade:06-retrospect
+                   .claude/commands/mf-upgrade:auto.md	✅ 可用 /mf-upgrade:auto
+Template	       .claude/templates/session-status-template.md	✅
+                   .claude/templates/tech-stack-profile-template.md	✅
+                   .claude/templates/consistency-baseline-template.md	✅
+                   .claude/templates/requirements-template.md	✅ 已加固
+                   .claude/templates/adr-template.md	✅ 已加固
+                   .claude/templates/test-plan-template.md	✅ 已加固
+                   .claude/templates/iteration-plan-template.md	✅ 已加固
+                   .claude/templates/sprint-status-template.md	✅ 已加固
+                   .claude/templates/task-summary-template.md	✅ 已加固
+                   .claude/templates/quality-report-template.md	✅ 已加固
+                   .claude/templates/manual-test-guide-template.md	✅ 已加固
+                   .claude/templates/bug-log-template.md	✅ 已加固
+                   .claude/templates/iteration-retrospective-template.md	✅ 已加固
+                   .claude/templates/evolution-proposal-template.md	✅ 已加固
+                   .claude/templates/log-entry-template.md	✅ 已加固
+                   .claude/templates/project-status-template.md	✅ 已加固
+Rule	           .claude/rules/global/session-init.md	✅
+                   .claude/rules/scenario-upgrade/consistency-first.md	✅
+                   .claude/rules/scenario-upgrade/api-compatibility.md	✅
+                   .claude/rules/scenario-upgrade/reuse-before-build.md	✅
+                   .claude/rules/global/conflict-resolution.md	✅ 已加固
+                   .claude/rules/global/exception-handling.md	✅ 已加固
+                   .claude/rules/global/tech-debt-management.md	✅ 已加固
+                   .claude/rules/global/hook-vs-guardian.md	✅ 已加固
+                   .claude/rules/global/harness-version-control.md	✅ 已加固
+                   .claude/rules/global/quality-gates.md	✅ 已加固
+                   .claude/rules/global/logging.md	✅ 已加固
+Skill	           .claude/skills/graphify-query-cheatsheet.md	✅ 核心
+                   .claude/skills/git-workflow.md	✅ 已加固
+                   .claude/skills/query-third-party-docs.md	✅ 已加固
+                   .claude/skills/tdd-red-green-refactor.md	✅ 已加固
+                   .claude/skills/code-review-checklist.md	✅ 已加固
+                   .claude/skills/write-manual-test-guide.md	✅ 已加固
+                   .claude/skills/ug-triage-classification.md	✅ 已加固
+                   .claude/skills/root-cause-analysis.md	✅ 已加固
+                   .claude/skills/pattern-extraction-from-logs.md	✅ 已加固
+Hook	           .mefan/hooks/check-consistency.py	✅ 已提供
+                   .mefan/hooks/log-event.sh	✅ 已提供
+                   .mefan/hooks/conversation-log.sh	✅ 已提供
+初始化	           .mefan/init-mefan-harness.sh	✅ 已提供（待更新）
 
 ---
 
