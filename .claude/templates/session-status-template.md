@@ -67,16 +67,16 @@
 
 | 阶段 | 产出物 | 路径 | 状态 | 完成时间 |
 |------|--------|------|------|---------|
-| 00 | tech-stack-profile.md | `.mefan/context/` | ✅ | |
-| 00 | consistency-baseline.md | `.mefan/context/` | ✅ | |
-| 01 | requirements.md | `.mefan/iterations/{sprint-name}/requirements/` | ✅ | |
-| 02 | adr.md | `.mefan/iterations/{sprint-name}/adr/` | ✅ | |
-| 02 | test-plan.md | `.mefan/iterations/{sprint-name}/test-plan/` | ✅ | |
-| 03 | iteration-plan.md | `.mefan/iterations/{sprint-name}/` | ✅ | |
-| 03 | sprint-status.md | `.mefan/iterations/{sprint-name}/` | ✅ | |
-| 04 | task-summary/T{NNN}.md | `.mefan/iterations/{sprint-name}/task-summary/` | ⏳ | |
-| 05 | quality-report.md | `.mefan/iterations/{sprint-name}/test-results/` | ✅ | |
-| 06 | retrospective.md | `.mefan/iterations/{sprint-name}/` | ✅ | |
+| 00 | tech-stack-profile.md | `.claude/context/` | ✅ | |
+| 00 | consistency-baseline.md | `.claude/context/` | ✅ | |
+| 01 | requirements.md | `.claude/iterations/{sprint-name}/requirements/` | ✅ | |
+| 02 | adr.md | `.claude/iterations/{sprint-name}/adr/` | ✅ | |
+| 02 | test-plan.md | `.claude/iterations/{sprint-name}/test-plan/` | ✅ | |
+| 03 | iteration-plan.md | `.claude/iterations/{sprint-name}/` | ✅ | |
+| 03 | sprint-status.md | `.claude/iterations/{sprint-name}/` | ✅ | |
+| 04 | task-summary/T{NNN}.md | `.claude/iterations/{sprint-name}/task-summary/` | ⏳ | |
+| 05 | quality-report.md | `.claude/iterations/{sprint-name}/test-results/` | ✅ | |
+| 06 | retrospective.md | `.claude/iterations/{sprint-name}/` | ✅ | |
 
 ---
 

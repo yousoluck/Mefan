@@ -1,8 +1,8 @@
 # /project-upgrade:01-requirements – 需求澄清与现有系统分析
 ## 0. 日志声明（自动追加
-执行本阶段所有步骤时，必须使用 `.mefan/hooks/log-event.sh` 记录日志。
-- 进入阶段时：`bash .mefan/hooks/log-event.sh <阶段> <Agent> "阶段进入" "进入阶段X" "" "成功"`
-- 结束阶段时：`bash .mefan/hooks/log-event.sh <阶段> <Agent> "阶段退出" "阶段X完成" "" "成功"`
+执行本阶段所有步骤时，必须使用 `.claude/hooks/log-event.sh` 记录日志。
+- 进入阶段时：`bash .claude/hooks/log-event.sh <阶段> <Agent> "阶段进入" "进入阶段X" "" "成功"`
+- 结束阶段时：`bash .claude/hooks/log-event.sh <阶段> <Agent> "阶段退出" "阶段X完成" "" "成功"`
 - 在 Human Gate 前后记录审批事件
 
 ## 1. 角色激活
@@ -10,9 +10,9 @@
 - **监督 Agent**：项目经理 (`agents/pm.md`)，阶段末执行硬性审查。
 
 ## 2. 前置输入（必须读取，禁止凭记忆）
-- `.mefan/iterations/{sprint-name}/session-status.md`
-- `.mefan/context/tech-stack-profile.md`
-- `.mefan/context/consistency-baseline.md`
+- `.claude/iterations/{sprint-name}/session-status.md`
+- `.claude/context/tech-stack-profile.md`
+- `.claude/context/consistency-baseline.md`
 - 知识图谱（通过 `graphify query` 使用，数据在 `graphify-out/`；若不可用，使用手动方式）
 
 **前置检查**：
@@ -20,10 +20,10 @@
 - 若 `session-status.md` 不存在，报错："阶段 0 未完成或 session-status.md 缺失，请先执行 /project-upgrade:00-init"
 
 ## 3. 强制规则
-- `.mefan/rules/scenario-upgrade/consistency-first.md`
-- `.mefan/rules/scenario-upgrade/api-compatibility.md`
-- `.mefan/rules/scenario-upgrade/reuse-before-build.md`
-- `.mefan/rules/global/conflict-resolution.md`（如有）
+- `.claude/rules/scenario-upgrade/consistency-first.md`
+- `.claude/rules/scenario-upgrade/api-compatibility.md`
+- `.claude/rules/scenario-upgrade/reuse-before-build.md`
+- `.claude/rules/global/conflict-resolution.md`（如有）
 
 ## 4. 执行流程
 
@@ -47,7 +47,7 @@
 #### 4.2.1 冲突识别与升级
 **执行者**：分析师
 
-1. **识别冲突**：读取 `.mefan/iterations/{sprint-name}/session-status.md` 中的 backlog 条目和已有任务列表，与本需求的"触达模块"交叉比对。
+1. **识别冲突**：读取 `.claude/iterations/{sprint-name}/session-status.md` 中的 backlog 条目和已有任务列表，与本需求的"触达模块"交叉比对。
    - 若任一模块已在 backlog 或其他任务中存在，记录为冲突。
    - **注意**：sprint-status.md 是阶段 3 产出，阶段 1 无法读取。冲突检查基于 session-status.md 中的 backlog。
 
@@ -63,7 +63,7 @@
      c. **人类裁决**：若 PM 无法通过 a 或 b 解决，生成《冲突裁决申请书》，列出冲突双方和 PM 分析，提交人类决策。
    - PM 做出决策后，分析师根据决策结果继续或暂停工作。
 
-4. **升级记录**：若产生核心冲突，PM 在 `.mefan/iterations/{sprint-name}/session-status.md` 的"异常记录"段追加：
+4. **升级记录**：若产生核心冲突，PM 在 `.claude/iterations/{sprint-name}/session-status.md` 的"异常记录"段追加：
    - 冲突描述：[任务 A] vs [任务 B] 在 [模块/文件] 上的核心冲突
    - 处理方式：[串行化 / 分模块 / 人类裁决]
    - 决策结果：[具体描述]
@@ -84,11 +84,11 @@
 4. **若搜索结果为零**：在需求文档测试章节显式标注"**高风险：无现有测试覆盖**"，并在 4.5 输出时同步提醒架构师需在阶段 2 制定基线测试方案。
 
 ### 4.5 输出需求文档
-**目录检查**：确保 `.mefan/iterations/{sprint-name}/requirements/` 目录存在，若不存在则创建。
-严格按照 `.mefan/templates/requirements-template.md` 填写，所有必填项不可留空。执行反向校验。
+**目录检查**：确保 `.claude/iterations/{sprint-name}/requirements/` 目录存在，若不存在则创建。
+严格按照 `.claude/templates/requirements-template.md` 填写，所有必填项不可留空。执行反向校验。
 
 ## 5. 产出物
-- `.mefan/iterations/{sprint-name}/requirements/upgrade-YYYY-MM-DD-title.md`
+- `.claude/iterations/{sprint-name}/requirements/upgrade-YYYY-MM-DD-title.md`
 
 ## 6. 项目经理硬性审查（逐项打钩）
 - [ ] 冲突拓扑是否分类完整且附具体模块名？核心/边缘分类是否准确？
@@ -103,4 +103,4 @@
 
 | 文件名 | 完整路径 | 模板 | 被依赖阶段 |
 |--------|----------|------|-----------|
-| requirements/*.md | `.mefan/iterations/{sprint-name}/requirements/upgrade-YYYY-MM-DD-title.md` | `.mefan/templates/requirements-template.md` | 02-arch-qa (§2), 03-plan (§2), 05-quality (§2) |
+| requirements/*.md | `.claude/iterations/{sprint-name}/requirements/upgrade-YYYY-MM-DD-title.md` | `.claude/templates/requirements-template.md` | 02-arch-qa (§2), 03-plan (§2), 05-quality (§2) |

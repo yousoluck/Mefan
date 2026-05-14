@@ -1,8 +1,8 @@
 # /project-upgrade:00-init – 会话初始化与上下文建立
 ## 0. 日志声明（自动追加
-执行本阶段所有步骤时，必须使用 `.mefan/hooks/log-event.sh` 记录日志。
-- 进入阶段时：`bash .mefan/hooks/log-event.sh <阶段> <Agent> "阶段进入" "进入阶段X" "" "成功"`
-- 结束阶段时：`bash .mefan/hooks/log-event.sh <阶段> <Agent> "阶段退出" "阶段X完成" "" "成功"`
+执行本阶段所有步骤时，必须使用 `.claude/hooks/log-event.sh` 记录日志。
+- 进入阶段时：`bash .claude/hooks/log-event.sh <阶段> <Agent> "阶段进入" "进入阶段X" "" "成功"`
+- 结束阶段时：`bash .claude/hooks/log-event.sh <阶段> <Agent> "阶段退出" "阶段X完成" "" "成功"`
 - 在 Human Gate 前后记录审批事件
 
 ## 1. 角色激活
@@ -12,26 +12,26 @@
 ## 2. 强制加载的规则与技能（不可跳过）
 
 ### 2.1 稳定规则（必须加载）
-- `.mefan/rules/global/session-init.md`
-- `.mefan/rules/scenario-upgrade/consistency-first.md`
-- `.mefan/rules/scenario-upgrade/api-compatibility.md`
+- `.claude/rules/global/session-init.md`
+- `.claude/rules/scenario-upgrade/consistency-first.md`
+- `.claude/rules/scenario-upgrade/api-compatibility.md`
 
 ### 2.2 实验规则（若有则加载）
 **检查步骤**：
-1. 检查 `.mefan/rules-proposed/` 目录是否存在。
+1. 检查 `.claude/rules-proposed/` 目录是否存在。
 2. 若存在，列出所有实验规则文件（如 `*.md`）。
 3. 将实验规则**追加到稳定规则之后**，作为本次迭代的额外约束。
 4. 在 session-status.md 中记录："本次迭代加载 N 条实验规则"。
 5. **注意**：实验规则与稳定规则冲突时，以**稳定规则为准**，实验规则自动降级为"参考"。
 
 ### 2.3 稳定技能（必须加载）
-- `.mefan/skills/graphify-query-cheatsheet.md`
-- `.mefan/skills/git-workflow.md`
-- `.mefan/skills/query-third-party-docs.md`
+- `.claude/skills/graphify-query-cheatsheet.md`
+- `.claude/skills/git-workflow.md`
+- `.claude/skills/query-third-party-docs.md`
 
 ### 2.4 实验技能（若有则加载）
 **检查步骤**：
-1. 检查 `.mefan/skills-proposed/` 目录是否存在。
+1. 检查 `.claude/skills-proposed/` 目录是否存在。
 2. 若存在，列出所有实验技能文件（如 `*.md`）。
 3. 将实验技能**追加到稳定技能之后**，供本次迭代使用。
 4. 在 session-status.md 中记录："本次迭代加载 N 条实验技能"。
@@ -49,7 +49,7 @@
    - 记录本次 iteration 名称（如 `sprint-2026-05-14`），供后续步骤使用。
 4. **创建 session-status.md**：
    - 检查 `iterations/{sprint-name}/session-status.md` 是否存在。
-   - 若不存在，使用 `.mefan/templates/session-status-template.md` 生成。
+   - 若不存在，使用 `.claude/templates/session-status-template.md` 生成。
    - 若存在，读取并作为当前状态的基础。
 
 ### 3.2 技术栈与一致性基线分析
@@ -60,20 +60,20 @@
 - **若发现依赖文件**：提取前端框架、状态管理、后端框架、数据库、中间件及版本号。
 - **若未发现任何依赖文件**：
   1. 向用户询问项目类型和技术栈信息（前端框架、后端框架、数据库）。
-  2. 在 `.mefan/context/tech-stack-profile.md` 中标注 **"人工补充"**，并逐条记录用户提供的技术栈。
-- 输出 `.mefan/context/tech-stack-profile.md`，**必须使用** `.mefan/templates/tech-stack-profile-template.md`。
-- **目录存在性**：确保 `.mefan/context/` 目录存在，若不存在则创建。
+  2. 在 `.claude/context/tech-stack-profile.md` 中标注 **"人工补充"**，并逐条记录用户提供的技术栈。
+- 输出 `.claude/context/tech-stack-profile.md`，**必须使用** `.claude/templates/tech-stack-profile-template.md`。
+- **目录存在性**：确保 `.claude/context/` 目录存在，若不存在则创建。
 
 #### 3.2.2 一致性基线提取
 - 运行 `graphify query "most common patterns in the project"`。
 - 运行 `graphify similar <核心模块名>` 提取高频设计模式。
 - **若 graphify 查询失败（无结果、超时、未安装）**：
   1. 架构师手动扫描项目：打开 `src/` 下前 5 个高频目录，识别代码组织模式、命名规则、错误处理范式。
-  2. 在 `.mefan/context/consistency-baseline.md` 中标注 **"手动分析"**，并列出观察到的模式。
+  2. 在 `.claude/context/consistency-baseline.md` 中标注 **"手动分析"**，并列出观察到的模式。
   3. 记录基线生成方式为"手动分析 + graphify（如可用）"。
 - **若 graphify 查询成功**：正常提取至少 3 条可验证基线条目。
 - **强制证据要求（无论何种方式）**：每条基线必须附带至少 1 条证据（文件路径 + 模式描述 或 graphify 节点名）。若无证据，该条目不得列入基线。
-- 输出 `.mefan/context/consistency-baseline.md`，**必须使用** `.mefan/templates/consistency-baseline-template.md`。
+- 输出 `.claude/context/consistency-baseline.md`，**必须使用** `.claude/templates/consistency-baseline-template.md`。
 
 #### 3.2.3 依赖全景图
 - 执行 `graphify dependents <核心模块>`，输出摘要**追加到** `iterations/{sprint-name}/session-status.md` 的"依赖基础信息"段。
@@ -90,7 +90,7 @@
      - 本次开发的 backlog 条目
      - 初步范围（模块清单）
      - 产出物追踪表（见下方模板）
-   - **必须使用** `.mefan/templates/session-status-template.md` 的结构。
+   - **必须使用** `.claude/templates/session-status-template.md` 的结构。
 
 2. **【删除】更新 sprint-status.md 看板**
    - **原因**：sprint-status.md 是阶段 3（03-plan）的产出物，阶段 0 无法更新。
@@ -99,8 +99,8 @@
 **产出物追踪表示例**：
 | 产出物 | 路径 | 状态 | 校验结果 |
 |--------|------|------|----------|
-| tech-stack-profile.md | .mefan/context/ | 已生成 | 待PM校验 |
-| consistency-baseline.md | .mefan/context/ | 已生成 | 待PM校验 |
+| tech-stack-profile.md | .claude/context/ | 已生成 | 待PM校验 |
+| consistency-baseline.md | .claude/context/ | 已生成 | 待PM校验 |
 | 依赖全景图 | iterations/{sprint-name}/session-status.md | 已生成/暂不可用 | 待PM校验 |
 
 ### 3.4 PM 对架构师输出的校验
@@ -134,6 +134,6 @@ PM 在架构师完成 3.2 的所有产出后，必须执行以下校验：
 
 | 产出物 | 路径 | 模板 |
 |--------|------|------|
-| tech-stack-profile.md | `.mefan/context/tech-stack-profile.md` | `.mefan/templates/tech-stack-profile-template.md` |
-| consistency-baseline.md | `.mefan/context/consistency-baseline.md` | `.mefan/templates/consistency-baseline-template.md` |
-| session-status.md | `iterations/{sprint-name}/session-status.md` | `.mefan/templates/session-status-template.md` |
+| tech-stack-profile.md | `.claude/context/tech-stack-profile.md` | `.claude/templates/tech-stack-profile-template.md` |
+| consistency-baseline.md | `.claude/context/consistency-baseline.md` | `.claude/templates/consistency-baseline-template.md` |
+| session-status.md | `iterations/{sprint-name}/session-status.md` | `.claude/templates/session-status-template.md` |

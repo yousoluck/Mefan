@@ -1,17 +1,17 @@
 # /project-upgrade:auto – 自动推进全流程
 ## 0. 日志声明（自动追加
-执行本阶段所有步骤时，必须使用 `.mefan/hooks/log-event.sh` 记录日志。
-- 进入阶段时：`bash .mefan/hooks/log-event.sh <阶段> <Agent> "阶段进入" "进入阶段X" "" "成功"`
-- 结束阶段时：`bash .mefan/hooks/log-event.sh <阶段> <Agent> "阶段退出" "阶段X完成" "" "成功"`
+执行本阶段所有步骤时，必须使用 `.claude/hooks/log-event.sh` 记录日志。
+- 进入阶段时：`bash .claude/hooks/log-event.sh <阶段> <Agent> "阶段进入" "进入阶段X" "" "成功"`
+- 结束阶段时：`bash .claude/hooks/log-event.sh <阶段> <Agent> "阶段退出" "阶段X完成" "" "成功"`
 - 在 Human Gate 前后记录审批事件
 
 ## 1. 角色激活
 - **执行 Agent**：PM (`agents/pm.md`)，负责判断当前阶段、拉起对应 Command、断点续跑。
 
 ## 2. 前置输入（必须读取）
-- `.mefan/iterations/{sprint-name}/session-status.md`（阶段状态 + US 状态 + 产出物追踪）
-- `.mefan/iterations/{sprint-name}/sprint-status.md`（task 进度）
-- `.mefan/iterations/mefan-log.md`（用于确认断点）
+- `.claude/iterations/{sprint-name}/session-status.md`（阶段状态 + US 状态 + 产出物追踪）
+- `.claude/iterations/{sprint-name}/sprint-status.md`（task 进度）
+- `.claude/iterations/mefan-log.md`（用于确认断点）
 
 **执行前检查**：
 1. 确认 `session-status.md` 存在，若不存在，报错退出。
@@ -20,7 +20,7 @@
 ## 3. 执行流程
 
 ### 3.1 断点检查
-读取 `.mefan/iterations/{sprint-name}/session-status.md`：
+读取 `.claude/iterations/{sprint-name}/session-status.md`：
 
 1. **读取 `## 自动推进状态`**：
    - 当前阶段：N
@@ -93,7 +93,7 @@
    - 确认所有 task 都是 Done
    - 更新 User Story 进度汇总
 
-3. **记录日志**：`bash .mefan/hooks/log-event.sh auto PM "阶段完成" "阶段N完成" "" "成功"`
+3. **记录日志**：`bash .claude/hooks/log-event.sh auto PM "阶段完成" "阶段N完成" "" "成功"`
 
 ### 3.5 异常处理
 - 若阶段执行失败：

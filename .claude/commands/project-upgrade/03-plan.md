@@ -1,8 +1,8 @@
 # /project-upgrade:03-plan – 迭代计划与任务排期
 ## 0. 日志声明（自动追加
-执行本阶段所有步骤时，必须使用 `.mefan/hooks/log-event.sh` 记录日志。
-- 进入阶段时：`bash .mefan/hooks/log-event.sh <阶段> <Agent> "阶段进入" "进入阶段X" "" "成功"`
-- 结束阶段时：`bash .mefan/hooks/log-event.sh <阶段> <Agent> "阶段退出" "阶段X完成" "" "成功"`
+执行本阶段所有步骤时，必须使用 `.claude/hooks/log-event.sh` 记录日志。
+- 进入阶段时：`bash .claude/hooks/log-event.sh <阶段> <Agent> "阶段进入" "进入阶段X" "" "成功"`
+- 结束阶段时：`bash .claude/hooks/log-event.sh <阶段> <Agent> "阶段退出" "阶段X完成" "" "成功"`
 - 在 Human Gate 前后记录审批事件
 
 ## 1. 角色激活
@@ -10,17 +10,17 @@
 - **辅助 Agent**：分析师 (`agents/analyst.md`)，负责将 ADR 中的实现步骤拆解为原子任务。
 
 ## 2. 前置输入（必须读取）
-- `.mefan/iterations/{sprint-name}/adr/upgrade-YYYY-MM-DD-title.md`
-- `.mefan/iterations/{sprint-name}/test-plan/upgrade-YYYY-MM-DD-title.md`
-- `.mefan/iterations/{sprint-name}/requirements/upgrade-YYYY-MM-DD-title.md`（用于对照功能优先级）
-- `.mefan/iterations/{sprint-name}/session-status.md`（查看是否有异常记录或遗留冲突）
+- `.claude/iterations/{sprint-name}/adr/upgrade-YYYY-MM-DD-title.md`
+- `.claude/iterations/{sprint-name}/test-plan/upgrade-YYYY-MM-DD-title.md`
+- `.claude/iterations/{sprint-name}/requirements/upgrade-YYYY-MM-DD-title.md`（用于对照功能优先级）
+- `.claude/iterations/{sprint-name}/session-status.md`（查看是否有异常记录或遗留冲突）
 
 **前置检查**：执行前确认上述文件存在，若不存在则报错退出。
 
 ## 3. 强制规则
-- `.mefan/rules/global/conflict-resolution.md`
-- `.mefan/rules/global/iteration-planning.md`（任务拆解标准、WIP限制、警戒线设置）
-- `.mefan/rules/scenario-upgrade/reuse-before-build.md`（检查是否有任务可复用现有代码）
+- `.claude/rules/global/conflict-resolution.md`
+- `.claude/rules/global/iteration-planning.md`（任务拆解标准、WIP限制、警戒线设置）
+- `.claude/rules/scenario-upgrade/reuse-before-build.md`（检查是否有任务可复用现有代码）
 
 ## 4. 执行流程
 
@@ -45,7 +45,7 @@
 
 1. 接收分析师的任务列表，对照 `session-status.md` 中其他已存在的任务（若有）。
 2. 对每个任务运行的模块，执行冲突检测：
-   - 若任务涉及模块与其他活跃任务产生**核心冲突**，按 `.mefan/rules/global/conflict-resolution.md` 决策树处理：
+   - 若任务涉及模块与其他活跃任务产生**核心冲突**，按 `.claude/rules/global/conflict-resolution.md` 决策树处理：
      a. 串行化（优先）
      b. 分模块（若可拆分）
      c. 人类裁决（生成《冲突裁决申请书》）
@@ -55,9 +55,9 @@
 ### 4.3 生成迭代计划
 **执行者**：PM
 
-**目录检查**：确保 `.mefan/iterations/{sprint-name}/` 目录存在。
+**目录检查**：确保 `.claude/iterations/{sprint-name}/` 目录存在。
 
-1. 创建 `.mefan/iterations/{sprint-name}/iteration-plan.md`，**必须使用** `.mefan/templates/iteration-plan-template.md`。
+1. 创建 `.claude/iterations/{sprint-name}/iteration-plan.md`，**必须使用** `.claude/templates/iteration-plan-template.md`。
 2. 填入：
    - 用户故事列表（从需求文档提取）
    - 任务清单（从 4.2 裁决结果）
@@ -69,9 +69,9 @@
 ### 4.4 看板初始化
 **执行者**：PM
 
-**目录检查**：确保 `.mefan/iterations/{sprint-name}/` 目录存在。
+**目录检查**：确保 `.claude/iterations/{sprint-name}/` 目录存在。
 
-1. 创建 `.mefan/iterations/{sprint-name}/sprint-status.md`，**必须使用** `.mefan/templates/sprint-status-template.md`。
+1. 创建 `.claude/iterations/{sprint-name}/sprint-status.md`，**必须使用** `.claude/templates/sprint-status-template.md`。
 2. 将所有任务初始化为 `To Do` 状态。看板必须包含列：任务ID、描述、状态、负责人、计划工时、实际工时、风险标记、技术债务。
 
 ### 4.5 PM 自检与反向校验
@@ -87,8 +87,8 @@
 
 | 产出物 | 路径 | 模板 |
 |--------|------|------|
-| iteration-plan.md | `.mefan/iterations/{sprint-name}/iteration-plan.md` | `.mefan/templates/iteration-plan-template.md` |
-| sprint-status.md | `.mefan/iterations/{sprint-name}/sprint-status.md` | `.mefan/templates/sprint-status-template.md` |
+| iteration-plan.md | `.claude/iterations/{sprint-name}/iteration-plan.md` | `.claude/templates/iteration-plan-template.md` |
+| sprint-status.md | `.claude/iterations/{sprint-name}/sprint-status.md` | `.claude/templates/sprint-status-template.md` |
 
 ## 6. 阶段结束
 - PM 向用户输出迭代计划摘要（任务总数、并行vs串行分布、里程碑），等待 `[Human Gate]` 审批。
@@ -97,5 +97,5 @@
 
 | 文件名 | 完整路径 | 模板 | 被依赖阶段 |
 |--------|----------|------|-----------|
-| iteration-plan.md | `.mefan/iterations/{sprint-name}/iteration-plan.md` | `.mefan/templates/iteration-plan-template.md` | 04-implement (§2), 05-quality (§2) |
-| sprint-status.md | `.mefan/iterations/{sprint-name}/sprint-status.md` | `.mefan/templates/sprint-status-template.md` | 04-implement (§2), 05-quality (§2), 06-retrospect (§2) |
+| iteration-plan.md | `.claude/iterations/{sprint-name}/iteration-plan.md` | `.claude/templates/iteration-plan-template.md` | 04-implement (§2), 05-quality (§2) |
+| sprint-status.md | `.claude/iterations/{sprint-name}/sprint-status.md` | `.claude/templates/sprint-status-template.md` | 04-implement (§2), 05-quality (§2), 06-retrospect (§2) |

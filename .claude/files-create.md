@@ -10,9 +10,9 @@
 
 | 文件名 | 完整路径 | 模板 | 被依赖阶段 |
 |--------|----------|------|-----------|
-| tech-stack-profile.md | `.mefan/context/tech-stack-profile.md` | `.mefan/templates/tech-stack-profile-template.md` | 01-requirements (§2), 02-arch-qa (§2) |
-| consistency-baseline.md | `.mefan/context/consistency-baseline.md` | `.mefan/templates/consistency-baseline-template.md` | 01-requirements (§2), 02-arch-qa (§2), 04-implement (§2) |
-| session-status.md | `.mefan/iterations/{sprint-name}/session-status.md` | `.mefan/templates/session-status-template.md` | 01-requirements (§2), 03-plan (§2), 04-implement (§2), 06-retrospect (§2), 下一 iteration 的 00-init (§2.2/§2.4 记录加载的实验规则/技能) |
+| tech-stack-profile.md | `.claude/context/tech-stack-profile.md` | `.claude/templates/tech-stack-profile-template.md` | 01-requirements (§2), 02-arch-qa (§2) |
+| consistency-baseline.md | `.claude/context/consistency-baseline.md` | `.claude/templates/consistency-baseline-template.md` | 01-requirements (§2), 02-arch-qa (§2), 04-implement (§2) |
+| session-status.md | `.claude/iterations/{sprint-name}/session-status.md` | `.claude/templates/session-status-template.md` | 01-requirements (§2), 03-plan (§2), 04-implement (§2), 06-retrospect (§2), 下一 iteration 的 00-init (§2.2/§2.4 记录加载的实验规则/技能) |
 
 ---
 
@@ -20,7 +20,7 @@
 
 | 文件名 | 完整路径 | 模板 | 被依赖阶段 |
 |--------|----------|------|-----------|
-| requirements/*.md | `.mefan/iterations/{sprint-name}/requirements/upgrade-YYYY-MM-DD-title.md` | `.mefan/templates/requirements-template.md` | 02-arch-qa (§2), 03-plan (§2), 05-quality (§4.2) |
+| requirements/*.md | `.claude/iterations/{sprint-name}/requirements/upgrade-YYYY-MM-DD-title.md` | `.claude/templates/requirements-template.md` | 02-arch-qa (§2), 03-plan (§2), 05-quality (§4.2) |
 
 ---
 
@@ -28,8 +28,8 @@
 
 | 文件名 | 完整路径 | 模板 | 被依赖阶段 |
 |--------|----------|------|-----------|
-| adr/*.md | `.mefan/iterations/{sprint-name}/adr/upgrade-YYYY-MM-DD-title.md` | `.mefan/templates/adr-template.md` | 03-plan (§2), 04-implement (§2) |
-| test-plan/*.md | `.mefan/iterations/{sprint-name}/test-plan/upgrade-YYYY-MM-DD-title.md` | `.mefan/templates/test-plan-template.md` | 03-plan (§2), 05-quality (§2) |
+| adr/*.md | `.claude/iterations/{sprint-name}/adr/upgrade-YYYY-MM-DD-title.md` | `.claude/templates/adr-template.md` | 03-plan (§2), 04-implement (§2) |
+| test-plan/*.md | `.claude/iterations/{sprint-name}/test-plan/upgrade-YYYY-MM-DD-title.md` | `.claude/templates/test-plan-template.md` | 03-plan (§2), 05-quality (§2) |
 
 ---
 
@@ -37,8 +37,8 @@
 
 | 文件名 | 完整路径 | 模板 | 被依赖阶段 |
 |--------|----------|------|-----------|
-| iteration-plan.md | `.mefan/iterations/{sprint-name}/iteration-plan.md` | `.mefan/templates/iteration-plan-template.md` | 04-implement (§2), 05-quality (§2) |
-| sprint-status.md | `.mefan/iterations/{sprint-name}/sprint-status.md` | `.mefan/templates/sprint-status-template.md` | 04-implement (§2), 05-quality (§2), 06-retrospect (§2) |
+| iteration-plan.md | `.claude/iterations/{sprint-name}/iteration-plan.md` | `.claude/templates/iteration-plan-template.md` | 04-implement (§2), 05-quality (§2) |
+| sprint-status.md | `.claude/iterations/{sprint-name}/sprint-status.md` | `.claude/templates/sprint-status-template.md` | 04-implement (§2), 05-quality (§2), 06-retrospect (§2) |
 
 ---
 
@@ -46,9 +46,9 @@
 
 | 文件名 | 完整路径 | 模板 | 被依赖阶段 |
 |--------|----------|------|-----------|
-| task-summary/T{NNN}.md | `.mefan/iterations/{sprint-name}/task-summary/T{NNN}.md` | `.mefan/templates/task-summary-template.md` | 05-quality (§2), 06-retrospect (§2) |
-| test-results/unit-T{NNN}.log | `.mefan/iterations/{sprint-name}/test-results/unit-T{NNN}.log` | - | 05-quality (§4.1), 06-retrospect (§4.1) |
-| interception-analysis.md | `.mefan/iterations/{sprint-name}/task-summary/interception-analysis.md` | - | 06-retrospect（分析Hook拦截模式） |
+| task-summary/T{NNN}.md | `.claude/iterations/{sprint-name}/task-summary/T{NNN}.md` | `.claude/templates/task-summary-template.md` | 05-quality (§2), 06-retrospect (§2) |
+| test-results/unit-T{NNN}.log | `.claude/iterations/{sprint-name}/test-results/unit-T{NNN}.log` | - | 05-quality (§4.1), 06-retrospect (§4.1) |
+| interception-analysis.md | `.claude/iterations/{sprint-name}/task-summary/interception-analysis.md` | - | 06-retrospect（分析Hook拦截模式） |
 
 ---
 
@@ -56,11 +56,11 @@
 
 | 文件名 | 完整路径 | 模板 | 被依赖阶段 |
 |--------|----------|------|-----------|
-| test-results/regression-YYYY-MM-DD.log | `.mefan/iterations/{sprint-name}/test-results/regression-YYYY-MM-DD.log` | - | 06-retrospect (§4.1) |
-| test-results/manual-test-guide.md | `.mefan/iterations/{sprint-name}/test-results/manual-test-guide.md` | `.mefan/templates/manual-test-guide-template.md` | 人机交接用 |
-| test-results/quality-report.md | `.mefan/iterations/{sprint-name}/test-results/quality-report.md` | `.mefan/templates/quality-report-template.md` | 06-retrospect (§4.1) |
-| bug-log/auto-YYYY-MM-DD.md | `.mefan/iterations/{sprint-name}/bug-log/auto-YYYY-MM-DD.md` | `.mefan/templates/bug-log-template.md` | 06-retrospect (§4.3) |
-| bug-log/manual-YYYY-MM-DD.md | `.mefan/iterations/{sprint-name}/bug-log/manual-YYYY-MM-DD.md` | `.mefan/templates/bug-log-template.md` | 06-retrospect (§4.3) |
+| test-results/regression-YYYY-MM-DD.log | `.claude/iterations/{sprint-name}/test-results/regression-YYYY-MM-DD.log` | - | 06-retrospect (§4.1) |
+| test-results/manual-test-guide.md | `.claude/iterations/{sprint-name}/test-results/manual-test-guide.md` | `.claude/templates/manual-test-guide-template.md` | 人机交接用 |
+| test-results/quality-report.md | `.claude/iterations/{sprint-name}/test-results/quality-report.md` | `.claude/templates/quality-report-template.md` | 06-retrospect (§4.1) |
+| bug-log/auto-YYYY-MM-DD.md | `.claude/iterations/{sprint-name}/bug-log/auto-YYYY-MM-DD.md` | `.claude/templates/bug-log-template.md` | 06-retrospect (§4.3) |
+| bug-log/manual-YYYY-MM-DD.md | `.claude/iterations/{sprint-name}/bug-log/manual-YYYY-MM-DD.md` | `.claude/templates/bug-log-template.md` | 06-retrospect (§4.3) |
 
 ---
 
@@ -68,13 +68,13 @@
 
 | 文件名 | 完整路径 | 模板 | 被依赖阶段 |
 |--------|----------|------|-----------|
-| retrospective.md | `.mefan/iterations/{sprint-name}/retrospective.md` | `.mefan/templates/iteration-retrospective-template.md` | 下一 iteration 的 00-init（输入上下文）、06-retrospect §4.4（进化分析参考） |
-| evolution-proposal.md | `.mefan/evolution-proposals/upgrade-YYYY-MM-DD-title.md` | `.mefan/templates/evolution-proposal-template.md` | 06-retrospect §4.4 采纳后写入 rules-proposed/ 或 skills-proposed/ → 下一 iteration 的 00-init §2.2/§2.4 加载 |
-| rules-proposed/*.md | `.mefan/rules-proposed/` | - | 下一 iteration 的 00-init §2.2 加载为实验规则 |
-| skills-proposed/*.md | `.mefan/skills-proposed/` | - | 下一 iteration 的 00-init §2.4 加载为实验技能 |
-| reports/PROJECT_STATUS.md | `.mefan/reports/PROJECT_STATUS.md` | `.mefan/templates/project-status-template.md` | 全局可读，下一 iteration 参考 |
+| retrospective.md | `.claude/iterations/{sprint-name}/retrospective.md` | `.claude/templates/iteration-retrospective-template.md` | 下一 iteration 的 00-init（输入上下文）、06-retrospect §4.4（进化分析参考） |
+| evolution-proposal.md | `.claude/evolution-proposals/upgrade-YYYY-MM-DD-title.md` | `.claude/templates/evolution-proposal-template.md` | 06-retrospect §4.4 采纳后写入 rules-proposed/ 或 skills-proposed/ → 下一 iteration 的 00-init §2.2/§2.4 加载 |
+| rules-proposed/*.md | `.claude/rules-proposed/` | - | 下一 iteration 的 00-init §2.2 加载为实验规则 |
+| skills-proposed/*.md | `.claude/skills-proposed/` | - | 下一 iteration 的 00-init §2.4 加载为实验技能 |
+| reports/PROJECT_STATUS.md | `.claude/reports/PROJECT_STATUS.md` | `.claude/templates/project-status-template.md` | 全局可读，下一 iteration 参考 |
 | CHANGELOG.md | `CHANGELOG.md`（更新） | - | 全局可读 |
-| HARNESS_VERSION.md | `.mefan/HARNESS_VERSION.md`（更新） | - | 所有阶段（版本参考） |
+| HARNESS_VERSION.md | `.claude/HARNESS_VERSION.md`（更新） | - | 所有阶段（版本参考） |
 
 ---
 
@@ -82,8 +82,8 @@
 
 | 文件名 | 完整路径 | 说明 | 被依赖阶段 |
 |--------|----------|------|-----------|
-| mefan-log.md | `.mefan/iterations/mefan-log.md` | 全局框架运行日志 | 所有阶段（日志追加） |
-| violations.json | `.mefan/iterations/{sprint-name}/violations.json` | Hook拦截记录 | 06-retrospect (§2) |
+| mefan-log.md | `.claude/iterations/mefan-log.md` | 全局框架运行日志 | 所有阶段（日志追加） |
+| violations.json | `.claude/iterations/{sprint-name}/violations.json` | Hook拦截记录 | 06-retrospect (§2) |
 
 ---
 
@@ -100,16 +100,16 @@
 
 | 文件类型 | 规范路径 |
 |----------|----------|
-| 全局上下文 | `.mefan/context/` |
-| 全局规则 | `.mefan/rules/` |
-| 全局技能 | `.mefan/skills/` |
-| 全局模板 | `.mefan/templates/` |
-| 全局报告 | `.mefan/reports/` |
-| 进化提案 | `.mefan/evolution-proposals/` |
-| 单次迭代 | `.mefan/iterations/sprint-YYYY-MM-DD/` |
-| 迭代内产出物 | `.mefan/iterations/{sprint-name}/requirements/` |
-| | `.mefan/iterations/{sprint-name}/adr/` |
-| | `.mefan/iterations/{sprint-name}/test-plan/` |
-| | `.mefan/iterations/{sprint-name}/task-summary/` |
-| | `.mefan/iterations/{sprint-name}/test-results/` |
-| | `.mefan/iterations/{sprint-name}/bug-log/` |
+| 全局上下文 | `.claude/context/` |
+| 全局规则 | `.claude/rules/` |
+| 全局技能 | `.claude/skills/` |
+| 全局模板 | `.claude/templates/` |
+| 全局报告 | `.claude/reports/` |
+| 进化提案 | `.claude/evolution-proposals/` |
+| 单次迭代 | `.claude/iterations/sprint-YYYY-MM-DD/` |
+| 迭代内产出物 | `.claude/iterations/{sprint-name}/requirements/` |
+| | `.claude/iterations/{sprint-name}/adr/` |
+| | `.claude/iterations/{sprint-name}/test-plan/` |
+| | `.claude/iterations/{sprint-name}/task-summary/` |
+| | `.claude/iterations/{sprint-name}/test-results/` |
+| | `.claude/iterations/{sprint-name}/bug-log/` |

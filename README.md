@@ -11,7 +11,7 @@
    │   │   ├── mf-upgrade:06-retrospect.md
    │   │   ├── mf-upgrade:auto.md
    │   │   └── mf-refactor:*/            → /mf-refactor:*
-   │   ├── agents/                       # Agent 角色提示词（从 .mefan/ 复制）
+   │   ├── agents/                       # Agent 角色提示词（从 .claude/ 复制）
    │   │   ├── pm.md
    │   │   ├── architect.md
    │   │   ├── analyst.md
@@ -19,7 +19,7 @@
    │   │   ├── qa.md
    │   │   ├── guardian.md
    │   │   └── coach.md
-   │   ├── rules/                        # Rules（从 .mefan/knowledge/ 重命名）
+   │   ├── rules/                        # Rules（从 .claude/knowledge/ 重命名）
    │   │   ├── global/
    │   │   │   ├── session-init.md
    │   │   │   ├── quality-gates.md
@@ -35,7 +35,7 @@
    │   │   │   └── reuse-before-build.md
    │   │   └── scenario-refactor/
    │   │       └── behavior-freeze.md
-   │   └── skills/                       # 能力库（从 .mefan/skills/ 复制）
+   │   └── skills/                       # 能力库（从 .claude/skills/ 复制）
    │       ├── graphify-query-cheatsheet.md
    │       ├── query-third-party-docs.md
    │       ├── git-workflow.md
@@ -48,7 +48,7 @@
    │       ├── tech-stack-profile-template.md
    │       └── ...
    │
-   ├── .mefan/                           # 【框架自身存储位置】
+   ├── .claude/                           # 【框架自身存储位置】
    │   ├── CLAUDE.md                     # 项目宪法（含 SCENARIO 变量）
    │   ├── HARNESS_VERSION.md            # 框架版本
    │   ├── templates/                    # 模板源文件（安装时复制到 .claude/）
@@ -151,10 +151,10 @@ Skill	           .claude/skills/graphify-query-cheatsheet.md	✅ 核心
                    .claude/skills/ug-triage-classification.md	✅ 已加固
                    .claude/skills/root-cause-analysis.md	✅ 已加固
                    .claude/skills/pattern-extraction-from-logs.md	✅ 已加固
-Hook	           .mefan/hooks/check-consistency.py	✅ 已提供
-                   .mefan/hooks/log-event.sh	✅ 已提供
-                   .mefan/hooks/conversation-log.sh	✅ 已提供
-初始化	           .mefan/init-mefan-harness.sh	✅ 已提供（待更新）
+Hook	           .claude/hooks/check-consistency.py	✅ 已提供
+                   .claude/hooks/log-event.sh	✅ 已提供
+                   .claude/hooks/conversation-log.sh	✅ 已提供
+初始化	           .claude/init-mefan-harness.sh	✅ 已提供（待更新）
 
 ---
 
@@ -166,22 +166,22 @@ Hook	           .mefan/hooks/check-consistency.py	✅ 已提供
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  Layer 1: PROJECT STATUS (.mefan/reports/PROJECT_STATUS.md) │
+│  Layer 1: PROJECT STATUS (.claude/reports/PROJECT_STATUS.md) │
 │  全局视角 · 跨迭代追踪 · 决策层使用                           │
 └─────────────────────────────────────────────────────────────┘
                               ↑
 ┌─────────────────────────────────────────────────────────────┐
-│  Layer 2: SESSION STATUS (.mefan/iterations/{sprint-name}/session-status.md) │
+│  Layer 2: SESSION STATUS (.claude/iterations/{sprint-name}/session-status.md) │
 │  迭代视角 · 阶段进度追踪 · 自动推进断点                        │
 └─────────────────────────────────────────────────────────────┘
                               ↑
 ┌─────────────────────────────────────────────────────────────┐
-│  Layer 3: SPRINT STATUS (.mefan/iterations/{sprint-name}/sprint-status.md)  │
+│  Layer 3: SPRINT STATUS (.claude/iterations/{sprint-name}/sprint-status.md)  │
 │  看板视角 · 任务状态流转 · 执行层使用                           │
 └─────────────────────────────────────────────────────────────┘
                               ↑
 ┌─────────────────────────────────────────────────────────────┐
-│  Layer 4: TASK SUMMARY (.mefan/iterations/{sprint-name}/task-summary/*.md)  │
+│  Layer 4: TASK SUMMARY (.claude/iterations/{sprint-name}/task-summary/*.md)  │
 │  任务视角 · 单任务详情 · 开发者使用                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -284,28 +284,28 @@ task-summary/T{NNN}.md
 
 | 阶段 | 产出物 | 完整路径 | 更新者 | 更新时机 | 更新内容 |
 |------|--------|----------|--------|---------|---------|
-| **00** | tech-stack-profile.md | `.mefan/context/` | 架构师 | 阶段完成时 | 技术栈组件列表 |
-| **00** | consistency-baseline.md | `.mefan/context/` | 架构师 | 阶段完成时 | 基线条目 + 证据 |
-| **00** | session-status.md | `.mefan/iterations/{sprint-name}/` | PM | 阶段完成时 | 自动推进状态、产出物追踪表、PM 报告 |
-| **01** | requirements.md | `.mefan/iterations/{sprint-name}/requirements/` | 分析师 | 阶段完成时 | 需求文档（完整填写） |
-| **02** | adr.md | `.mefan/iterations/{sprint-name}/adr/` | 架构师 | 阶段完成时 | 方案对比、详细设计、参考实现 |
-| **02** | test-plan.md | `.mefan/iterations/{sprint-name}/test-plan/` | QA | 阶段完成时 | 回归范围、新增场景、质量门槛 |
-| **03** | iteration-plan.md | `.mefan/iterations/{sprint-name}/` | PM | 阶段完成时 | 用户故事、任务清单、里程碑、WIP 限制 |
-| **03** | sprint-status.md | `.mefan/iterations/{sprint-name}/` | PM | 阶段完成时 | 任务看板初始化（全任务 To Do） |
-| **04** | task-summary/T{NNN}.md | `.mefan/iterations/{sprint-name}/task-summary/` | 开发者 | 任务完成时 | 修改清单、新 API、技术债务 |
-| **04** | unit-T{NNN}.log | `.mefan/iterations/{sprint-name}/test-results/` | 开发者 | 测试执行时 | 单元测试输出 |
-| **04** | violations.json | `.mefan/iterations/{sprint-name}/` | Hook（自动） | 每次拦截时 | 违规记录 |
-| **05** | regression-YYYY-MM-DD.log | `.mefan/iterations/{sprint-name}/test-results/` | QA | 测试执行时 | 回归测试结果 |
-| **05** | manual-test-guide.md | `.mefan/iterations/{sprint-name}/test-results/` | QA | 阶段完成时 | 测试用例、操作步骤、判定标准 |
-| **05** | quality-report.md | `.mefan/iterations/{sprint-name}/test-results/` | QA | 缺陷修复完成后 | 测试覆盖、缺陷统计、质量就绪声明 |
-| **05** | bug-log/auto-YYYY-MM-DD.md | `.mefan/iterations/{sprint-name}/bug-log/` | QA | 发现缺陷时 | 缺陷分类、根因分析 |
-| **05** | bug-log/manual-YYYY-MM-DD.md | `.mefan/iterations/{sprint-name}/bug-log/` | QA | 人工测试反馈时 | 缺陷分类、根因分析 |
-| **06** | retrospective.md | `.mefan/iterations/{sprint-name}/` | PM | 阶段完成时 | 迭代概览、缺陷分析、待改进项 |
-| **06** | evolution-proposal.md | `.mefan/evolution-proposals/` | 进化教练 | 阶段完成时 | 提案触发原因、草案、预期效果 |
-| **06** | PROJECT_STATUS.md | `.mefan/reports/` | PM | 阶段完成时 | 迭代概况、需求矩阵、缺陷分布、技术债务 |
+| **00** | tech-stack-profile.md | `.claude/context/` | 架构师 | 阶段完成时 | 技术栈组件列表 |
+| **00** | consistency-baseline.md | `.claude/context/` | 架构师 | 阶段完成时 | 基线条目 + 证据 |
+| **00** | session-status.md | `.claude/iterations/{sprint-name}/` | PM | 阶段完成时 | 自动推进状态、产出物追踪表、PM 报告 |
+| **01** | requirements.md | `.claude/iterations/{sprint-name}/requirements/` | 分析师 | 阶段完成时 | 需求文档（完整填写） |
+| **02** | adr.md | `.claude/iterations/{sprint-name}/adr/` | 架构师 | 阶段完成时 | 方案对比、详细设计、参考实现 |
+| **02** | test-plan.md | `.claude/iterations/{sprint-name}/test-plan/` | QA | 阶段完成时 | 回归范围、新增场景、质量门槛 |
+| **03** | iteration-plan.md | `.claude/iterations/{sprint-name}/` | PM | 阶段完成时 | 用户故事、任务清单、里程碑、WIP 限制 |
+| **03** | sprint-status.md | `.claude/iterations/{sprint-name}/` | PM | 阶段完成时 | 任务看板初始化（全任务 To Do） |
+| **04** | task-summary/T{NNN}.md | `.claude/iterations/{sprint-name}/task-summary/` | 开发者 | 任务完成时 | 修改清单、新 API、技术债务 |
+| **04** | unit-T{NNN}.log | `.claude/iterations/{sprint-name}/test-results/` | 开发者 | 测试执行时 | 单元测试输出 |
+| **04** | violations.json | `.claude/iterations/{sprint-name}/` | Hook（自动） | 每次拦截时 | 违规记录 |
+| **05** | regression-YYYY-MM-DD.log | `.claude/iterations/{sprint-name}/test-results/` | QA | 测试执行时 | 回归测试结果 |
+| **05** | manual-test-guide.md | `.claude/iterations/{sprint-name}/test-results/` | QA | 阶段完成时 | 测试用例、操作步骤、判定标准 |
+| **05** | quality-report.md | `.claude/iterations/{sprint-name}/test-results/` | QA | 缺陷修复完成后 | 测试覆盖、缺陷统计、质量就绪声明 |
+| **05** | bug-log/auto-YYYY-MM-DD.md | `.claude/iterations/{sprint-name}/bug-log/` | QA | 发现缺陷时 | 缺陷分类、根因分析 |
+| **05** | bug-log/manual-YYYY-MM-DD.md | `.claude/iterations/{sprint-name}/bug-log/` | QA | 人工测试反馈时 | 缺陷分类、根因分析 |
+| **06** | retrospective.md | `.claude/iterations/{sprint-name}/` | PM | 阶段完成时 | 迭代概览、缺陷分析、待改进项 |
+| **06** | evolution-proposal.md | `.claude/evolution-proposals/` | 进化教练 | 阶段完成时 | 提案触发原因、草案、预期效果 |
+| **06** | PROJECT_STATUS.md | `.claude/reports/` | PM | 阶段完成时 | 迭代概况、需求矩阵、缺陷分布、技术债务 |
 | **06** | CHANGELOG.md | `CHANGELOG.md`（根目录） | PM | 阶段完成时 | 功能和修复追加 |
-| **06** | HARNESS_VERSION.md | `.mefan/HARNESS_VERSION.md` | PM | 阶段完成时 | 语义版本递增 |
-| 全局 | mefan-log.md | `.mefan/iterations/mefan-log.md` | 所有 Agent | 每次操作 | 阶段进入/退出、异常、Human Gate 审批 |
+| **06** | HARNESS_VERSION.md | `.claude/HARNESS_VERSION.md` | PM | 阶段完成时 | 语义版本递增 |
+| 全局 | mefan-log.md | `.claude/iterations/mefan-log.md` | 所有 Agent | 每次操作 | 阶段进入/退出、异常、Human Gate 审批 |
 
 ### 3.5 AUTO COMMAND 断点续跑机制
 

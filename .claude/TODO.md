@@ -4,39 +4,44 @@
 
 ---
 
-## 需求（Requirements）
+## ✅ 已完成（Completed）
 
-### R1: Claude Code 配置迁移（init.sh 功能）
+### C1: 目录结构迁移
+- [x] `.mefan/` 已迁移到 `.claude/`
+- [x] 所有 `.mefan/` 路径引用已更新为 `.claude/`
 
-- **描述**：Mefan 项目完工后，由 init.sh 脚本将 `.mefan` 框架文件迁移到 `.claude` 目录，以匹配 Claude Code 工具的目录结构。
-- **前置条件**：Mefan 框架开发完成，所有功能测试通过
-- **执行者**：init.sh 脚本
-- **要求**：
-  1. 迁移时保持文件路径一致性
-  2. 所有文件内对特定路径的引用（如 `.mefan/rules/` → `.claude/rules/`）必须同步更新
-  3. 迁移完成后，`.mefan` 目录可以保留作为备份，或由 init.sh 清理
+### C2: 路径引用更新
+- [x] `CLAUDE.md` - 日志命令路径已更新
+- [x] `files-create.md` - 所有路径已更新
+- [x] `rules/global/logging.md` - 日志命令路径已更新
+- [x] `rules/global/evolution-process.md` - 提案路径已更新
+- [x] `templates/session-status-template.md` - 路径已更新
+- [x] 所有 `commands/project-upgrade/*.md` - 路径已更新
 
 ---
 
-## 待办任务（Tasks）
+## 🔄 进行中（In Progress）
 
-### T1: init.sh 迁移脚本开发
+### I1: 初始化脚本更新
+- [ ] `init.sh` 需要更新为将文件复制到 `.claude/` 而不是 `.mefan/`
+- [ ] `init.sh` 中的路径替换逻辑需要从 `.mefan` → `.claude`
 
-- [ ] 编写 init.sh 脚本，实现以下功能：
-  - [ ] 创建 `.claude/` 目录结构（agents/、commands/、rules/、skills/、templates/）
-  - [ ] 从 `.mefan/` 复制框架文件到 `.claude/`
-  - [ ] 扫描所有文件，替换路径引用（.mefan/rules/ → .claude/rules/）
-  - [ ] 验证迁移后文件完整性
+---
 
-### T2: 路径引用一致性检查
+## 📋 待办（Pending）
 
-- [ ] 检查所有文件中是否有对 `.mefan/` 的硬编码引用
-- [ ] 确认 init.sh 会处理这些引用
+### T1: 验证完整性
+- [ ] 检查所有更新后的路径对应的文件是否真实存在
+- [ ] 运行 `/project-upgrade:auto` 验证框架正常工作
+
+### T2: README.md 更新
+- [x] 更新 README.md 中对 `.mefan/` 的引用为 `.claude/`
+- [x] 更新目录结构说明
 
 ---
 
 ## 备注
 
-- 当前开发在 `.mefan/` 目录下进行
-- `.claude/` 目录已删除，等 init.sh 完工后由脚本重建
-- 所有文件中的路径引用必须使用相对路径或占位符，便于迁移时替换
+- 所有文件内的 `.mefan/` 硬编码引用已替换为 `.claude/`
+- 框架文件实际位于 `.claude/` 目录
+- Hooks 和 scripts 位于 `.claude/hooks/`

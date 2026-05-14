@@ -1,8 +1,8 @@
 # /project-upgrade:05-quality – 质量测试与门禁
 ## 0. 日志声明（自动追加
-执行本阶段所有步骤时，必须使用 `.mefan/hooks/log-event.sh` 记录日志。
-- 进入阶段时：`bash .mefan/hooks/log-event.sh <阶段> <Agent> "阶段进入" "进入阶段X" "" "成功"`
-- 结束阶段时：`bash .mefan/hooks/log-event.sh <阶段> <Agent> "阶段退出" "阶段X完成" "" "成功"`
+执行本阶段所有步骤时，必须使用 `.claude/hooks/log-event.sh` 记录日志。
+- 进入阶段时：`bash .claude/hooks/log-event.sh <阶段> <Agent> "阶段进入" "进入阶段X" "" "成功"`
+- 结束阶段时：`bash .claude/hooks/log-event.sh <阶段> <Agent> "阶段退出" "阶段X完成" "" "成功"`
 - 在 Human Gate 前后记录审批事件
 
 ## 1. 角色激活
@@ -12,33 +12,33 @@
 - **决策 Agent**：项目经理 (`agents/pm.md`)，处理 P0 缺陷和进度异常。
 
 ## 2. 前置输入（必须读取）
-- `.mefan/iterations/{sprint-name}/test-plan/upgrade-YYYY-MM-DD-title.md`
-- `.mefan/iterations/{sprint-name}/iteration-plan.md`
-- `.mefan/iterations/{sprint-name}/sprint-status.md`
+- `.claude/iterations/{sprint-name}/test-plan/upgrade-YYYY-MM-DD-title.md`
+- `.claude/iterations/{sprint-name}/iteration-plan.md`
+- `.claude/iterations/{sprint-name}/sprint-status.md`
 - 阶段 4 产出的全部代码、单元测试、task-summary
-- `.mefan/skills/write-manual-test-guide.md`
-- `.mefan/skills/ug-triage-classification.md`
+- `.claude/skills/write-manual-test-guide.md`
+- `.claude/skills/ug-triage-classification.md`
 
 **前置检查**：执行前确认上述文件存在，若不存在则报错退出。
 
 ## 3. 强制规则
-- `.mefan/rules/global/quality-gates.md`
-- `.mefan/rules/global/exception-handling.md`
-- `.mefan/rules/global/manual-test-bug-handling.md`（人工测试Bug提交、修复闭环、P0优先级）
-- `.mefan/rules/scenario-upgrade/api-compatibility.md`
-- `.mefan/rules/scenario-upgrade/consistency-first.md`
+- `.claude/rules/global/quality-gates.md`
+- `.claude/rules/global/exception-handling.md`
+- `.claude/rules/global/manual-test-bug-handling.md`（人工测试Bug提交、修复闭环、P0优先级）
+- `.claude/rules/scenario-upgrade/api-compatibility.md`
+- `.claude/rules/scenario-upgrade/consistency-first.md`
 
 ## 4. 执行流程
 
 ### 4.1 自动化测试执行
 **执行者**：QA 工程师
 
-**目录检查**：确保 `.mefan/iterations/{sprint-name}/test-results/` 和 `.mefan/iterations/{sprint-name}/bug-log/` 目录存在。
+**目录检查**：确保 `.claude/iterations/{sprint-name}/test-results/` 和 `.claude/iterations/{sprint-name}/bug-log/` 目录存在。
 
 1. **回归测试**：
    - 按照测试计划中的回归范围，运行全部回归测试套件。
-   - 记录通过/失败结果到 `.mefan/iterations/{sprint-name}/test-results/regression-YYYY-MM-DD.log`。
-   - 若回归测试发现失败，立即记录到 `.mefan/iterations/{sprint-name}/bug-log/auto-YYYY-MM-DD.md`（每条失败一个缺陷条目）。
+   - 记录通过/失败结果到 `.claude/iterations/{sprint-name}/test-results/regression-YYYY-MM-DD.log`。
+   - 若回归测试发现失败，立即记录到 `.claude/iterations/{sprint-name}/bug-log/auto-YYYY-MM-DD.md`（每条失败一个缺陷条目）。
 
 2. **集成测试**：
    - 运行测试计划中设计的新增集成测试。
@@ -53,12 +53,12 @@
 
 1. 基于需求文档中的核心流程和边界条件，设计并执行探索性测试。
 2. 探索重点：边界值、异常路径、并发情况、兼容性。
-3. 发现缺陷记录到 `.mefan/iterations/{sprint-name}/bug-log/auto-YYYY-MM-DD.md`。
+3. 发现缺陷记录到 `.claude/iterations/{sprint-name}/bug-log/auto-YYYY-MM-DD.md`。
 
 ### 4.3 缺陷分类与记录
 **执行者**：QA 工程师
 
-所有发现的缺陷（自动+探索）必须按 `.mefan/skills/ug-triage-classification.md` 进行分类：
+所有发现的缺陷（自动+探索）必须按 `.claude/skills/ug-triage-classification.md` 进行分类：
 
 | 维度 | 分类选项 |
 |------|---------|
@@ -66,12 +66,12 @@
 | 类型 | 功能/性能/安全/兼容性/UI/文档 |
 | 来源 | 自动化回归/自动化集成/探索性测试/人工测试 |
 
-每次记录使用 `.mefan/templates/bug-log-template.md`。
+每次记录使用 `.claude/templates/bug-log-template.md`。
 
 ### 4.4 人工测试指南生成
 **执行者**：QA 工程师
 
-1. 按 `.mefan/skills/write-manual-test-guide.md` 严格按照 `.mefan/templates/manual-test-guide-template.md` 生成 `.mefan/iterations/{sprint-name}/test-results/manual-test-guide.md`。
+1. 按 `.claude/skills/write-manual-test-guide.md` 严格按照 `.claude/templates/manual-test-guide-template.md` 生成 `.claude/iterations/{sprint-name}/test-results/manual-test-guide.md`。
 2. 内容必须包含：
    - 实现的功能清单及对应文件路径
    - 每个功能的测试用例（正常/边界/异常），含具体操作步骤和预期结果
@@ -82,9 +82,9 @@
 ### 4.5 人机测试交接
 **执行者**：QA 工程师 → 人类
 
-1. QA Agent 将 `.mefan/iterations/{sprint-name}/test-results/manual-test-guide.md` 提交给用户，附一段摘要。
+1. QA Agent 将 `.claude/iterations/{sprint-name}/test-results/manual-test-guide.md` 提交给用户，附一段摘要。
 2. 用户按指南执行人工测试。
-3. 用户将发现的缺陷（如有）反馈到 `.mefan/iterations/{sprint-name}/bug-log/manual-YYYY-MM-DD.md`，使用 bug-log 模板。
+3. 用户将发现的缺陷（如有）反馈到 `.claude/iterations/{sprint-name}/bug-log/manual-YYYY-MM-DD.md`，使用 bug-log 模板。
 4. QA Agent 读取人工反馈，进行统一分类和汇总。
 
 ### 4.6 缺陷修复闭环
@@ -104,7 +104,7 @@
 ### 4.7 质量报告生成
 **执行者**：QA 工程师
 
-所有缺陷修复完成后，严格按照 `.mefan/templates/quality-report-template.md` 输出 `.mefan/iterations/{sprint-name}/test-results/quality-report.md`：
+所有缺陷修复完成后，严格按照 `.claude/templates/quality-report-template.md` 输出 `.claude/iterations/{sprint-name}/test-results/quality-report.md`：
 - 测试覆盖统计
 - 缺陷统计（按严重度/类型/来源）
 - 性能基线对比
@@ -132,18 +132,18 @@
 
 | 产出物 | 路径 | 模板 |
 |--------|------|------|
-| regression-YYYY-MM-DD.log | `.mefan/iterations/{sprint-name}/test-results/regression-YYYY-MM-DD.log` | - |
-| manual-test-guide.md | `.mefan/iterations/{sprint-name}/test-results/manual-test-guide.md` | `.mefan/templates/manual-test-guide-template.md` |
-| quality-report.md | `.mefan/iterations/{sprint-name}/test-results/quality-report.md` | `.mefan/templates/quality-report-template.md` |
-| bug-log/auto-YYYY-MM-DD.md | `.mefan/iterations/{sprint-name}/bug-log/auto-YYYY-MM-DD.md` | `.mefan/templates/bug-log-template.md` |
-| bug-log/manual-YYYY-MM-DD.md | `.mefan/iterations/{sprint-name}/bug-log/manual-YYYY-MM-DD.md` | `.mefan/templates/bug-log-template.md` |
+| regression-YYYY-MM-DD.log | `.claude/iterations/{sprint-name}/test-results/regression-YYYY-MM-DD.log` | - |
+| manual-test-guide.md | `.claude/iterations/{sprint-name}/test-results/manual-test-guide.md` | `.claude/templates/manual-test-guide-template.md` |
+| quality-report.md | `.claude/iterations/{sprint-name}/test-results/quality-report.md` | `.claude/templates/quality-report-template.md` |
+| bug-log/auto-YYYY-MM-DD.md | `.claude/iterations/{sprint-name}/bug-log/auto-YYYY-MM-DD.md` | `.claude/templates/bug-log-template.md` |
+| bug-log/manual-YYYY-MM-DD.md | `.claude/iterations/{sprint-name}/bug-log/manual-YYYY-MM-DD.md` | `.claude/templates/bug-log-template.md` |
 
 ## 6. 本阶段产出物清单（供后续依赖检查）
 
 | 文件名 | 完整路径 | 模板 | 被依赖阶段 |
 |--------|----------|------|-----------|
-| regression-YYYY-MM-DD.log | `.mefan/iterations/{sprint-name}/test-results/regression-YYYY-MM-DD.log` | - | 06-retrospect (§2) |
-| manual-test-guide.md | `.mefan/iterations/{sprint-name}/test-results/manual-test-guide.md` | `.mefan/templates/manual-test-guide-template.md` | - |
-| quality-report.md | `.mefan/iterations/{sprint-name}/test-results/quality-report.md` | `.mefan/templates/quality-report-template.md` | 06-retrospect (§2) |
-| bug-log/auto-YYYY-MM-DD.md | `.mefan/iterations/{sprint-name}/bug-log/auto-YYYY-MM-DD.md` | `.mefan/templates/bug-log-template.md` | 06-retrospect (§2) |
-| bug-log/manual-YYYY-MM-DD.md | `.mefan/iterations/{sprint-name}/bug-log/manual-YYYY-MM-DD.md` | `.mefan/templates/bug-log-template.md` | 06-retrospect (§2) |
+| regression-YYYY-MM-DD.log | `.claude/iterations/{sprint-name}/test-results/regression-YYYY-MM-DD.log` | - | 06-retrospect (§2) |
+| manual-test-guide.md | `.claude/iterations/{sprint-name}/test-results/manual-test-guide.md` | `.claude/templates/manual-test-guide-template.md` | - |
+| quality-report.md | `.claude/iterations/{sprint-name}/test-results/quality-report.md` | `.claude/templates/quality-report-template.md` | 06-retrospect (§2) |
+| bug-log/auto-YYYY-MM-DD.md | `.claude/iterations/{sprint-name}/bug-log/auto-YYYY-MM-DD.md` | `.claude/templates/bug-log-template.md` | 06-retrospect (§2) |
+| bug-log/manual-YYYY-MM-DD.md | `.claude/iterations/{sprint-name}/bug-log/manual-YYYY-MM-DD.md` | `.claude/templates/bug-log-template.md` | 06-retrospect (§2) |

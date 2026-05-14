@@ -1,8 +1,8 @@
 # /project-upgrade:02-arch-qa – 架构设计与测试策略
 ## 0. 日志声明（自动追加
-执行本阶段所有步骤时，必须使用 `.mefan/hooks/log-event.sh` 记录日志。
-- 进入阶段时：`bash .mefan/hooks/log-event.sh <阶段> <Agent> "阶段进入" "进入阶段X" "" "成功"`
-- 结束阶段时：`bash .mefan/hooks/log-event.sh <阶段> <Agent> "阶段退出" "阶段X完成" "" "成功"`
+执行本阶段所有步骤时，必须使用 `.claude/hooks/log-event.sh` 记录日志。
+- 进入阶段时：`bash .claude/hooks/log-event.sh <阶段> <Agent> "阶段进入" "进入阶段X" "" "成功"`
+- 结束阶段时：`bash .claude/hooks/log-event.sh <阶段> <Agent> "阶段退出" "阶段X完成" "" "成功"`
 - 在 Human Gate 前后记录审批事件
 
 ## 1. 角色激活
@@ -11,20 +11,20 @@
 - **监督 Agent**：PM (`agents/pm.md`)，阶段末执行硬性审查。
 
 ## 2. 前置输入（必须读取）
-- `.mefan/iterations/{sprint-name}/requirements/upgrade-YYYY-MM-DD-title.md`
-- `.mefan/context/tech-stack-profile.md`
-- `.mefan/context/consistency-baseline.md`
-- 知识图谱（`.mefan/graphify-out/`，若不可用则以手动方式补充）
+- `.claude/iterations/{sprint-name}/requirements/upgrade-YYYY-MM-DD-title.md`
+- `.claude/context/tech-stack-profile.md`
+- `.claude/context/consistency-baseline.md`
+- 知识图谱（`.claude/graphify-out/`，若不可用则以手动方式补充）
 
 **前置检查**：执行前确认上述文件存在，若不存在则报错退出。
 
 ## 3. 强制规则
-- `.mefan/rules/scenario-upgrade/consistency-first.md`
-- `.mefan/rules/scenario-upgrade/api-compatibility.md`
-- `.mefan/rules/scenario-upgrade/reuse-before-build.md`
-- `.mefan/rules/scenario-upgrade/reference-module.md`（指定权威参考模块作为风格蓝本）
-- `.mefan/rules/global/conflict-resolution.md`（设计冲突升级用）
-- `.mefan/rules/global/exception-handling.md`（如有）
+- `.claude/rules/scenario-upgrade/consistency-first.md`
+- `.claude/rules/scenario-upgrade/api-compatibility.md`
+- `.claude/rules/scenario-upgrade/reuse-before-build.md`
+- `.claude/rules/scenario-upgrade/reference-module.md`（指定权威参考模块作为风格蓝本）
+- `.claude/rules/global/conflict-resolution.md`（设计冲突升级用）
+- `.claude/rules/global/exception-handling.md`（如有）
 
 ## 4. 执行流程
 
@@ -41,7 +41,7 @@
    - 接口签名：API 路径、HTTP 方法、请求体/响应体结构、错误码（遵循项目现有风格）。
    - 数据流：新模块与现有模块的数据交互序列（可文字描述或序列图）。
    - 数据库变更（若有）：表结构、索引、迁移脚本。
-   - 设计模式：显式声明用了项目中的哪个现有模式，引用 `.mefan/context/consistency-baseline.md` 中的条目。
+   - 设计模式：显式声明用了项目中的哪个现有模式，引用 `.claude/context/consistency-baseline.md` 中的条目。
 
 3. **参考实现**：
    - 使用 `graphify similar <关键模块名>` 找到相似模块，列出至少 2 个可参考的文件路径和关键函数。
@@ -86,17 +86,17 @@
 1. 架构师将冲突写入 ADR 的"设计冲突声明"章节，说明冲突原因和备选方案。
 2. PM 读取冲突声明，尝试通过调整设计（如切换备选方案）解决。
 3. 若 PM 无法裁定，生成《设计冲突裁决申请书》提交人类决策。
-4. 记录冲突和决议到 `.mefan/iterations/{sprint-name}/session-status.md` 的异常记录。
+4. 记录冲突和决议到 `.claude/iterations/{sprint-name}/session-status.md` 的异常记录。
 
 ## 5. 产出物
 **目录检查**：确保以下目录存在，若不存在则创建：
-- `.mefan/iterations/{sprint-name}/adr/`
-- `.mefan/iterations/{sprint-name}/test-plan/`
+- `.claude/iterations/{sprint-name}/adr/`
+- `.claude/iterations/{sprint-name}/test-plan/`
 
 | 产出物 | 路径 | 模板 |
 |--------|------|------|
-| adr/*.md | `.mefan/iterations/{sprint-name}/adr/upgrade-YYYY-MM-DD-title.md` | `.mefan/templates/adr-template.md` |
-| test-plan/*.md | `.mefan/iterations/{sprint-name}/test-plan/upgrade-YYYY-MM-DD-title.md` | `.mefan/templates/test-plan-template.md` |
+| adr/*.md | `.claude/iterations/{sprint-name}/adr/upgrade-YYYY-MM-DD-title.md` | `.claude/templates/adr-template.md` |
+| test-plan/*.md | `.claude/iterations/{sprint-name}/test-plan/upgrade-YYYY-MM-DD-title.md` | `.claude/templates/test-plan-template.md` |
 
 ## 6. PM 硬性审查（逐项打钩）
 - [ ] ADR 是否包含至少两个方案的对比？
@@ -112,5 +112,5 @@
 
 | 文件名 | 完整路径 | 模板 | 被依赖阶段 |
 |--------|----------|------|-----------|
-| adr/*.md | `.mefan/iterations/{sprint-name}/adr/upgrade-YYYY-MM-DD-title.md` | `.mefan/templates/adr-template.md` | 03-plan (§2), 04-implement (§2) |
-| test-plan/*.md | `.mefan/iterations/{sprint-name}/test-plan/upgrade-YYYY-MM-DD-title.md` | `.mefan/templates/test-plan-template.md` | 03-plan (§2), 05-quality (§2) |
+| adr/*.md | `.claude/iterations/{sprint-name}/adr/upgrade-YYYY-MM-DD-title.md` | `.claude/templates/adr-template.md` | 03-plan (§2), 04-implement (§2) |
+| test-plan/*.md | `.claude/iterations/{sprint-name}/test-plan/upgrade-YYYY-MM-DD-title.md` | `.claude/templates/test-plan-template.md` | 03-plan (§2), 05-quality (§2) |

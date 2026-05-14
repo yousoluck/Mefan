@@ -13,4 +13,4 @@
 4. 生成正式文档
 5. 任何异常或阻断
 6. Human Gate 提交/通过
-格式：bash .mefan/hooks/log-event.sh <阶段> <Agent> <事件类型> <描述> <关联> <结果>
+格式：bash .claude/hooks/log-event.sh <阶段> <Agent> <事件类型> <描述> <关联> <结果>

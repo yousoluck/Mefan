@@ -65,7 +65,7 @@
 
 1. 进化教练分析 iteration-retrospective.md 中的缺陷模式
 2. 如果发现值得改进的点，生成 `evolution-proposal.md`
-3. 提案写入 `.mefan/evolution-proposals/`
+3. 提案写入 `.claude/evolution-proposals/`
 
 ### 阶段2：PM审批
 
