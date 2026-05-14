@@ -14,7 +14,12 @@
     │   │   ├── project-upgrade/
     │   │   │   ├── 00-init.md
     │   │   │   ├── 01-requirements.md
-    │   │   │   └── ...
+    │   │   │   ├── 02-arch-qa.md
+    │   │   │   ├── 03-plan.md
+    │   │   │   ├── 04-implement.md
+    │   │   │   ├── 05-quality.md
+    │   │   │   ├── 06-retrospect.md
+    │   │   │   └── auto.md
     │   │   ├── project-refactor/
     │   │   └── project-new/
     │   ├── knowledge/                  # Rules 和 Skills 统一存储
@@ -35,10 +40,15 @@
     │   │   ├── graphify-query-cheatsheet.md
     │   │   ├── query-third-party-docs.md
     │   │   ├── git-workflow.md
-    │   │   └── ...
+    │   │   ├── tdd-red-green-refactor.md
+    │   │   ├── code-review-checklist.md
+    │   │   ├── write-manual-test-guide.md
+    │   │   ├── ug-triage-classification.md
+    │   │   ├── root-cause-analysis.md
+    │   │   └── pattern-extraction-from-logs.md
     │   ├── hooks/                      # 自动化检查脚本
     │   │   ├── check-consistency.py
-    │   │   └── ...
+    │   │   └── log-event.sh
     │   ├── templates/                  # 所有产出物的标准模板
     │   │   ├── session-status-template.md
     │   │   ├── tech-stack-profile-template.md
@@ -58,52 +68,59 @@
     ├── graphify-out/                   # 知识图谱输出（由 Graphify 生成）
     └── src/                            # 项目业务代码（已有）
 
-2. 
+2.
 层级	                 文件	               状态
 Agent	           agents/pm.md	        ✅ 已加固
                    agents/architect.md	✅ 已加固
                    agents/analyst.md	✅ 已加固
-                   agents/developer.md	⬜ 占位
-                   agents/qa.md	        ⬜ 占位
-                   agents/guardian.md	⬜ 占位
+                   agents/developer.md	✅ 已加固
+                   agents/qa.md	        ✅ 已加固
+                   agents/guardian.md	✅ 已加固
+                   agents/coach.md	    ✅ 已加固
 Command	           commands/project-upgrade/00-init.md	✅ 已加固
                    commands/project-upgrade/01-requirements.md	✅ 已加固
-                   commands/project-upgrade/02-arch-qa.md	⬜ 未开始
-                   commands/project-upgrade/03-plan.md	⬜ 未开始
-                   commands/project-upgrade/04-implement.md	⬜ 未开始
-                   commands/project-upgrade/05-quality.md	⬜ 未开始
-                   commands/project-upgrade/06-retrospect.md	⬜ 未开始
+                   commands/project-upgrade/02-arch-qa.md	✅ 已加固
+                   commands/project-upgrade/03-plan.md	✅ 已加固
+                   commands/project-upgrade/04-implement.md	✅ 已加固
+                   commands/project-upgrade/05-quality.md	✅ 已加固
+                   commands/project-upgrade/06-retrospect.md	✅ 已加固
+                   commands/project-upgrade/auto.md	✅ 已加固
 Template	       templates/session-status-template.md	✅
                    templates/tech-stack-profile-template.md	✅
                    templates/consistency-baseline-template.md	✅
                    templates/requirements-template.md	✅ 已加固
-                   templates/adr-template.md	✅ 核心占位
-                   templates/test-plan-template.md	✅ 核心占位
-                   templates/iteration-plan-template.md	✅ 核心占位
-                   templates/sprint-status-template.md	✅ 核心占位
-                   templates/task-summary-template.md	✅ 核心占位
-                   templates/quality-report-template.md	⬜ 未开始
-                   templates/manual-test-guide-template.md	⬜ 未开始
-                   templates/bug-log-template.md	⬜ 未开始
-                   templates/iteration-retrospective-template.md	⬜ 未开始
-                   templates/evolution-proposal-template.md	⬜ 未开始
+                   templates/adr-template.md	✅ 已加固
+                   templates/test-plan-template.md	✅ 已加固
+                   templates/iteration-plan-template.md	✅ 已加固
+                   templates/sprint-status-template.md	✅ 已加固
+                   templates/task-summary-template.md	✅ 已加固
+                   templates/quality-report-template.md	✅ 已加固
+                   templates/manual-test-guide-template.md	✅ 已加固
+                   templates/bug-log-template.md	✅ 已加固
+                   templates/iteration-retrospective-template.md	✅ 已加固
+                   templates/evolution-proposal-template.md	✅ 已加固
+                   templates/log-entry-template.md	✅ 已加固
+                   templates/project-status-template.md	✅ 已加固
 Rule	           knowledge/global/session-init.md	✅
                    knowledge/scenario-upgrade/consistency-first.md	✅
                    knowledge/scenario-upgrade/api-compatibility.md	✅
                    knowledge/scenario-upgrade/reuse-before-build.md	✅
-                   knowledge/global/conflict-resolution.md	⬜ 未开始
-                   knowledge/global/exception-handling.md	⬜ 未开始
-                   knowledge/global/tech-debt-management.md	⬜ 未开始
-                   knowledge/global/hook-vs-guardian.md	⬜ 未开始
-                   knowledge/global/harness-version-control.md	⬜ 未开始
-                   knowledge/global/quality-gates.md	⬜ 未开始
+                   knowledge/global/conflict-resolution.md	✅ 已加固
+                   knowledge/global/exception-handling.md	✅ 已加固
+                   knowledge/global/tech-debt-management.md	✅ 已加固
+                   knowledge/global/hook-vs-guardian.md	✅ 已加固
+                   knowledge/global/harness-version-control.md	✅ 已加固
+                   knowledge/global/quality-gates.md	✅ 已加固
+                   knowledge/global/logging.md	✅ 已加固
 Skill	           skills/graphify-query-cheatsheet.md	✅ 核心
-                   skills/git-workflow.md	✅ 占位
-                   skills/query-third-party-docs.md	✅ 占位
-                   skills/tdd-red-green-refactor.md	⬜ 未开始
-                   skills/code-review-checklist.md	⬜ 未开始
-                   skills/write-manual-test-guide.md	⬜ 未开始
-                   skills/bug-triage-classification.md	⬜ 未开始
-                   skills/root-cause-analysis.md	⬜ 未开始
-                   Hook	hooks/check-consistency.py	⬜ 占位（待实现）
+                   skills/git-workflow.md	✅ 已加固
+                   skills/query-third-party-docs.md	✅ 已加固
+                   skills/tdd-red-green-refactor.md	✅ 已加固
+                   skills/code-review-checklist.md	✅ 已加固
+                   skills/write-manual-test-guide.md	✅ 已加固
+                   skills/ug-triage-classification.md	✅ 已加固
+                   skills/root-cause-analysis.md	✅ 已加固
+                   skills/pattern-extraction-from-logs.md	✅ 已加固
+Hook	           hooks/check-consistency.py	✅ 已提供
+                   hooks/log-event.sh	✅ 已提供
 初始化	           init-mefan-harness.sh	✅ 已提供
