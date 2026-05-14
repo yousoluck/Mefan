@@ -128,16 +128,20 @@ Template	       .claude/templates/session-status-template.md	✅
                    .claude/templates/log-entry-template.md	✅ 已加固
                    .claude/templates/project-status-template.md	✅ 已加固
 Rule	           .claude/rules/global/session-init.md	✅
+                   .claude/rules/global/quality-gates.md	✅
+                   .claude/rules/global/exception-handling.md	✅ 已加固
+                   .claude/rules/global/tech-debt-management.md	✅
+                   .claude/rules/global/harness-version-control.md	✅
+                   .claude/rules/global/conflict-resolution.md	✅ 已加固
+                   .claude/rules/global/hook-vs-guardian.md	✅
+                   .claude/rules/global/logging.md	✅
+                   .claude/rules/global/iteration-planning.md	✅ 新增
+                   .claude/rules/global/manual-test-bug-handling.md	✅ 新增
+                   .claude/rules/global/evolution-process.md	✅ 新增
                    .claude/rules/scenario-upgrade/consistency-first.md	✅
                    .claude/rules/scenario-upgrade/api-compatibility.md	✅
                    .claude/rules/scenario-upgrade/reuse-before-build.md	✅
-                   .claude/rules/global/conflict-resolution.md	✅ 已加固
-                   .claude/rules/global/exception-handling.md	✅ 已加固
-                   .claude/rules/global/tech-debt-management.md	✅ 已加固
-                   .claude/rules/global/hook-vs-guardian.md	✅ 已加固
-                   .claude/rules/global/harness-version-control.md	✅ 已加固
-                   .claude/rules/global/quality-gates.md	✅ 已加固
-                   .claude/rules/global/logging.md	✅ 已加固
+                   .claude/rules/scenario-upgrade/reference-module.md	✅ 新增
 Skill	           .claude/skills/graphify-query-cheatsheet.md	✅ 核心
                    .claude/skills/git-workflow.md	✅ 已加固
                    .claude/skills/query-third-party-docs.md	✅ 已加固
