@@ -43,7 +43,7 @@
 
 **目录检查**：确保 `.claude/iterations/{sprint-name}/` 目录存在。
 
-输出 `.claude/iterations/{sprint-name}/retrospective.md`，**必须使用** `.claude/templates/iteration-retrospective-template.md`：
+输出 `.claude/iterations/{sprint-name}/iteration-retrospective.md`，**必须使用** `.claude/templates/iteration-retrospective-template.md`：
 
 1. **迭代概览**：用户故事数、任务完成率、工时偏差。
 2. **缺陷分析**：按类型和严重度分布图（文字描述）。
@@ -88,12 +88,25 @@
 3. 将已审批通过且完成实验验证（从上一个迭代的实验池中）的 Rule/Skill 正式合并入 `.claude/rules/` 和 `.claude/skills/`。
 4. 更新知识库索引（如有）。
 
-### 4.6 阶段结束
+### 4.6 异常处理
+**执行者**：PM
+
+| 异常场景 | 处理方式 |
+|---------|---------|
+| 进化提案审批失败（连续 3 条被驳回） | 汇总驳回理由，提交 Human Gate 决策 |
+| CHANGELOG.md 更新失败 | 报错退出，检查文件权限 |
+| HARNESS_VERSION.md 更新失败 | 报错退出，检查文件权限 |
+| 提案合并时冲突（与现有规则矛盾） | 标注"冲突待解决"，阻止合并，提交 Human Gate |
+| 实验规则验证失败（连续 3 次） | 撤销实验，标记为"不采纳"，记录教训 |
+
+**异常记录**：所有异常需记录到 session-status.md 的"异常记录"章节。
+
+### 4.7 阶段结束
 - PM 输出迭代总结摘要，包含进化提案数量和技术债务趋势。
 - 等待 `[Human Gate]` 审批。
 - 审批通过后，标记本迭代关闭，准备下一迭代。
 
-### 4.7 生成项目全局进度报告
+### 4.8 生成项目全局进度报告
 **执行者**：PM
 
 1. **目录检查**：确保 `.claude/reports/` 目录存在。
@@ -104,7 +117,7 @@
 
 | 产出物 | 路径 | 模板 |
 |--------|------|------|
-| retrospective.md | `.claude/iterations/{sprint-name}/retrospective.md` | `.claude/templates/iteration-retrospective-template.md` |
+| iteration-retrospective.md | `.claude/iterations/{sprint-name}/iteration-retrospective.md` | `.claude/templates/iteration-retrospective-template.md` |
 | evolution-proposal.md | `.claude/evolution-proposals/upgrade-YYYY-MM-DD-title.md` | `.claude/templates/evolution-proposal-template.md` |
 | PROJECT_STATUS.md | `.claude/reports/PROJECT_STATUS.md` | `.claude/templates/project-status-template.md` |
 | CHANGELOG.md | `CHANGELOG.md`（更新） | - |
@@ -114,7 +127,7 @@
 
 | 文件名 | 完整路径 | 模板 | 被依赖阶段 |
 |--------|----------|------|-----------|
-| retrospective.md | `.claude/iterations/{sprint-name}/retrospective.md` | `.claude/templates/iteration-retrospective-template.md` | 下一 iteration 的 00-init |
+| iteration-retrospective.md | `.claude/iterations/{sprint-name}/iteration-retrospective.md` | `.claude/templates/iteration-retrospective-template.md` | 下一 iteration 的 00-init |
 | evolution-proposal.md | `.claude/evolution-proposals/upgrade-YYYY-MM-DD-title.md` | `.claude/templates/evolution-proposal-template.md` | 框架维护用 |
 | PROJECT_STATUS.md | `.claude/reports/PROJECT_STATUS.md` | `.claude/templates/project-status-template.md` | 全局可读 |
 | CHANGELOG.md | `CHANGELOG.md` | - | 全局可读 |
