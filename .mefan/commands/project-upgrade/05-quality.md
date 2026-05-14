@@ -65,7 +65,7 @@
 ### 4.4 人工测试指南生成
 **执行者**：QA 工程师
 
-1. 按 `skills/write-manual-test-guide.md` 生成 `manual-test-guide.md`，放入 `test-results/`。
+1. 按 `skills/write-manual-test-guide.md` 严格按照 `templates/manual-test-guide-template.md` 生成 `manual-test-guide.md`，放入 `test-results/`。
 2. 内容必须包含：
    - 实现的功能清单及对应文件路径
    - 每个功能的测试用例（正常/边界/异常），含具体操作步骤和预期结果
@@ -98,7 +98,7 @@
 ### 4.7 质量报告生成
 **执行者**：QA 工程师
 
-所有缺陷修复完成后，输出 `quality-report.md`（模板 `templates/quality-report-template.md`）：
+所有缺陷修复完成后，严格按照 `templates/quality-report-template.md` 输出 `quality-report.md`（模板 `templates/quality-report-template.md`）：
 - 测试覆盖统计
 - 缺陷统计（按严重度/类型/来源）
 - 性能基线对比

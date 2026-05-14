@@ -5,8 +5,19 @@ CURRENT_STAGE=0
 Skills 路径：skills/
 图谱目录：graphify-out/
 
+## 对话日志（强制执行）
+> ⚠️ **每次对话结束时，AI 必须自动执行日志记录，无需用户提醒**
+
+- **日志文件**：`../logs/conversation-log.md`
+- **执行时机**：对话结束时（即 AI 回复用户后）
+- **执行命令**：
+  ```bash
+  bash .mefan/hooks/conversation-log.sh "assistant" "<用户输入>" "<AI回复摘要>" "<执行的操作>"
+  ```
+- **记录内容**：时间戳、用户输入、AI回复摘要、执行的操作
+
 ## 调试与日志
-- 日志文件：`iterations/mefan-log.md`
+- 框架运行日志：`iterations/mefan-log.md`
 - 所有 Agent 必须按照 `knowledge/global/logging.md` 写入日志。
 - 日志命令：`bash .mefan/hooks/log-event.sh <阶段> <Agent> <事件类型> <描述> <关联> <结果>`
 EOFCLAUDE

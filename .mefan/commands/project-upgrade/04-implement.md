@@ -94,7 +94,7 @@
 **执行者**：开发者
 
 1. 更新看板任务状态为 `In Review` → `Done`。
-2. 生成 `task-summary/<task-id>.md`，包含：修改清单、新 API、技术债务、优化建议。
+2. 严格按照 `templates/task-summary-template.md` 生成 `task-summary/<task-id>.md`，包含：修改清单、新 API、技术债务、优化建议。
 3. 提交代码到特性分支，按 `skills/git-workflow.md` 规范编写 commit message。
 4. 更新 `iterations/sprint-status.md` 的实际工时。
 
