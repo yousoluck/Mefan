@@ -64,9 +64,40 @@
     │   │   ├── bug-log-template.md
     │   │   ├── iteration-retrospective-template.md
     │   │   └── evolution-proposal-template.md
-    │   └── settings.json               # Hook 和 MCP 配置
-    ├── graphify-out/                   # 知识图谱输出（由 Graphify 生成）
-    └── src/                            # 项目业务代码（已有）
+    │   ├── settings.json                      # Hook/MCP 配置
+    │   ├── context/                           # 全局技术上下文（跨迭代共享）
+    │   │   ├── tech-stack-profile.md
+    │   │   └── consistency-baseline.md
+    │   ├── iterations/                        # 迭代总目录
+    │   │   ├── mefan-log.md                   # 全局日志
+    │   │   ├── sprint-2026-05-14/             # 单个迭代
+    │   │   │   ├── session-status.md
+    │   │   │   ├── requirements/
+    │   │   │   │   └── upgrade-2026-05-14-xxx.md
+    │   │   │   ├── adr/
+    │   │   │   │   └── upgrade-2026-05-14-xxx.md
+    │   │   │   ├── test-plan/
+    │   │   │   │   └── upgrade-2026-05-14-xxx.md
+    │   │   │   ├── sprint-status.md
+    │   │   │   ├── iteration-plan.md
+    │   │   │   ├── task-summary/
+    │   │   │   │   ├── T001.md
+    │   │   │   │   └── ...
+    │   │   │   ├── test-results/
+    │   │   │   │   ├── regression-2026-05-14.log
+    │   │   │   │   ├── manual-test-guide.md
+    │   │   │   │   └── unit-T001.log
+    │   │   │   ├── bug-log/
+    │   │   │   │   ├── auto-2026-05-14.md
+    │   │   │   │   └── manual-2026-05-14.md
+    │   │   │   └── retrospective.md
+    │   │   └── sprint-2026-05-28/
+    │   │       └── ...
+    │   ├── evolution-proposals/               # 进化提案
+    │   │   └── upgrade-2026-05-14.md
+    │   └── reports/                           # 人类可读报告
+    │       └── PROJECT_STATUS.md
+    └── graphify-out/                          # 知识图谱（由工具生成，非框架文件）
 
 2.
 层级	                 文件	               状态
