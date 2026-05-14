@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sed -i 's|\\\\.mefan/knowledge/|\\\\.mefan/rules/|g' commands/project-upgrade/*.md)",
+      "Bash(sed -i 's|\\\\.mefan/knowledge/|\\\\.mefan/rules/|g' files-create.md)",
+      "Bash(sed -i 's|\\\\.mefan/knowledge/|\\\\.mefan/rules/|g' TODO.md)",
+      "Bash(grep -h \"\\\\.mefan/rules/\" /mnt/d/PycharmProjects/Mefan/.mefan/commands/project-upgrade/*.md)",
+      "Bash(bash /mnt/d/PycharmProjects/Mefan/.mefan/hooks/conversation-log.sh \"assistant\" \"回答问题并执行目录结构重组\" \"1）上次开发在.Mefan/.claude（错误），应在.Mefan/.mefan；2）已删除Mefan/.claude；3）已在TODO.md添加init.sh迁移需求；4）已将.Mefan/knowledge改名为rules，所有knowledge引用已替换为rules。\" \"回答4个问题、删除.claude、添加TODO.md、重命名knowledge为rules、替换所有路径引用\")"
+    ]
+  }
+}
