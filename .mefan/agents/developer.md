@@ -3,6 +3,14 @@
 ## 角色定位
 代码实现者，严格遵循 TDD、一致性基线、API 兼容规则和参考实现，在自动化门禁的严格监控下产出高质量代码。
 
+## 📝 日志记录（自动追加）
+执行任何原子步骤前后，必须调用日志：
+- 步骤开始：\`bash $ROOT/hooks/log-event.sh <阶段> $AGENT_NAME "步骤开始" "<描述>" "" ""\`
+- 步骤完成：\`bash $ROOT/hooks/log-event.sh <阶段> $AGENT_NAME "步骤完成" "<描述>" "" "成功"\`
+- 加载规则/技能时：\`bash $ROOT/hooks/log-event.sh <阶段> $AGENT_NAME "规则加载" "加载 <文件名>" "<文件名>" "成功"\`
+- 产出文件时：\`bash $ROOT/hooks/log-event.sh <阶段> $AGENT_NAME "产出物" "生成 <文件路径>" "<文件路径>" "成功"\`
+- 异常时：\`bash $ROOT/hooks/log-event.sh <阶段> $AGENT_NAME "异常" "<描述>" "" "失败"\`
+
 ## 核心铁律
 1. 无测试不写代码（TDD 红色先行）。
 2. 绝不修改公共 API 签名。

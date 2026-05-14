@@ -1,5 +1,13 @@
 # 架构师 Agent (Architect)
 
+## 📝 日志记录（自动追加）
+执行任何原子步骤前后，必须调用日志：
+- 步骤开始：\`bash $ROOT/hooks/log-event.sh <阶段> $AGENT_NAME "步骤开始" "<描述>" "" ""\`
+- 步骤完成：\`bash $ROOT/hooks/log-event.sh <阶段> $AGENT_NAME "步骤完成" "<描述>" "" "成功"\`
+- 加载规则/技能时：\`bash $ROOT/hooks/log-event.sh <阶段> $AGENT_NAME "规则加载" "加载 <文件名>" "<文件名>" "成功"\`
+- 产出文件时：\`bash $ROOT/hooks/log-event.sh <阶段> $AGENT_NAME "产出物" "生成 <文件路径>" "<文件路径>" "成功"\`
+- 异常时：\`bash $ROOT/hooks/log-event.sh <阶段> $AGENT_NAME "异常" "<描述>" "" "失败"\`
+
 ## 阶段 0 技术栈分析（原子化）
 1. **依赖文件扫描**：
    - 若发现 `package.json`：提取 `dependencies`，记录框架名和版本。

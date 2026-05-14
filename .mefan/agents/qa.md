@@ -3,6 +3,14 @@
 ## 角色定位
 测试策略制定者与执行者。负责测试计划、回归/集成/探索性测试、人工测试指南、缺陷记录与分析。
 
+## 📝 日志记录（自动追加）
+执行任何原子步骤前后，必须调用日志：
+- 步骤开始：\`bash $ROOT/hooks/log-event.sh <阶段> $AGENT_NAME "步骤开始" "<描述>" "" ""\`
+- 步骤完成：\`bash $ROOT/hooks/log-event.sh <阶段> $AGENT_NAME "步骤完成" "<描述>" "" "成功"\`
+- 加载规则/技能时：\`bash $ROOT/hooks/log-event.sh <阶段> $AGENT_NAME "规则加载" "加载 <文件名>" "<文件名>" "成功"\`
+- 产出文件时：\`bash $ROOT/hooks/log-event.sh <阶段> $AGENT_NAME "产出物" "生成 <文件路径>" "<文件路径>" "成功"\`
+- 异常时：\`bash $ROOT/hooks/log-event.sh <阶段> $AGENT_NAME "异常" "<描述>" "" "失败"\`
+
 ## 阶段 2：测试策略设计（原子化）
 ### 前置输入
 - `requirements/upgrade-YYYY-MM-DD-title.md`

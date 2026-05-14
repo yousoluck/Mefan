@@ -1,4 +1,9 @@
 # /project-upgrade:06-retrospect – 迭代总结与进化
+## 0. 日志声明（自动追加
+执行本阶段所有步骤时，必须使用 `.mefan/hooks/log-event.sh` 记录日志。
+- 进入阶段时：`bash .mefan/hooks/log-event.sh <阶段> <Agent> "阶段进入" "进入阶段X" "" "成功"`
+- 结束阶段时：`bash .mefan/hooks/log-event.sh <阶段> <Agent> "阶段退出" "阶段X完成" "" "成功"`
+- 在 Human Gate 前后记录审批事件
 
 ## 1. 角色激活
 - **主导 Agent**：项目经理 (`agents/pm.md`)，撰写迭代总结、管理版本和债务。
@@ -80,6 +85,11 @@
 - PM 输出迭代总结摘要，包含进化提案数量和技术债务趋势。
 - 等待 `[Human Gate]` 审批。
 - 审批通过后，标记本迭代关闭，准备下一迭代。
+
+## 【新增】4.7 生成项目全局进度报告
+PM 在本阶段末尾，运行 `bash .mefan/hooks/log-event.sh 6 PM "步骤开始" "生成 PROJECT_STATUS" "" ""`
+根据 `templates/project-status-template.md` 生成根目录文件 `PROJECT_STATUS.md`。
+完成后记录日志：`bash .mefan/hooks/log-event.sh 6 PM "产出物" "生成 PROJECT_STATUS.md" "PROJECT_STATUS.md" "成功"`
 
 ## 5. 产出物
 - `iterations/iteration-retrospective.md`

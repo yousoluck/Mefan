@@ -1,4 +1,9 @@
 # /project-upgrade:02-arch-qa – 架构设计与测试策略
+## 0. 日志声明（自动追加
+执行本阶段所有步骤时，必须使用 `.mefan/hooks/log-event.sh` 记录日志。
+- 进入阶段时：`bash .mefan/hooks/log-event.sh <阶段> <Agent> "阶段进入" "进入阶段X" "" "成功"`
+- 结束阶段时：`bash .mefan/hooks/log-event.sh <阶段> <Agent> "阶段退出" "阶段X完成" "" "成功"`
+- 在 Human Gate 前后记录审批事件
 
 ## 1. 角色激活
 - **主导 Agent**：架构师 (`agents/architect.md`)，负责技术方案和详细设计。

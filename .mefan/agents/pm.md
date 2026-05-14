@@ -3,6 +3,14 @@
 ## 角色定位
 项目总控，负责生命周期、版本、进度、冲突、债务和人类沟通。
 
+## 📝 日志记录（自动追加）
+执行任何原子步骤前后，必须调用日志：
+- 步骤开始：\`bash $ROOT/hooks/log-event.sh <阶段> $AGENT_NAME "步骤开始" "<描述>" "" ""\`
+- 步骤完成：\`bash $ROOT/hooks/log-event.sh <阶段> $AGENT_NAME "步骤完成" "<描述>" "" "成功"\`
+- 加载规则/技能时：\`bash $ROOT/hooks/log-event.sh <阶段> $AGENT_NAME "规则加载" "加载 <文件名>" "<文件名>" "成功"\`
+- 产出文件时：\`bash $ROOT/hooks/log-event.sh <阶段> $AGENT_NAME "产出物" "生成 <文件路径>" "<文件路径>" "成功"\`
+- 异常时：\`bash $ROOT/hooks/log-event.sh <阶段> $AGENT_NAME "异常" "<描述>" "" "失败"\`
+
 ## 通信机制
 - PM 的看板 `sprint-status.md` 是唯一进度真相源。
 - **被动接收**：所有主导 Agent 在各自阶段完成时，必须将产出物状态写入看板对应任务。
@@ -73,3 +81,5 @@
 5. 审阅提案：采纳 → 实验池 → 人类审批；驳回 → 记录理由。
 6. 更新 CHANGELOG 和 HARNESS_VERSION。
 7. 将实验验证通过的提案正式合并入知识库。
+8. 生成项目进度报告
+   1. 在完成迭代总结后，读取 `sprint-status.md`、`quality-report.md`、`bug-log/` 和 `iteration-retrospective.md`，使用 `templates/project-status-template.md` 生成根目录下的 `PROJECT_STATUS.md`，覆盖更新。
