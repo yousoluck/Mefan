@@ -16,32 +16,61 @@
 - [x] `rules/global/logging.md` - 日志命令路径已更新
 - [x] `rules/global/evolution-process.md` - 提案路径已更新
 - [x] `templates/session-status-template.md` - 路径已更新
-- [x] 所有 `commands/project-upgrade/*.md` - 路径已更新
-
----
-
-## 🔄 进行中（In Progress）
-
-### I1: 初始化脚本更新
-- [ ] `init.sh` 需要更新为将文件复制到 `.claude/` 而不是 `.mefan/`
-- [ ] `init.sh` 中的路径替换逻辑需要从 `.mefan` → `.claude`
+- [x] 所有 `commands/mf-upgrade:*.md` - 已重命名
+- [x] README.md 更新 - 目录结构说明
 
 ---
 
 ## 📋 待办（Pending）
 
-### T1: 验证完整性
-- [ ] 检查所有更新后的路径对应的文件是否真实存在
-- [ ] 运行 `/project-upgrade:auto` 验证框架正常工作
+### T1: 开源框架集成规划
 
-### T2: README.md 更新
-- [x] 更新 README.md 中对 `.mefan/` 的引用为 `.claude/`
-- [x] 更新目录结构说明
+**目标**：将 Mefan 与 OpenSpec/Gstack/SStack 集成融合，打造完整的 AI 工程化开发栈。
+
+**集成架构**：
+
+```
+Mefan (流程引擎)
+    ├── 输入层 → OpenSpec/Spec Kit (需求规范)
+    ├── 执行层 → Mefan (阶段流程 + Agent 协作)
+    └── 输出层 → Gstack/Tabario (SDLC 集成) + SStack (UI 设计认知)
+```
+
+**分层职责**：
+
+| 层级 | 框架 | 职责 | 集成接口 |
+|------|------|------|----------|
+| 需求输入 | OpenSpec | 需求规范编写、验收标准定义 | 阶段1读取 `.md` 文件 |
+| 流程引擎 | Mefan | 7阶段执行、Agent编排、门禁控制 | 核心框架 |
+| SDLC集成 | Gstack/Tabario | Linear/Jira Issue追踪、PR/MR管理 | 阶段3/4 调用 `gh` CLI |
+| UI设计 | SStack | 设计稿认知、设计规范提取 | 阶段2 Architecture 参考 |
+
+**实施步骤**：
+
+1. **Phase 1 - OpenSpec 集成**
+   - 研究 OpenSpec 规范格式
+   - 在阶段1 (Requirements) 中支持读取 OpenSpec 格式
+   - 输出适配器 `.claude/adapters/openspec-loader.md`
+
+2. **Phase 2 - Gstack/Tabario 集成**
+   - 研究 Gstack 的 Linear/Issue 追踪 API
+   - 在阶段3 (Plan) 中实现 Issue → Task 自动转换
+   - 在阶段4 (Implement) 中实现 PR 状态同步
+   - 输出适配器 `.claude/adapters/gstack-sync.md`
+
+3. **Phase 3 - SStack 集成**
+   - 研究 SStack 的设计稿认知能力
+   - 在阶段2 (Arch-QA) 中支持设计稿解析
+   - 输出适配器 `.claude/adapters/sstack-design.md`
+
+4. **Phase 4 - 统一接口层**
+   - 定义标准适配器接口 `.claude/interfaces/adapter-protocol.md`
+   - 实现配置化加载机制
 
 ---
 
 ## 备注
 
-- 所有文件内的 `.mefan/` 硬编码引用已替换为 `.claude/`
-- 框架文件实际位于 `.claude/` 目录
+- 框架文件位于 `.claude/` 目录
 - Hooks 和 scripts 位于 `.claude/hooks/`
+- 日志文件位于 `../logs/conversation-log.md`

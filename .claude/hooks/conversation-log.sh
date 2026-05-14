@@ -1,6 +1,6 @@
 #!/bin/bash
 # conversation-log.sh - 对话日志自动保存脚本
-# 用法: bash .mefan/hooks/conversation-log.sh "<agent>" "<user_message>" "<ai_response>" "<operations>"
+# 用法: bash .claude/hooks/conversation-log.sh "<agent>" "<user_message>" "<ai_response>" "<operations>"
 
 AGENT="${1:-assistant}"
 TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")

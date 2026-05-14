@@ -1,4 +1,4 @@
-# /project-upgrade:03-plan – 迭代计划与任务排期
+# /mf-upgrade:03-plan – 迭代计划与任务排期
 ## 0. 日志声明（自动追加
 执行本阶段所有步骤时，必须使用 `.claude/hooks/log-event.sh` 记录日志。
 - 进入阶段时：`bash .claude/hooks/log-event.sh <阶段> <Agent> "阶段进入" "进入阶段X" "" "成功"`

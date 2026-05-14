@@ -1,4 +1,4 @@
-# /project-upgrade:auto – 自动推进全流程
+# /mf-upgrade:auto – 自动推进全流程
 ## 0. 日志声明（自动追加
 执行本阶段所有步骤时，必须使用 `.claude/hooks/log-event.sh` 记录日志。
 - 进入阶段时：`bash .claude/hooks/log-event.sh <阶段> <Agent> "阶段进入" "进入阶段X" "" "成功"`
@@ -66,13 +66,13 @@
    - 验证这些产出物在 session-status 中标记为 ✅
 
 3. **拉起对应 Command**：
-   - 阶段 0：触发 `/project-upgrade:00-init`
-   - 阶段 1：触发 `/project-upgrade:01-requirements`
-   - 阶段 2：触发 `/project-upgrade:02-arch-qa`
-   - 阶段 3：触发 `/project-upgrade:03-plan`
-   - 阶段 4：触发 `/project-upgrade:04-implement`
-   - 阶段 5：触发 `/project-upgrade:05-quality`
-   - 阶段 6：触发 `/project-upgrade:06-retrospect`
+   - 阶段 0：触发 `/mf-upgrade:00-init`
+   - 阶段 1：触发 `/mf-upgrade:01-requirements`
+   - 阶段 2：触发 `/mf-upgrade:02-arch-qa`
+   - 阶段 3：触发 `/mf-upgrade:03-plan`
+   - 阶段 4：触发 `/mf-upgrade:04-implement`
+   - 阶段 5：触发 `/mf-upgrade:05-quality`
+   - 阶段 6：触发 `/mf-upgrade:06-retrospect`
 
 4. **等待阶段完成 + PM 报告**：
    - 若阶段内包含 `[Human Gate]`，PM 等待用户 `APPROVED` 或 `继续`

@@ -1,4 +1,4 @@
-# /project-upgrade:01-requirements – 需求澄清与现有系统分析
+# /mf-upgrade:01-requirements – 需求澄清与现有系统分析
 ## 0. 日志声明（自动追加
 执行本阶段所有步骤时，必须使用 `.claude/hooks/log-event.sh` 记录日志。
 - 进入阶段时：`bash .claude/hooks/log-event.sh <阶段> <Agent> "阶段进入" "进入阶段X" "" "成功"`
@@ -17,7 +17,7 @@
 
 **前置检查**：
 - 执行前确认上述 3 个文件存在，若任一不存在则报错退出。
-- 若 `session-status.md` 不存在，报错："阶段 0 未完成或 session-status.md 缺失，请先执行 /project-upgrade:00-init"
+- 若 `session-status.md` 不存在，报错："阶段 0 未完成或 session-status.md 缺失，请先执行 /mf-upgrade:00-init"
 
 ## 3. 强制规则
 - `.claude/rules/scenario-upgrade/consistency-first.md`

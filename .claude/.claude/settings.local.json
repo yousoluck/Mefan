@@ -7,7 +7,20 @@
       "Bash(grep -h \"\\\\.mefan/rules/\" /mnt/d/PycharmProjects/Mefan/.mefan/commands/project-upgrade/*.md)",
       "Bash(bash /mnt/d/PycharmProjects/Mefan/.mefan/hooks/conversation-log.sh \"assistant\" \"回答问题并执行目录结构重组\" \"1）上次开发在.Mefan/.claude（错误），应在.Mefan/.mefan；2）已删除Mefan/.claude；3）已在TODO.md添加init.sh迁移需求；4）已将.Mefan/knowledge改名为rules，所有knowledge引用已替换为rules。\" \"回答4个问题、删除.claude、添加TODO.md、重命名knowledge为rules、替换所有路径引用\")",
       "Bash(bash .claude/hooks/conversation-log.sh \"assistant\" \"我们的日志会自动记录吗\" \"回答：不会自动记录，需要在 settings.json 配置 Hook 或手动调用脚本。解释了脚本存在但未配置为自动触发。\" \"读取 hooks 脚本内容，分析日志机制，回复用户问题\")",
-      "Bash(bash .claude/hooks/conversation-log.sh \"assistant\" \"再检查一下，我们的所有文档里面还有对.mefan目录的引用吗？Claude.md里面有规定,要手动记录每一次的会话\" \"完成：1）检查所有文档发现.mefan目录已不存在；2）批量更新所有.mefan引用为.claude（包括commands/、templates/、rules/、files-create.md、CLAUDE.md等）；3）验证所有更新后的路径对应的文件都真实存在；4）README.md已完全更新。\" \"执行批量路径替换（.mefan→.claude）、验证路径存在性、更新TODO.md标记完成\")"
+      "Bash(bash .claude/hooks/conversation-log.sh \"assistant\" \"再检查一下，我们的所有文档里面还有对.mefan目录的引用吗？Claude.md里面有规定,要手动记录每一次的会话\" \"完成：1）检查所有文档发现.mefan目录已不存在；2）批量更新所有.mefan引用为.claude（包括commands/、templates/、rules/、files-create.md、CLAUDE.md等）；3）验证所有更新后的路径对应的文件都真实存在；4）README.md已完全更新。\" \"执行批量路径替换（.mefan→.claude）、验证路径存在性、更新TODO.md标记完成\")",
+      "Bash(bash .claude/hooks/conversation-log.sh \"assistant\" \"你再全部检查一下，有没有改错的，或者说有遗漏的地方\" \"完成全面复查：1）conversation-log.sh注释路径已修正；2）init.sh是安装脚本，保留.mefan引用是正确的（源目录）；3）TODO.md是迁移记录，保留历史信息合理；4）logs/conversation-log.md是历史日志，无需修改；5）所有.claude路径引用的文件都真实存在，验证通过。\" \"复查所有.mefan引用，修正conversation-log.sh注释，验证所有.claude路径存在性\")",
+      "Bash(grep -r project-upgrade . --include=*.md --include=*.sh --include=*.json)",
+      "Bash(grep -r project-upgrade . --include=*.md)",
+      "Bash(grep -r project-upgrade: . --include=*.md)",
+      "Bash(mv project-upgrade/00-init.md mf-upgrade:00-init.md)",
+      "Bash(mv project-upgrade/01-requirements.md mf-upgrade:01-requirements.md)",
+      "Bash(mv project-upgrade/02-arch-qa.md mf-upgrade:02-arch-qa.md)",
+      "Bash(mv project-upgrade/03-plan.md mf-upgrade:03-plan.md)",
+      "Bash(mv project-upgrade/04-implement.md mf-upgrade:04-implement.md)",
+      "Bash(grep -r project-upgrade /mnt/d/PycharmProjects/Mefan/.claude --include=*.md)",
+      "Bash(grep -r project-upgrade /mnt/d/PycharmProjects/Mefan --include=*.md --include=*.sh --include=*.json)",
+      "WebSearch",
+      "mcp__github__search_repositories"
     ]
   }
 }
