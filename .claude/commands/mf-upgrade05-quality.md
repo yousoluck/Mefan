@@ -1,149 +1,163 @@
 # /mf-upgrade:05-quality – 质量测试与门禁
-## 0. 日志声明（自动追加
-执行本阶段所有步骤时，必须使用 `.claude/hooks/log-event.sh` 记录日志。
-- 进入阶段时：`bash .claude/hooks/log-event.sh <阶段> <Agent> "阶段进入" "进入阶段X" "" "成功"`
-- 结束阶段时：`bash .claude/hooks/log-event.sh <阶段> <Agent> "阶段退出" "阶段X完成" "" "成功"`
-- 在 Human Gate 前后记录审批事件
 
-## 1. 角色激活
-- **主导 Agent**：QA 工程师 (`agents/qa.md`)，负责测试执行、缺陷记录、人工测试指南。
-- **修复 Agent**：开发者 (`agents/developer.md`)，负责修复被驳回的缺陷。
-- **终审 Agent**：守护者 (`agents/guardian.md`)，执行最终门禁裁定。
-- **决策 Agent**：项目经理 (`agents/pm.md`)，处理 P0 缺陷和进度异常。
+> **当前阶段**：阶段 5（质量测试与门禁）
+> **前置条件**：阶段 4 已完成，代码已产出
 
-## 2. 前置输入（必须读取）
-- `.claude/iterations/{sprint-name}/test-plan/upgrade-YYYY-MM-DD-title.md`
-- `.claude/iterations/{sprint-name}/iteration-plan.md`
-- `.claude/iterations/{sprint-name}/sprint-status.md`
-- 阶段 4 产出的全部代码、单元测试、task-summary
-- `.claude/skills/write-manual-test-guide.md`
-- `.claude/skills/ug-triage-classification.md`
+---
 
-**前置检查**：执行前确认上述文件存在，若不存在则报错退出。
+## 0. 日志声明
 
-## 3. 强制规则
-- `.claude/rules/global/quality-gates.md`
-- `.claude/rules/global/exception-handling.md`
-- `.claude/rules/global/manual-test-bug-handling.md`（人工测试Bug提交、修复闭环、P0优先级）
-- `.claude/rules/scenario-upgrade/api-compatibility.md`
-- `.claude/rules/scenario-upgrade/consistency-first.md`
+执行本阶段所有步骤时，必须使用 `.claude/hooks/log-event.sh` 记录日志：
+- 进入阶段：`bash .claude/hooks/log-event.sh "05" "$AGENT_NAME" "阶段进入" "阶段5开始" "" "成功"`
+- 结束阶段：`bash .claude/hooks/log-event.sh "05" "$AGENT_NAME" "阶段退出" "阶段5完成" "" "成功"`
+- 产出文件：`bash .claude/hooks/log-event.sh "05" "$AGENT_NAME" "产出物" "生成 <文件>" "<文件>" "成功"`
 
-## 4. 执行流程
+---
 
-### 4.1 自动化测试执行
-**执行者**：QA 工程师
+## 1. 规则加载（按需引用）
 
-**目录检查**：确保 `.claude/iterations/{sprint-name}/test-results/` 和 `.claude/iterations/{sprint-name}/bug-log/` 目录存在。
+| 规则/技能 | 用途 | 引用时机 |
+|-----------|------|---------|
+| `.claude/rules/global/session-init.md` | 阶段初始化三原则 | 步骤 2 开始前 |
+| `.claude/rules/global/quality-gates.md` | 质量门禁标准 | qa-stage5 内部 |
+| `.claude/rules/global/exception-handling.md` | 异常处理规则 | qa-stage5 内部 |
+| `.claude/rules/global/manual-test-bug-handling.md` | 人工测试Bug处理 | qa-stage5 内部 |
+| `.claude/rules/scenario-upgrade/api-compatibility.md` | API兼容性 | qa-stage5 内部 |
+| `.claude/rules/scenario-upgrade/consistency-first.md` | 一致性优先 | qa-stage5 内部 |
 
-1. **回归测试**：
-   - 按照测试计划中的回归范围，运行全部回归测试套件。
-   - 记录通过/失败结果到 `.claude/iterations/{sprint-name}/test-results/regression-YYYY-MM-DD.log`。
-   - 若回归测试发现失败，立即记录到 `.claude/iterations/{sprint-name}/bug-log/auto-YYYY-MM-DD.md`（每条失败一个缺陷条目）。
+---
 
-2. **集成测试**：
-   - 运行测试计划中设计的新增集成测试。
-   - 记录结果，失败同上记录。
+## 2. 前置检查
 
-3. **性能测试**（若测试计划有要求）：
-   - 运行性能基准对比测试。
-   - 记录指标到质量报告。
+**执行者**：框架自动检查
 
-### 4.2 探索性测试
-**执行者**：QA 工程师
+### 2.1 检查阶段 4 产出物
 
-1. 基于需求文档中的核心流程和边界条件，设计并执行探索性测试。
-2. 探索重点：边界值、异常路径、并发情况、兼容性。
-3. 发现缺陷记录到 `.claude/iterations/{sprint-name}/bug-log/auto-YYYY-MM-DD.md`。
+1. 读取 `.claude/iterations/{sprint-name}/session-status.md`
+2. 确认阶段 4 已完成（状态为 ✅）
+3. 若不存在或阶段 4 未完成，报错退出：
+   ```
+   [自动检查] 阶段 4 未完成或 session-status.md 缺失，请先执行 /mf-upgrade:04-implement
+   ```
 
-### 4.3 缺陷分类与记录
-**执行者**：QA 工程师
+### 2.2 自动检查上一 Agent 产出物
 
-所有发现的缺陷（自动+探索）必须按 `.claude/skills/ug-triage-classification.md` 进行分类：
+#### 步骤 1 → 步骤 2 自动检查
 
-| 维度 | 分类选项 |
-|------|---------|
-| 严重度 | P0(阻断)/P1(严重)/P2(一般)/P3(建议) |
-| 类型 | 功能/性能/安全/兼容性/UI/文档 |
-| 来源 | 自动化回归/自动化集成/探索性测试/人工测试 |
+**触发时机**：在激活 `pm-stage5.md` 之前
 
-每次记录使用 `.claude/templates/bug-log-template.md`。
+1. 检查 `.claude/iterations/{sprint-name}/test-results/quality-report.md` 是否存在
+2. 若不存在，报错：
+   ```
+   [自动检查] qa-stage5 产出物不存在：test-results/quality-report.md 未找到
+   错误：前置 Agent 未完成工作，请先执行 qa-stage5
+   ```
+3. 若存在，继续执行步骤 2
 
-### 4.4 人工测试指南生成
-**执行者**：QA 工程师
+#### 步骤 2 → 步骤 3 自动检查
 
-1. 按 `.claude/skills/write-manual-test-guide.md` 严格按照 `.claude/templates/manual-test-guide-template.md` 生成 `.claude/iterations/{sprint-name}/test-results/manual-test-guide.md`。
-2. 内容必须包含：
-   - 实现的功能清单及对应文件路径
-   - 每个功能的测试用例（正常/边界/异常），含具体操作步骤和预期结果
-   - 环境搭建步骤（如需）
-   - 受影响模块的回归测试步骤
-   - 明确的通过/失败判定标准
+**触发时机**：在激活 `dev-stage5.md` 之前
 
-### 4.5 人机测试交接
-**执行者**：QA 工程师 → 人类
+1. 检查 `.claude/iterations/{sprint-name}/bug-log/auto-*.md` 或 `.claude/iterations/{sprint-name}/bug-log/manual-*.md` 是否存在
+2. 若存在缺陷记录（bug-log 中有 P0/P1），继续执行步骤 3
+3. 若不存在且无缺陷记录，跳过步骤 3（无缺陷需修复）
+4. 若存在但 PM 决策为"延期"，跳过步骤 3
 
-1. QA Agent 将 `.claude/iterations/{sprint-name}/test-results/manual-test-guide.md` 提交给用户，附一段摘要。
-2. 用户按指南执行人工测试。
-3. 用户将发现的缺陷（如有）反馈到 `.claude/iterations/{sprint-name}/bug-log/manual-YYYY-MM-DD.md`，使用 bug-log 模板。
-4. QA Agent 读取人工反馈，进行统一分类和汇总。
+#### 步骤 3 → 步骤 4 自动检查
 
-### 4.6 缺陷修复闭环
-**执行者**：PM（决策）、开发者（修复）
+**触发时机**：在激活 `guardian-stage5.md` 之前
 
-1. QA 将所有缺陷（自动+人工）汇总后提交守护者预审。
-2. 守护者对 P0/P1 缺陷标记为"阻塞"。
-3. PM 审阅缺陷清单：
-   - **P0 缺陷**：立即暂停当前迭代所有其他任务，打回阶段 4 由开发者优先修复。
-   - **P1 缺陷**：打回阶段 4 修复，但允许其他非冲突任务并行。
-   - **P2/P3 缺陷**：记录为技术债务，可在下个迭代处理。
-4. 开发者修复缺陷时：
-   - 在 bug-log 中补充**根因分析**和**修复方案**。
-   - 补充对应的回归测试用例，防止复现。
-   - 修复后通知 QA 重新测试。
+1. 检查 dev-stage5 是否完成（如果步骤 3 被跳过，则直接检查）
+2. 若缺陷修复未完成但 Human Gate 审批通过，继续执行步骤 4
+3. 否则报错：
 
-### 4.7 质量报告生成
-**执行者**：QA 工程师
+---
 
-所有缺陷修复完成后，严格按照 `.claude/templates/quality-report-template.md` 输出 `.claude/iterations/{sprint-name}/test-results/quality-report.md`：
-- 测试覆盖统计
-- 缺陷统计（按严重度/类型/来源）
-- 性能基线对比
-- API 兼容性检查结果
-- 人工测试结果摘要
-- 质量就绪声明
+## 3. 工作流编排
 
-### 4.8 守护者终审门禁
-**执行者**：守护者
+### 步骤 1：QA 主导质量测试
 
-- [ ] 是否存在未修复的 P0/P1 缺陷？（存在则驳回）
-- [ ] 测试覆盖率是否达到质量门槛？
-- [ ] 性能退化是否在允许范围内？
-- [ ] API 兼容性是否未破坏？
-- [ ] 一致性基线是否未被违反？
+- **前置检查**：自动检查阶段 4 产出物
+- **激活 Agent**：`agents/qa-stage5.md`
+- **职责**：QA 执行完整质量测试工作（自动化测试、探索性测试、缺陷分类与记录、人工测试指南生成、缺陷汇总、质量报告生成）
+- **引用技能**：`.claude/skills/write-manual-test-guide.md`、`.claude/skills/bug-triage-classification.md`
+- **引用规则**：`.claude/rules/global/quality-gates.md`、`.claude/rules/global/manual-test-bug-handling.md`
+- **产出物**：
+  - `.claude/iterations/{sprint-name}/test-results/regression-YYYY-MM-DD.log`
+  - `.claude/iterations/{sprint-name}/test-results/manual-test-guide.md`
+  - `.claude/iterations/{sprint-name}/test-results/quality-report.md`
+  - `.claude/iterations/{sprint-name}/bug-log/auto-YYYY-MM-DD.md`
+  - `.claude/iterations/{sprint-name}/bug-log/manual-YYYY-MM-DD.md`
+- **完成后**：更新 session-status.md 中阶段 5 QA 完成状态为"✅"
 
-全部通过则输出 `APPROVED`，否则 `REJECTED` 并附驳回清单。
+### 步骤 2：PM 处理 P0/P1 缺陷决策
 
-### 4.9 阶段结束
-- PM 汇总质量报告摘要，提交 `[Human Gate]` 审批。
-- 审批通过后，PM 更新看板状态。
-- 若人工测试发现的 P0/P1 缺陷经 PM 评估可延后，记录为已知技术债务。
+- **前置检查**：自动检查步骤 1 产出物（quality-report.md 存在）
+- **激活 Agent**：`agents/pm-stage5.md`
+- **职责**：PM 审阅缺陷清单，做 P0/P1 缺陷决策，协调开发者和 QA
+- **引用规则**：`.claude/rules/global/exception-handling.md`、`.claude/rules/global/manual-test-bug-handling.md`
+- **产出物**：更新 session-status.md 中阶段 5 PM 完成状态为"✅"
+
+### 步骤 3：开发者执行缺陷修复（如有 P0/P1 缺陷）
+
+- **前置检查**：自动检查步骤 2 决策（若有 P0/P1 缺陷需修复）
+- **激活 Agent**：`agents/dev-stage5.md`
+- **职责**：开发者接收 PM 分配的缺陷修复任务，执行修复并补充回归测试
+- **引用技能**：`.claude/skills/tdd-red-green-refactor.md`
+- **引用规则**：`.claude/rules/scenario-upgrade/consistency-first.md`、`.claude/rules/scenario-upgrade/api-compatibility.md`
+- **完成后**：更新 session-status.md 中阶段 5 Dev 完成状态为"✅"
+
+### 步骤 4：守护者执行终审门禁
+
+- **前置检查**：自动检查步骤 2 和步骤 3（若需要）产出物
+- **激活 Agent**：`agents/guardian-stage5.md`
+- **职责**：守护者检查所有质量门禁，输出 APPROVED 或 REJECTED
+- **引用规则**：`.claude/rules/global/quality-gates.md`
+- **产出物**：更新 session-status.md 中阶段 5 完成状态为"✅"
+
+---
+
+## 4. Human Gate
+
+**审查内容**：质量报告摘要、P0/P1 缺陷状态、人工测试结果
+**通过条件**：全部门禁检查通过
+
+---
 
 ## 5. 产出物
 
-| 产出物 | 路径 | 模板 |
-|--------|------|------|
-| regression-YYYY-MM-DD.log | `.claude/iterations/{sprint-name}/test-results/regression-YYYY-MM-DD.log` | - |
-| manual-test-guide.md | `.claude/iterations/{sprint-name}/test-results/manual-test-guide.md` | `.claude/templates/manual-test-guide-template.md` |
-| quality-report.md | `.claude/iterations/{sprint-name}/test-results/quality-report.md` | `.claude/templates/quality-report-template.md` |
-| bug-log/auto-YYYY-MM-DD.md | `.claude/iterations/{sprint-name}/bug-log/auto-YYYY-MM-DD.md` | `.claude/templates/bug-log-template.md` |
-| bug-log/manual-YYYY-MM-DD.md | `.claude/iterations/{sprint-name}/bug-log/manual-YYYY-MM-DD.md` | `.claude/templates/bug-log-template.md` |
+| 产出物 | 路径 |
+|--------|------|
+| regression-YYYY-MM-DD.log | `.claude/iterations/{sprint-name}/test-results/regression-YYYY-MM-DD.log` |
+| manual-test-guide.md | `.claude/iterations/{sprint-name}/test-results/manual-test-guide.md` |
+| quality-report.md | `.claude/iterations/{sprint-name}/test-results/quality-report.md` |
+| bug-log/auto-YYYY-MM-DD.md | `.claude/iterations/{sprint-name}/bug-log/auto-YYYY-MM-DD.md` |
+| bug-log/manual-YYYY-MM-DD.md | `.claude/iterations/{sprint-name}/bug-log/manual-YYYY-MM-DD.md` |
 
-## 6. 本阶段产出物清单（供后续依赖检查）
+---
 
-| 文件名 | 完整路径 | 模板 | 被依赖阶段 |
-|--------|----------|------|-----------|
-| regression-YYYY-MM-DD.log | `.claude/iterations/{sprint-name}/test-results/regression-YYYY-MM-DD.log` | - | 06-retrospect (§2) |
-| manual-test-guide.md | `.claude/iterations/{sprint-name}/test-results/manual-test-guide.md` | `.claude/templates/manual-test-guide-template.md` | - |
-| quality-report.md | `.claude/iterations/{sprint-name}/test-results/quality-report.md` | `.claude/templates/quality-report-template.md` | 06-retrospect (§2) |
-| bug-log/auto-YYYY-MM-DD.md | `.claude/iterations/{sprint-name}/bug-log/auto-YYYY-MM-DD.md` | `.claude/templates/bug-log-template.md` | 06-retrospect (§2) |
-| bug-log/manual-YYYY-MM-DD.md | `.claude/iterations/{sprint-name}/bug-log/manual-YYYY-MM-DD.md` | `.claude/templates/bug-log-template.md` | 06-retrospect (§2) |
+## 6. 异常处理
+
+| 异常场景 | 处理方式 |
+|---------|---------|
+| 前置文档缺失 | 报错退出 |
+| 上一 Agent 产出物不存在 | 报错退出，提示前置 Agent 未完成 |
+| P0 缺陷发现 | 立即暂停其他任务，优先修复 P0 |
+| P1 缺陷发现 | 允许非冲突任务并行 |
+| P2/P3 缺陷 | 记录为技术债务，下个迭代处理 |
+| 门禁未通过 | 驳回清单，修复后重新测试 |
+
+---
+
+## 关联文档
+
+| 文档 | 路径 |
+|------|------|
+| QA Agent（阶段5） | `agents/qa-stage5.md` |
+| PM Agent（阶段5） | `agents/pm-stage5.md` |
+| DEV Agent（阶段5） | `agents/dev-stage5.md` |
+| 守护者 Agent（阶段5） | `agents/guardian-stage5.md` |
+| 质量门禁规则 | `.claude/rules/global/quality-gates.md` |
+| Bug 处理规则 | `.claude/rules/global/manual-test-bug-handling.md` |
+| 质量报告模板 | `.claude/templates/quality-report-template.md` |
+| Bug 日志模板 | `.claude/templates/bug-log-template.md` |

@@ -1,134 +1,169 @@
 # /mf-upgrade:06-retrospect – 迭代总结与进化
-## 0. 日志声明（自动追加
-执行本阶段所有步骤时，必须使用 `.claude/hooks/log-event.sh` 记录日志。
-- 进入阶段时：`bash .claude/hooks/log-event.sh <阶段> <Agent> "阶段进入" "进入阶段X" "" "成功"`
-- 结束阶段时：`bash .claude/hooks/log-event.sh <阶段> <Agent> "阶段退出" "阶段X完成" "" "成功"`
-- 在 Human Gate 前后记录审批事件
 
-## 1. 角色激活
-- **主导 Agent**：项目经理 (`agents/pm.md`)，撰写迭代总结、管理版本和债务。
-- **分析 Agent**：进化教练 (`agents/coach.md`)，分析缺陷模式、生成进化提案。
-- **验证 Agent**：守护者 (`agents/guardian.md`)，在下一迭代验证进化提案的有效性。
+> **当前阶段**：阶段 6（迭代总结与进化）
+> **前置条件**：阶段 5 已完成，质量门禁已通过
 
-## 2. 前置输入（必须读取）
-- 本迭代全部产出物：需求文档、ADR、测试计划、task-summary、质量报告、bug-log
-- `.claude/iterations/{sprint-name}/sprint-status.md`
-- `.claude/iterations/{sprint-name}/session-status.md`
-- Hook 拦截日志（所有 `violations.json`）
-- `.claude/skills/pattern-extraction-from-logs.md`
-- `.claude/skills/root-cause-analysis.md`
-- `.claude/rules/global/tech-debt-management.md`
+---
 
-**前置检查**：执行前确认上述文件存在，若不存在则报错退出。
+## 0. 日志声明
 
-## 3. 强制规则
-- `.claude/rules/global/harness-version-control.md`
-- `.claude/rules/global/tech-debt-management.md`
-- `.claude/rules/global/evolution-process.md`（进化提案的实验验证、合并流程）
+执行本阶段所有步骤时，必须使用 `.claude/hooks/log-event.sh` 记录日志：
+- 进入阶段：`bash .claude/hooks/log-event.sh "06" "$AGENT_NAME" "阶段进入" "阶段6开始" "" "成功"`
+- 结束阶段：`bash .claude/hooks/log-event.sh "06" "$AGENT_NAME" "阶段退出" "阶段6完成" "" "成功"`
+- 产出文件：`bash .claude/hooks/log-event.sh "06" "$AGENT_NAME" "产出物" "生成 <文件>" "<文件>" "成功"`
 
-## 4. 执行流程
+---
 
-### 4.1 迭代数据汇总
-**执行者**：PM
+## 1. 规则加载（按需引用）
 
-收集本迭代的关键数据：
-- 用户故事总数及完成数
-- 任务总数及完成数（来自 sprint-status.md）
-- 缺陷总数及分类统计（来自 quality-report.md）
-- Hook 拦截次数及高频违规类型
-- 工时汇总（计划 vs 实际）
+| 规则/技能 | 用途 | 引用时机 |
+|-----------|------|---------|
+| `.claude/rules/global/session-init.md` | 阶段初始化三原则 | 步骤 2 开始前 |
+| `.claude/rules/global/harness-version-control.md` | 版本控制规则 | pm-stage6 内部 |
+| `.claude/rules/global/tech-debt-management.md` | 技术债务管理 | pm-stage6 内部 |
+| `.claude/rules/global/evolution-process.md` | 进化流程规则 | coach-stage6 内部 |
 
-### 4.2 迭代总结撰写
-**执行者**：PM
+---
 
-**目录检查**：确保 `.claude/iterations/{sprint-name}/` 目录存在。
+## 2. 前置检查
 
-输出 `.claude/iterations/{sprint-name}/iteration-retrospective.md`，**必须使用** `.claude/templates/iteration-retrospective-template.md`：
+**执行者**：框架自动检查
 
-1. **迭代概览**：用户故事数、任务完成率、工时偏差。
-2. **缺陷分析**：按类型和严重度分布图（文字描述）。
-3. **做得好的地方**：至少列出 3 个正面案例（如某任务零拦截通过、某 Bug 半小时修复）。
-4. **做得不好的地方**：至少列出 3 个问题案例（如连续 Hook 拦截、P0 缺陷发生）。
-5. **技术债务评估**：按 `.claude/rules/global/tech-debt-management.md` 要求评估当前债务分布和风险。
-6. **待改进项清单**：列出可分配给具体阶段或 Agent 的改进点。
+### 2.1 检查阶段 5 产出物
 
-### 4.3 进化分析
-**执行者**：进化教练
+1. 读取 `.claude/iterations/{sprint-name}/session-status.md`
+2. 确认阶段 5 已完成（状态为 ✅）
+3. 若不存在或阶段 5 未完成，报错退出：
+   ```
+   [自动检查] 阶段 5 未完成或 session-status.md 缺失，请先执行 /mf-upgrade:05-quality
+   ```
 
-1. 审查本迭代全量日志（按 `.claude/skills/pattern-extraction-from-logs.md`）：
-   - Hook 拦截日志 → 找出高频违规模式
-   - bug-log 中的根因分类 → 找出知识缺失/规则不完备占比最高的类型
-   - task-summary 中的技术债务 → 找出重复出现的债务类型
-   - retrospective 中的待改进项
+### 2.2 自动检查上一 Agent 产出物
 
-2. 识别可沉淀为 Rule/Skill 的模式：
-   - **反复出现相同违规** → 建议新增或加强 Rule
-   - **开发者频繁查阅同一文档** → 建议新建 Skill
-   - **某类缺陷反复发生** → 建议修改阶段 2 的设计检查项或阶段 4 的 CR 清单
+#### 步骤 1 → 步骤 2 自动检查
 
-3. **目录检查**：确保 `.claude/evolution-proposals/` 目录存在。
-3. 输出 `.claude/evolution-proposals/upgrade-YYYY-MM-DD-title.md`，**必须使用** `.claude/templates/evolution-proposal-template.md`：
-   - 每条提案需含：触发原因（数据支撑）、具体修改草案、预期效果
+**触发时机**：在激活 `coach-stage6.md` 之前
 
-### 4.4 进化提案审批
-**执行者**：PM
+1. 检查 `.claude/iterations/{sprint-name}/iteration-retrospective.md` 是否存在
+2. 若不存在，报错：
+   ```
+   [自动检查] pm-stage6 产出物不存在：iteration-retrospective.md 未找到
+   错误：前置 Agent 未完成工作，请先执行 pm-stage6
+   ```
+3. 若存在，继续执行步骤 2
 
-1. 审阅进化教练的提案，逐条判断是否采纳。
-2. 若采纳：
-   - 标记为"实验状态"，写入 `.claude/rules-proposed/` 或 `.claude/skills-proposed/`。
-   - 在下个迭代中作为实验规则运行。
-3. 若驳回：记录驳回理由。
-4. 提交 `[Human Gate]` 对采纳的提案进行最终审批。
+#### 步骤 2 → 步骤 3 自动检查
 
-### 4.5 版本与知识库更新
-**执行者**：PM
+**触发时机**：在激活 `pm-stage6.md`（步骤 3）之前
 
-1. 更新 `CHANGELOG.md`：追加本次迭代的功能和修复。
-2. 更新 `.claude/HARNESS_VERSION.md`：按语义版本递增框架版本号。
-3. 将已审批通过且完成实验验证（从上一个迭代的实验池中）的 Rule/Skill 正式合并入 `.claude/rules/` 和 `.claude/skills/`。
-4. 更新知识库索引（如有）。
+1. 检查 `.claude/evolution-proposals/upgrade-*.md` 是否存在
+2. 若不存在，报错：
+   ```
+   [自动检查] coach-stage6 产出物不存在：evolution-proposals/upgrade-*.md 未找到
+   错误：前置 Agent 未完成工作，请先执行 coach-stage6
+   ```
+3. 若存在，继续执行步骤 3
 
-### 4.6 异常处理
-**执行者**：PM
+#### 步骤 3 → 步骤 4 自动检查
 
-| 异常场景 | 处理方式 |
-|---------|---------|
-| 进化提案审批失败（连续 3 条被驳回） | 汇总驳回理由，提交 Human Gate 决策 |
-| CHANGELOG.md 更新失败 | 报错退出，检查文件权限 |
-| HARNESS_VERSION.md 更新失败 | 报错退出，检查文件权限 |
-| 提案合并时冲突（与现有规则矛盾） | 标注"冲突待解决"，阻止合并，提交 Human Gate |
-| 实验规则验证失败（连续 3 次） | 撤销实验，标记为"不采纳"，记录教训 |
+**触发时机**：在激活 `pm-stage6.md`（步骤 4）之前
 
-**异常记录**：所有异常需记录到 session-status.md 的"异常记录"章节。
+1. 检查 `.claude/evolution-proposals/guardian-verification-*.md` 是否存在
+2. 若不存在，报错：
+   ```
+   [自动检查] guardian-stage6 产出物不存在：guardian-verification-*.md 未找到
+   错误：前置 Agent 未完成工作，请先执行 guardian-stage6
+   ```
+3. 若存在，继续执行步骤 4
 
-### 4.7 阶段结束
-- PM 输出迭代总结摘要，包含进化提案数量和技术债务趋势。
-- 等待 `[Human Gate]` 审批。
-- 审批通过后，标记本迭代关闭，准备下一迭代。
+---
 
-### 4.8 生成项目全局进度报告
-**执行者**：PM
+## 3. 工作流编排
 
-1. **目录检查**：确保 `.claude/reports/` 目录存在。
-2. 根据 `.claude/templates/project-status-template.md` 生成 `.claude/reports/PROJECT_STATUS.md`。
-3. 完成后记录日志：`bash .claude/hooks/log-event.sh 6 PM "产出物" "生成 PROJECT_STATUS.md" "PROJECT_STATUS.md" "成功"`
+### 步骤 1：PM 主导迭代总结
+
+- **前置检查**：自动检查阶段 5 产出物
+- **激活 Agent**：`agents/pm-stage6.md`
+- **职责**：PM 执行完整的迭代总结工作（迭代数据汇总、迭代总结撰写、进化提案审批、版本与知识库更新、异常处理）
+- **引用规则**：`.claude/rules/global/harness-version-control.md`、`.claude/rules/global/tech-debt-management.md`、`.claude/rules/global/evolution-process.md`
+- **产出物**：
+  - `.claude/iterations/{sprint-name}/iteration-retrospective.md`
+  - `CHANGELOG.md`（更新）
+  - `.claude/HARNESS_VERSION.md`（更新）
+- **完成后**：更新 session-status.md 中阶段 6 PM 完成状态为"✅"
+
+### 步骤 2：进化教练主导进化分析
+
+- **前置检查**：自动检查步骤 1 产出物（iteration-retrospective.md 存在）
+- **激活 Agent**：`agents/coach-stage6.md`
+- **职责**：进化教练从全量迭代日志中提取可复用的改进模式，生成结构化的进化提案
+- **引用技能**：`.claude/skills/pattern-extraction-from-logs.md`、`.claude/skills/root-cause-analysis.md`
+- **产出物**：`.claude/evolution-proposals/upgrade-YYYY-MM-DD-title.md`
+- **完成后**：更新 session-status.md 中阶段 6 Coach 完成状态为"✅"
+
+### 步骤 3：守护者验证进化提案
+
+- **前置检查**：自动检查步骤 2 产出物（evolution-proposal.md 存在）
+- **激活 Agent**：`agents/guardian-stage6.md`
+- **职责**：守护者验证进化提案的可合并性、框架版本影响，输出验证报告
+- **引用规则**：`.claude/rules/global/evolution-process.md`、`.claude/rules/global/harness-version-control.md`
+- **产出物**：`.claude/evolution-proposals/guardian-verification-YYYY-MM-DD.md`
+- **完成后**：更新 session-status.md 中阶段 6 Guardian 完成状态为"✅"
+
+### 步骤 4：PM 生成项目全局进度报告
+
+- **前置检查**：自动检查步骤 3 产出物（guardian-verification 存在）
+- **激活 Agent**：`agents/pm-stage6.md`
+- **职责**：PM 生成项目状态报告，覆盖更新 PROJECT_STATUS.md
+- **产出物**：`.claude/reports/PROJECT_STATUS.md`
+- **完成后**：更新 session-status.md 中阶段 6 完成状态为"✅"
+
+---
+
+## 4. Human Gate
+
+**审查内容**：迭代总结摘要、进化提案数量、技术债务趋势、守护者验证报告
+**通过条件**：人类审批通过 + 守护者验证通过
+
+---
 
 ## 5. 产出物
 
-| 产出物 | 路径 | 模板 |
-|--------|------|------|
-| iteration-retrospective.md | `.claude/iterations/{sprint-name}/iteration-retrospective.md` | `.claude/templates/iteration-retrospective-template.md` |
-| evolution-proposal.md | `.claude/evolution-proposals/upgrade-YYYY-MM-DD-title.md` | `.claude/templates/evolution-proposal-template.md` |
-| PROJECT_STATUS.md | `.claude/reports/PROJECT_STATUS.md` | `.claude/templates/project-status-template.md` |
-| CHANGELOG.md | `CHANGELOG.md`（更新） | - |
-| HARNESS_VERSION.md | `.claude/HARNESS_VERSION.md`（更新） | - |
+| 产出物 | 路径 |
+|--------|------|
+| iteration-retrospective.md | `.claude/iterations/{sprint-name}/iteration-retrospective.md` |
+| evolution-proposal.md | `.claude/evolution-proposals/upgrade-YYYY-MM-DD-title.md` |
+| guardian-verification.md | `.claude/evolution-proposals/guardian-verification-YYYY-MM-DD.md` |
+| PROJECT_STATUS.md | `.claude/reports/PROJECT_STATUS.md` |
+| CHANGELOG.md | `CHANGELOG.md`（更新） |
+| HARNESS_VERSION.md | `.claude/HARNESS_VERSION.md`（更新） |
 
-## 6. 本阶段产出物清单（供后续依赖检查）
+---
 
-| 文件名 | 完整路径 | 模板 | 被依赖阶段 |
-|--------|----------|------|-----------|
-| iteration-retrospective.md | `.claude/iterations/{sprint-name}/iteration-retrospective.md` | `.claude/templates/iteration-retrospective-template.md` | 下一 iteration 的 00-init |
-| evolution-proposal.md | `.claude/evolution-proposals/upgrade-YYYY-MM-DD-title.md` | `.claude/templates/evolution-proposal-template.md` | 框架维护用 |
-| PROJECT_STATUS.md | `.claude/reports/PROJECT_STATUS.md` | `.claude/templates/project-status-template.md` | 全局可读 |
-| CHANGELOG.md | `CHANGELOG.md` | - | 全局可读 |
-| HARNESS_VERSION.md | `.claude/HARNESS_VERSION.md` | - | 所有阶段（版本参考） |
+## 6. 异常处理
+
+| 异常场景 | 处理方式 |
+|---------|---------|
+| 前置文档缺失 | 报错退出 |
+| 上一 Agent 产出物不存在 | 报错退出，提示前置 Agent 未完成 |
+| 进化提案连续 3 条被驳回 | 汇总驳回理由，提交 Human Gate 决策 |
+| CHANGELOG.md 更新失败 | 报错退出，检查文件权限 |
+| HARNESS_VERSION.md 更新失败 | 报错退出，检查文件权限 |
+| 提案合并时冲突 | 标注"冲突待解决"，阻止合并，提交 Human Gate |
+| 实验规则验证失败连续 3 次 | 撤销实验，标记为"不采纳"，记录教训 |
+
+---
+
+## 关联文档
+
+| 文档 | 路径 |
+|------|------|
+| PM Agent（阶段6） | `agents/pm-stage6.md` |
+| 进化教练 Agent（阶段6） | `agents/coach-stage6.md` |
+| 守护者 Agent（阶段6） | `agents/guardian-stage6.md` |
+| 迭代总结模板 | `.claude/templates/iteration-retrospective-template.md` |
+| 进化提案模板 | `.claude/templates/evolution-proposal-template.md` |
+| 项目状态模板 | `.claude/templates/project-status-template.md` |
+| 版本控制规则 | `.claude/rules/global/harness-version-control.md` |
+| 技术债务管理规则 | `.claude/rules/global/tech-debt-management.md` |
+| 进化流程规则 | `.claude/rules/global/evolution-process.md` |

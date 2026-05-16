@@ -158,7 +158,115 @@ Hook	           .claude/hooks/check-consistency.py	✅ 已提供
 
 ---
 
-## 3. 进度追踪体系
+## 3. 框架架构设计
+
+### 3.1 三层分层架构
+
+Mefan 框架采用**三层分离架构**：
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Command Layer (Playbook)                 │
+│         工作流编排层 · 人类与 Agent 之间的桥接              │
+└─────────────────────────────────────────────────────────────┘
+                              ↓ 激活 / 引用
+┌─────────────────────────────────────────────────────────────┐
+│                      Agent Layer                            │
+│                    阶段执行层 · 具体操作                     │
+└─────────────────────────────────────────────────────────────┘
+                              ↓ 共享状态
+┌─────────────────────────────────────────────────────────────┐
+│                     Shared Layer                            │
+│              共享片段 · Rules · Skills                      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 3.2 各层职责
+
+| 层级 | 职责 | 包含什么 |
+|------|------|---------|
+| **Command** | 工作流编排 | 阶段标识、工作流编排、规则/技能引用、产出物清单、Human Gate |
+| **Agent** | 具体操作执行 | 需要的技能声明、需要的规则声明、操作步骤 |
+| **Shared** | 跨阶段复用 | snippets（日志格式、异常处理）、Rules、Skills |
+
+### 3.3 Command 与 Agent 的边界
+
+| 层级 | 写什么 | 不写什么 |
+|------|--------|---------|
+| **Command** | 工作流编排（谁在哪个步骤做什么） | 具体操作步骤 |
+| **Agent** | 具体操作步骤 | 工作流编排 |
+
+**示例**：
+
+```markdown
+# mf-upgrade:00-init.md（Command）
+## 2. 工作流编排
+
+### 2.1 环境确认
+- **激活 Agent**：`agents/pm-stage0.md`
+- **执行操作**：PM-操作-1 + PM-操作-2
+```
+
+```markdown
+# pm-stage0.md（Agent）
+## 需要的技能
+- `.claude/skills/graphify-query-cheatsheet.md`
+
+## 操作步骤
+### PM-操作-1：SCENARIO 确认
+1. 读取 CLAUDE.md 中的 SCENARIO 变量
+2. 若值不为 `upgrade`，报错退出
+```
+
+### 3.4 Rules/Skills 加载机制
+
+- **Command** 引用 Rules/Skills（告诉全局这个阶段需要什么）
+- **Agent** 声明自己需要什么（框架激活时自动加载）
+- **Rules/Skills 按需引用**，不在阶段开头集中声明
+
+### 3.5 Agent 间通信机制
+
+- Agent 之间**不直接通信**，通过 `sprint-status.md`（看板）共享状态
+- 下一个 Agent 由 Command **显式调用**，不是自己主动触发
+- **Human Gate** 是阶段分界线，AI 无法自行跨越
+
+**DEV → Architecture Code Review 示例**：
+```
+DEV Agent 完成 → 写入 sprint-status.md（T001 = Done）
+    ↓
+Command 04 调用 Architecture Agent
+    ↓
+Architecture Agent 读取看板，发现 T001 Done → 执行 Code Review
+```
+
+### 3.6 目录结构
+
+```
+.claude/
+├── commands/                      # Command Layer
+│   ├── mf-upgrade:00-init.md     # 阶段 0：会话初始化
+│   ├── mf-upgrade:01-requirements.md  # 阶段 1：需求澄清
+│   └── ...
+│
+├── agents/                        # Agent Layer（按角色+阶段）
+│   ├── pm-stage0.md              # PM - 阶段 0
+│   ├── architect-stage0.md      # Architect - 阶段 0
+│   └── ...
+│
+├── snippets/                      # Shared Layer - 共享片段
+│   ├── logging-boilerplate.md    # 日志格式
+│   └── exception-handling.md      # 异常处理表
+│
+├── rules/                         # Shared Layer - 规则
+├── skills/                       # Shared Layer - 技能
+└── templates/                     # 模板文件
+```
+
+详细架构设计见：[`.claude/docs/architecture.md`](.claude/docs/architecture.md)
+
+---
+
+## 4. 进度追踪体系
 
 ### 3.1 四层追踪架构
 

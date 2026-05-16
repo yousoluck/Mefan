@@ -4,7 +4,7 @@
 
 AGENT="${1:-assistant}"
 TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
-LOGFILE="/mnt/d/PycharmProjects/Mefan/logs/conversation-log.md"
+LOGFILE="/mnt/d/pycharmprojects/Mefan/logs/conversation-log.md"
 
 # 初始化日志文件（如果不存在）
 if [ ! -f "$LOGFILE" ]; then
