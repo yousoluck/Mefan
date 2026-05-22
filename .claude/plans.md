@@ -107,6 +107,8 @@
 | Command Layer（阶段 0-6） | ✅ 全部完成 | — |
 | 外部 Skills 目录 | ⏳ 待创建 skills-external/ | — |
 | SuperPowers/GStack 集成 | ⏳ 待集成 | — |
+| P1 问题修复 | ✅ CLAUDE.md 配置自动加载 | — |
+| P3 问题修复 | ✅ guardian-stage6.md 独立 | — |
 
 ---
 
@@ -123,7 +125,7 @@
 阶段 3 ✅ 完成（方案 B：pm-stage3 一次激活 + 自动检查）
 阶段 4 ✅ 完成（方案 B：dev-stage4 一次激活 + pm-stage4 + 自动检查）
 阶段 5 ✅ 完成（方案 B：qa-stage5 + dev-stage5 + guardian-stage5 + 自动检查）
-阶段 6 ✅ 完成（方案 B：pm-stage6 + coach-stage6 + 自动检查）
+阶段 6 ✅ 完成（方案 B：pm-stage6 + coach-stage6 + guardian-stage6 + 自动检查）
 ```
 
 **自动检查机制**：
@@ -131,8 +133,21 @@
 - 若产出物不存在，报错退出，提示前置 Agent 未完成
 - 防止人类跳过前置 Agent 直接执行下一步
 
-**P1 问题修复**：
-- ✅ 框架自动加载 Rules/Skills 已实现（在 CLAUDE.md 中配置）
+**P1 问题修复**：框架自动加载 Rules/Skills 已实现（在 CLAUDE.md 中配置）
+
+**P3 问题修复**：守护者验证角色已独立（创建 guardian-stage6.md）
+
+---
+
+## 框架对比与改进路径
+
+| 优先级 | 问题 | 状态 |
+|--------|------|------|
+| **P0** | Skills 库薄弱（仅 3 个） | ⏳ 待集成 SuperPowers/GStack |
+| **P1** | 框架自动加载 Rules/Skills | ✅ 已解决 |
+| **P1** | 开源生态为零 | ⏳ 待考虑开源 |
+| **P2** | Agent 直接通信缺失 | ⏳ 待借鉴 Ruflo |
+| **P3** | 守护者验证在阶段 6 未独立 | ✅ 已解决 |
 
 ---
 
@@ -362,6 +377,7 @@
 | coach-stage6.md | ✅ 完成（阶段6） |
 | dev-stage5.md | ✅ 完成（阶段5） |
 | guardian-stage5.md | ✅ 完成（阶段5） |
+| guardian-stage6.md | ✅ 完成（阶段6） |
 
 ### Agent 文件清理
 
@@ -389,12 +405,15 @@
 ## 开始下一阶段
 
 **重构状态**：阶段 0-6 全部完成 ✅
+**框架对比**：已与 OpenSpec/SuperPowers/GStack/Ruflo 对比评分，Mefan 9.35分
 
 **下一步工作**：
-1. Agent 文件清理（删除 coach.md, analyst.md, developer.md, qa.md, guardian.md）
-2. 创建 `skills-external/` 目录
-3. 引入 SuperPowers/GStack Skills
-4. 处理 15 项自查问题（P0-P3）
+1. ✅ Agent 文件清理完成
+2. ⏳ 创建 `skills-external/` 目录
+3. ⏳ 引入 SuperPowers/GStack Skills
+4. ⏳ 更新 Agent 文件引用外部 Skills
+5. ⏳ 考虑开源框架（P1）
+6. ⏳ 借鉴 Ruflo 改进 Agent 协调（P2）
 
 **自检清单**：
 - [ ] Command 使用工作流编排格式（步骤 → 激活 Agent → 执行操作）
@@ -427,6 +446,82 @@
 2. **Agent 文件结构不变** — 只需在 `## 需要的技能` section 添加外部技能引用
 3. **Skills 目录结构预留** — 创建 `skills-external/` 目录存放外部 Skills
 
+---
+
+## 附录：框架对比与改进路径
+
+> 来源：docs/framework-comparison.md（2026-05-16）
+
+### 对比结果摘要
+
+| 框架 | 加权总分 | 核心优势 |
+|------|---------|---------|
+| SuperPowers | 9.40 | 35+ Skills，跨平台支持 |
+| **Mefan** | **9.35** | 质量保障最强，进化机制完整 |
+| OpenSpec | 8.65 | Spec-driven 开发，774 代码片段 |
+| Ruflo | 7.40 | Swarm 蜂群架构 |
+| GStack | 6.25 | 7 个决策框架 |
+
+### Mefan 评分明细
+
+| 维度 | 得分 | 备注 |
+|------|------|------|
+| 架构完整（20%） | 17/20 | 三层分离架构清晰 |
+| Agent协调（15%） | 10/15 | 无直接通信 |
+| 规则库（15%） | 6/15 | **薄弱点** |
+| 质量保障（15%） | 13/15 | **优势** |
+| 用户体验（10%） | 7/10 | — |
+| 场景覆盖（10%） | 8/10 | — |
+| 开源生态（10%） | 3/10 | **薄弱点** |
+| 进化能力（5%） | 5/5 | **优势** |
+
+### 改进路径（按优先级）
+
+#### P0：集成外部 Skills（解决规则库薄弱问题）
+
+| 步骤 | 任务 | 状态 |
+|------|------|------|
+| 1 | 创建 `skills-external/` 目录 | ⏳ 待创建 |
+| 2 | 引入 SuperPowers（35+ Skills）→ `skills-external/superpowers/` | ⏳ 待集成 |
+| 3 | 引入 GStack（7 决策框架）→ `skills-external/gstack/` | ⏳ 待集成 |
+| 4 | 更新 Agent 文件的 `## 需要的技能` section，引用外部 Skills | ⏳ 待更新 |
+| 5 | 验证 Skills 加载正常 | ⏳ 待验证 |
+
+**目标**：Skills 从 3 个增至 45+ 个
+
+#### P1：开源框架（解决生态为零问题）
+
+| 步骤 | 任务 | 状态 |
+|------|------|------|
+| 1 | 确定开源范围（核心框架 vs 完整框架） | ⏳ 待决策 |
+| 2 | 整理开源代码仓库 | ⏳ 待整理 |
+| 3 | 撰写 README 和贡献指南 | ⏳ 待撰写 |
+| 4 | 发布到 GitHub | ⏳ 待发布 |
+
+#### P2：改进 Agent 协调（借鉴 Ruflo Swarm）
+
+| 步骤 | 任务 | 状态 |
+|------|------|------|
+| 1 | 研究 Ruflo Swarm 架构设计 | ⏳ 待研究 |
+| 2 | 设计 Agent 间直接通信机制 | ⏳ 待设计 |
+| 3 | 实现或引入通信中间件 | ⏳ 待实现 |
+
+### 集成路线图
+
+```
+当前状态：Skills 3 个
+    ↓ 集成 SuperPowers → Skills 38+ 个
+    ↓ 集成 GStack → Skills 45+ 个 + 7 决策框架
+    ↓ 借鉴 Ruflo → Agent 协调增强
+```
+
+### 下一步工作
+
+1. **立即执行**：创建 `skills-external/` 目录，引入 SuperPowers
+2. **短期**：更新 Agent 文件引用外部 Skills
+3. **中期**：考虑开源框架核心部分
+4. **长期**：借鉴 Ruflo 改进 Agent 协调
+
 ### 下一步行动
 
 1. 完成 Command 文件重构（阶段 1-6）
@@ -435,3 +530,177 @@
 4. 创建 `skills-external/` 目录
 5. 引入 SuperPowers/GStack Skills
 6. 更新 Agent 文件的技能引用
+
+---
+
+## 附录：Harness 确定性改进计划
+
+> 添加时间：2026-05-21
+> 目标：将 mefan 从"纯 Prompt 驱动"改为"确定性代码约束"
+
+### 问题分析
+
+| 维度 | 当前问题 | 影响 |
+|------|---------|------|
+| AI 执行不稳定 | Prompt 只能描述要做什么，AI 可能跳过步骤 | 阶段状态可能不一致 |
+| 路径依赖约定 | `{sprint-name}/` 是文本，AI 可能读错 | 多 sprint 时文件可能放错位置 |
+| 状态管理靠 AI | session-status.md 更新依赖 AI 自觉 | 状态可能丢失或不完整 |
+| 异常处理靠自审 | 没有 try/catch，AI 可能卡住 | 流程中断难以恢复 |
+
+### 改进原则
+
+**核心思路**：用确定性代码把框架约定住，减少对 AI 自觉性的依赖
+
+```
+AI 执行 = 不稳定（可能跳过步骤、读错路径）
+确定性代码 = 强制校验（不通过则阻断）
+```
+
+### 改进方案：双层架构
+
+```
+.claude/
+├── commands/           # Markdown 工作流定义（Prompt）
+├── agents/             # Markdown Agent 提示词
+├── rules/              # Markdown 约束规则
+├── skills/
+│   ├── *.md            # 技能定义（Markdown）
+│   └── scripts/        # 可执行脚本（新增）
+│       ├── check-prerequisites.py   # 前置检查
+│       ├── validate-output.py        # 产出物校验
+│       ├── state-machine.py           # 状态管理
+│       └── sprint-manager.sh          # Sprint 目录管理
+└── templates/          # 文档模板
+```
+
+### 为什么用 `skills/scripts/` 而不是独立 `src/mefan/`？
+
+1. **不混淆** — 框架代码全在 `.claude/` 下，项目代码在项目根目录
+2. **单一目录** — 所有框架相关都在 `.claude/` 下，没有外部目录
+3. **按需调用** — Command 文件通过 Shell 调用脚本
+4. **可复用** — 脚本可被多个 Command 引用
+
+### 核心脚本设计
+
+#### 1. `check-prerequisites.py` — 前置检查
+
+```bash
+# 调用方式
+bash .claude/skills/scripts/check-prerequisites.sh 01
+
+# 检查内容
+- session-status.md 是否存在
+- 阶段 0 是否已完成
+- tech-stack-profile.md 是否存在
+- consistency-baseline.md 是否存在
+- knowledge-graph.md 是否存在
+- techstack-overall.md 是否存在
+- feature.md 是否存在
+
+# 行为
+- 检查不通过 → 输出错误信息 + exit 1
+- 检查通过 → 输出 "OK" + exit 0
+```
+
+#### 2. `validate-output.py` — 产出物校验
+
+```bash
+# 调用方式
+python .claude/skills/scripts/validate-output.py requirements
+
+# 检查内容
+- .claude/iterations/sprint-latest/requirements/upgrade-*.md 是否存在
+
+# 行为
+- 不存在 → exit 1 + 报错
+- 存在 → exit 0
+```
+
+#### 3. `state-machine.py` — 状态管理
+
+```bash
+# 调用方式
+python .claude/skills/scripts/state-machine.py --get-current-stage
+
+# 功能
+- 读取 `.claude/iterations/.state.json`（不是 md 文件）
+- 查询当前阶段
+- 写入完成状态
+
+# 行为
+- 读取/写入 JSON 格式状态
+- 不依赖 AI 更新 md
+```
+
+#### 4. `sprint-manager.sh` — Sprint 目录管理
+
+```bash
+# 调用方式
+bash .claude/skills/scripts/sprint-manager.sh --init
+
+# 功能
+1. 检查 sprint-latest 是否存在
+2. 若存在：
+   - 统计已有 sprint-N 数量
+   - 将 sprint-latest 重命名为 sprint-{N+1}
+   - 自检编号连续性
+3. 创建新的 sprint-latest/
+4. 更新 session-status.md 中的历史 Sprint 索引
+
+# 行为
+- 目录不连续 → exit 1 + 报错
+- 成功 → exit 0
+```
+
+### Command 文件调用方式
+
+改进后的 Command 文件：
+
+```markdown
+## 2. 前置检查
+
+**执行者**：框架自动执行
+
+1. `bash .claude/skills/scripts/check-prerequisites.sh 01`
+   - 若报错，退出并输出错误信息
+
+2. `python .claude/skills/scripts/validate-output.py requirements`
+   - 检查阶段 1 产出物是否存在
+   - 若不存在，报错退出
+```
+
+### 改进效果对比
+
+| 场景 | 当前（纯 Prompt） | 改进后（代码校验） |
+|------|-----------------|------------------|
+| 阶段 0 未完成就执行阶段 1 | AI 可能忽略，继续执行 | `check-prerequisites.sh` exit 1 阻断 |
+| sprint-latest 不存在 | AI 可能创建失败 | `sprint-manager.sh` 检查，不存在则报错 |
+| 产出物缺失 | AI 可能跳过检查 | `validate-output.py` 不存在则阻断 |
+| 状态丢失 | AI 可能不更新 | `state-machine.py` 代码写入 JSON |
+| Human Gate 跳过 | AI 可能跳过等待 | 脚本调用时 `input()` 强制等待 |
+
+### 执行计划
+
+| 步骤 | 任务 | 优先级 |
+|------|------|--------|
+| 1 | 创建 `.claude/skills/scripts/` 目录 | P0 |
+| 2 | 实现 `sprint-manager.sh`（Sprint 目录管理） | P0 |
+| 3 | 实现 `check-prerequisites.py`（前置检查） | P0 |
+| 4 | 实现 `state-machine.py`（状态管理） | P1 |
+| 5 | 实现 `validate-output.py`（产出物校验） | P1 |
+| 6 | 更新 Command 文件调用脚本 | P1 |
+| 7 | 测试完整流程 | P1 |
+
+### 状态
+
+- [ ] 创建 `.claude/skills/scripts/` 目录
+- [ ] 实现 `sprint-manager.sh`
+- [ ] 实现 `check-prerequisites.py`
+- [ ] 实现 `state-machine.py`
+- [ ] 实现 `validate-output.py`
+- [ ] 更新 Command 文件
+- [ ] 测试完整流程
+
+---
+
+*最后更新：2026-05-21（新增 Harness 确定性改进计划）*

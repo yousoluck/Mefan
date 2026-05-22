@@ -1,5 +1,5 @@
 # 架构决策记录 (ADR)
-> 文件名：`.claude/iterations/{sprint-name}/adr/upgrade-YYYY-MM-DD-title.md`
+> 文件名：`.claude/iterations/sprint-latest/adr/upgrade-YYYY-MM-DD-title.md`
 > 所有标注 `[必填]` 的字段不可留空。无则填 N/A + 原因。
 
 ## 1. 元信息 [必填]

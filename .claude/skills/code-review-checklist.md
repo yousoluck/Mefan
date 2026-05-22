@@ -6,7 +6,7 @@
 - 开发者提交的 PR/分支
 - 关联的 ADR 文档
 - 一致性基线文档 `.claude/context/consistency-baseline.md`
-- 需求文档 `.claude/iterations/{sprint-name}/requirements/*.md`
+- 需求文档 `.claude/iterations/sprint-latest/requirements/*.md`
 
 ## 输出
 - Code Review 结果：APPROVED / REJECTED / CONDITIONAL

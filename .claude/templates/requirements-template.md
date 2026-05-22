@@ -1,6 +1,6 @@
 # 需求文档模板（二次开发 · 强化版）
 
-> 文件名：`.claude/iterations/{sprint-name}/requirements/upgrade-YYYY-MM-DD-title.md`
+> 文件名：`.claude/iterations/sprint-latest/requirements/upgrade-YYYY-MM-DD-title.md`
 >
 > ⚠️ 填写规则：
 > - 所有标注 `[必填]` 的字段不可留空。

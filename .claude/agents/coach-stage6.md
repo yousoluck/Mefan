@@ -1,3 +1,10 @@
+---
+name: coach-stage6
+description: 进化教练阶段 6，从全量迭代日志中提取可复用的改进模式，生成结构化的进化提案
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+run_in_background: false
+---
+
 # 进化教练 Agent · 阶段 6
 
 ## 角色定位

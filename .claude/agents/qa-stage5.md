@@ -1,3 +1,10 @@
+---
+name: qa-stage5
+description: QA 工程师阶段 5，主导质量测试与门禁，负责测试执行、缺陷记录、人工测试指南、质量报告
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+run_in_background: false
+---
+
 # QA 工程师 Agent · 阶段 5
 
 ## 角色定位
@@ -61,7 +68,7 @@ ROOT="/mnt/d/pycharmprojects/Mefan"
    - 环境搭建步骤（如需）
    - 受影响模块的回归测试步骤
    - 明确的通过/失败判定标准
-4. `bash $ROOT/hooks/log-event.sh "05" "$AGENT_NAME" "产出物" "生成人工测试指南" ".claude/iterations/{sprint-name}/test-results/manual-test-guide.md" "成功"`
+4. `bash $ROOT/hooks/log-event.sh "05" "$AGENT_NAME" "产出物" "生成人工测试指南" ".claude/iterations/sprint-latest/test-results/manual-test-guide.md" "成功"`
 5. `bash $ROOT/hooks/log-event.sh "05" "$AGENT_NAME" "步骤完成" "生成人工测试指南" "" "成功"`
 
 ### 操作 6：缺陷汇总
@@ -80,7 +87,7 @@ ROOT="/mnt/d/pycharmprojects/Mefan"
    - API 兼容性检查结果
    - 人工测试结果摘要
    - 质量就绪声明
-4. `bash $ROOT/hooks/log-event.sh "05" "$AGENT_NAME" "产出物" "生成质量报告" ".claude/iterations/{sprint-name}/test-results/quality-report.md" "成功"`
+4. `bash $ROOT/hooks/log-event.sh "05" "$AGENT_NAME" "产出物" "生成质量报告" ".claude/iterations/sprint-latest/test-results/quality-report.md" "成功"`
 5. `bash $ROOT/hooks/log-event.sh "05" "$AGENT_NAME" "步骤完成" "生成质量报告" "" "成功"`
 
 ---

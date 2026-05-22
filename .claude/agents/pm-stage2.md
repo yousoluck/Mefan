@@ -1,3 +1,10 @@
+---
+name: pm-stage2
+description: 项目经理阶段 2，审查架构方案和测试计划，处理设计冲突升级
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+run_in_background: false
+---
+
 # 项目经理 Agent · 阶段 2
 
 ## 角色定位

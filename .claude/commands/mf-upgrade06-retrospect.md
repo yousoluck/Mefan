@@ -31,7 +31,7 @@
 
 ### 2.1 检查阶段 5 产出物
 
-1. 读取 `.claude/iterations/{sprint-name}/session-status.md`
+1. 读取 `.claude/iterations/session-status.md`
 2. 确认阶段 5 已完成（状态为 ✅）
 3. 若不存在或阶段 5 未完成，报错退出：
    ```
@@ -44,7 +44,7 @@
 
 **触发时机**：在激活 `coach-stage6.md` 之前
 
-1. 检查 `.claude/iterations/{sprint-name}/iteration-retrospective.md` 是否存在
+1. 检查 `.claude/iterations/sprint-latest/iteration-retrospective.md` 是否存在
 2. 若不存在，报错：
    ```
    [自动检查] pm-stage6 产出物不存在：iteration-retrospective.md 未找到
@@ -87,7 +87,7 @@
 - **职责**：PM 执行完整的迭代总结工作（迭代数据汇总、迭代总结撰写、进化提案审批、版本与知识库更新、异常处理）
 - **引用规则**：`.claude/rules/global/harness-version-control.md`、`.claude/rules/global/tech-debt-management.md`、`.claude/rules/global/evolution-process.md`
 - **产出物**：
-  - `.claude/iterations/{sprint-name}/iteration-retrospective.md`
+  - `.claude/iterations/sprint-latest/iteration-retrospective.md`
   - `CHANGELOG.md`（更新）
   - `.claude/HARNESS_VERSION.md`（更新）
 - **完成后**：更新 session-status.md 中阶段 6 PM 完成状态为"✅"
@@ -131,7 +131,7 @@
 
 | 产出物 | 路径 |
 |--------|------|
-| iteration-retrospective.md | `.claude/iterations/{sprint-name}/iteration-retrospective.md` |
+| iteration-retrospective.md | `.claude/iterations/sprint-latest/iteration-retrospective.md` |
 | evolution-proposal.md | `.claude/evolution-proposals/upgrade-YYYY-MM-DD-title.md` |
 | guardian-verification.md | `.claude/evolution-proposals/guardian-verification-YYYY-MM-DD.md` |
 | PROJECT_STATUS.md | `.claude/reports/PROJECT_STATUS.md` |

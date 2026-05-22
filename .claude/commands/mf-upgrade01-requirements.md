@@ -1,7 +1,21 @@
 # /mf-upgrade:01-requirements – 需求澄清与现有系统分析
 
-> **当前阶段**：阶段 1（需求澄清）
-> **前置条件**：阶段 0 已完成，`session-status.md` 已创建
+## 0. 前置条件
+
+> 执行本阶段前，必须满足以下条件：
+
+| 文件 | 路径 | 状态要求 |
+|------|------|---------|
+| session-status.md | `.claude/iterations/session-status.md` | 已创建 |
+| techstack-overall.md | `.claude/iterations/context/techstack-overall.md` | 已存在 |
+| tech-stack-profile.md | `.claude/context/tech-stack-profile.md` | 已存在 |
+| consistency-baseline.md | `.claude/context/consistency-baseline.md` | 已存在 |
+| knowledge-graph.md | `.claude/iterations/context/knowledge-graph.md` | 已存在 |
+| feature.md | `.claude/iterations/sprint-latest/feature.md` | 已存在 |
+
+### 路径说明
+- 所有输入输出文件均使用完整相对路径，避免歧义
+- 路径基准：项目根目录（即 `main.py` 所在目录）
 
 ---
 
@@ -31,7 +45,7 @@
 
 ### 2.1 检查 session-status.md
 
-1. 读取 `.claude/iterations/{sprint-name}/session-status.md`
+1. 读取 `.claude/iterations/session-status.md`
 2. 确认阶段 0 已完成（状态为 ✅）
 3. 若不存在或阶段 0 未完成，报错退出：
    ```
@@ -55,7 +69,7 @@
 
 **触发时机**：在激活 `pm-stage1.md` 之前
 
-1. 检查 `.claude/iterations/{sprint-name}/requirements/upgrade-*.md` 是否存在
+1. 检查 `.claude/iterations/sprint-latest/requirements/upgrade-*.md` 是否存在
 2. 若不存在，报错：
    ```
    [自动检查] analyst-stage1 产出物不存在：requirements/upgrade-*.md 未找到
@@ -73,7 +87,7 @@
 - **职责**：分析师执行完整的需求澄清工作（需求访谈、系统关联分析、命名约定提取、测试影响评估、输出需求文档）
 - **引用技能**：`.claude/skills/graphify-query-cheatsheet.md`
 - **引用规则**：`.claude/rules/scenario-upgrade/consistency-first.md`、`.claude/rules/scenario-upgrade/api-compatibility.md`、`.claude/rules/scenario-upgrade/reuse-before-build.md`
-- **产出物**：`.claude/iterations/{sprint-name}/requirements/upgrade-YYYY-MM-DD-title.md`
+- **产出物**：`.claude/iterations/sprint-latest/requirements/upgrade-YYYY-MM-DD-title.md`
 - **完成后**：更新 session-status.md 中阶段 1 Analyst 完成状态为"✅"
 
 ### 步骤 2：PM 执行硬性审查
@@ -104,7 +118,7 @@
 
 | 产出物 | 路径 |
 |--------|------|
-| 需求文档 | `.claude/iterations/{sprint-name}/requirements/upgrade-YYYY-MM-DD-title.md` |
+| 需求文档 | `.claude/iterations/sprint-latest/requirements/upgrade-YYYY-MM-DD-title.md` |
 
 ---
 

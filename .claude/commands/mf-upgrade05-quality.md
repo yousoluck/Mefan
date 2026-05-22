@@ -33,7 +33,7 @@
 
 ### 2.1 检查阶段 4 产出物
 
-1. 读取 `.claude/iterations/{sprint-name}/session-status.md`
+1. 读取 `.claude/iterations/session-status.md`
 2. 确认阶段 4 已完成（状态为 ✅）
 3. 若不存在或阶段 4 未完成，报错退出：
    ```
@@ -46,7 +46,7 @@
 
 **触发时机**：在激活 `pm-stage5.md` 之前
 
-1. 检查 `.claude/iterations/{sprint-name}/test-results/quality-report.md` 是否存在
+1. 检查 `.claude/iterations/sprint-latest/test-results/quality-report.md` 是否存在
 2. 若不存在，报错：
    ```
    [自动检查] qa-stage5 产出物不存在：test-results/quality-report.md 未找到
@@ -58,7 +58,7 @@
 
 **触发时机**：在激活 `dev-stage5.md` 之前
 
-1. 检查 `.claude/iterations/{sprint-name}/bug-log/auto-*.md` 或 `.claude/iterations/{sprint-name}/bug-log/manual-*.md` 是否存在
+1. 检查 `.claude/iterations/sprint-latest/bug-log/auto-*.md` 或 `.claude/iterations/sprint-latest/bug-log/manual-*.md` 是否存在
 2. 若存在缺陷记录（bug-log 中有 P0/P1），继续执行步骤 3
 3. 若不存在且无缺陷记录，跳过步骤 3（无缺陷需修复）
 4. 若存在但 PM 决策为"延期"，跳过步骤 3
@@ -83,11 +83,11 @@
 - **引用技能**：`.claude/skills/write-manual-test-guide.md`、`.claude/skills/bug-triage-classification.md`
 - **引用规则**：`.claude/rules/global/quality-gates.md`、`.claude/rules/global/manual-test-bug-handling.md`
 - **产出物**：
-  - `.claude/iterations/{sprint-name}/test-results/regression-YYYY-MM-DD.log`
-  - `.claude/iterations/{sprint-name}/test-results/manual-test-guide.md`
-  - `.claude/iterations/{sprint-name}/test-results/quality-report.md`
-  - `.claude/iterations/{sprint-name}/bug-log/auto-YYYY-MM-DD.md`
-  - `.claude/iterations/{sprint-name}/bug-log/manual-YYYY-MM-DD.md`
+  - `.claude/iterations/sprint-latest/test-results/regression-YYYY-MM-DD.log`
+  - `.claude/iterations/sprint-latest/test-results/manual-test-guide.md`
+  - `.claude/iterations/sprint-latest/test-results/quality-report.md`
+  - `.claude/iterations/sprint-latest/bug-log/auto-YYYY-MM-DD.md`
+  - `.claude/iterations/sprint-latest/bug-log/manual-YYYY-MM-DD.md`
 - **完成后**：更新 session-status.md 中阶段 5 QA 完成状态为"✅"
 
 ### 步骤 2：PM 处理 P0/P1 缺陷决策
@@ -128,11 +128,11 @@
 
 | 产出物 | 路径 |
 |--------|------|
-| regression-YYYY-MM-DD.log | `.claude/iterations/{sprint-name}/test-results/regression-YYYY-MM-DD.log` |
-| manual-test-guide.md | `.claude/iterations/{sprint-name}/test-results/manual-test-guide.md` |
-| quality-report.md | `.claude/iterations/{sprint-name}/test-results/quality-report.md` |
-| bug-log/auto-YYYY-MM-DD.md | `.claude/iterations/{sprint-name}/bug-log/auto-YYYY-MM-DD.md` |
-| bug-log/manual-YYYY-MM-DD.md | `.claude/iterations/{sprint-name}/bug-log/manual-YYYY-MM-DD.md` |
+| regression-YYYY-MM-DD.log | `.claude/iterations/sprint-latest/test-results/regression-YYYY-MM-DD.log` |
+| manual-test-guide.md | `.claude/iterations/sprint-latest/test-results/manual-test-guide.md` |
+| quality-report.md | `.claude/iterations/sprint-latest/test-results/quality-report.md` |
+| bug-log/auto-YYYY-MM-DD.md | `.claude/iterations/sprint-latest/bug-log/auto-YYYY-MM-DD.md` |
+| bug-log/manual-YYYY-MM-DD.md | `.claude/iterations/sprint-latest/bug-log/manual-YYYY-MM-DD.md` |
 
 ---
 

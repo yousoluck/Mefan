@@ -1,5 +1,5 @@
 # 迭代计划
-> 文件：`.claude/iterations/{sprint-name}/iteration-plan.md`
+> 文件：`.claude/iterations/sprint-latest/iteration-plan.md`
 
 ## 1. 用户故事 [必填]
 - 故事1：...

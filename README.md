@@ -279,7 +279,7 @@ Architecture Agent 读取看板，发现 T001 Done → 执行 Code Review
 └─────────────────────────────────────────────────────────────┘
                               ↑
 ┌─────────────────────────────────────────────────────────────┐
-│  Layer 2: SESSION STATUS (.claude/iterations/{sprint-name}/session-status.md) │
+│  Layer 2: SESSION STATUS (.claude/iterations/session-status.md) │
 │  迭代视角 · 阶段进度追踪 · 自动推进断点                        │
 └─────────────────────────────────────────────────────────────┘
                               ↑

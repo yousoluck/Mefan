@@ -31,7 +31,7 @@
 
 ### 2.1 检查阶段 2 产出物
 
-1. 读取 `.claude/iterations/{sprint-name}/session-status.md`
+1. 读取 `.claude/iterations/session-status.md`
 2. 确认阶段 2 已完成（状态为 ✅）
 3. 若不存在或阶段 2 未完成，报错退出：
    ```
@@ -44,8 +44,8 @@
 
 **触发时机**：在完成步骤 1 进入 Human Gate 前
 
-1. 检查 `.claude/iterations/{sprint-name}/iteration-plan.md` 是否存在
-2. 检查 `.claude/iterations/{sprint-name}/sprint-status.md` 是否存在
+1. 检查 `.claude/iterations/sprint-latest/iteration-plan.md` 是否存在
+2. 检查 `.claude/iterations/sprint-latest/sprint-status.md` 是否存在
 3. 若任一不存在，报错：
    ```
    [自动检查] pm-stage3 产出物不存在：iteration-plan.md 或 sprint-status.md 未找到
@@ -64,8 +64,8 @@
 - **职责**：PM 执行完整的迭代计划工作（任务拆解、冲突裁决、生成迭代计划、初始化看板、自检与反向校验）
 - **引用规则**：`.claude/rules/global/iteration-planning.md`、`.claude/rules/global/conflict-resolution.md`、`.claude/rules/scenario-upgrade/reuse-before-build.md`
 - **产出物**：
-  - `.claude/iterations/{sprint-name}/iteration-plan.md`
-  - `.claude/iterations/{sprint-name}/sprint-status.md`
+  - `.claude/iterations/sprint-latest/iteration-plan.md`
+  - `.claude/iterations/sprint-latest/sprint-status.md`
 - **完成后**：更新 session-status.md 中阶段 3 完成状态为"✅"
 
 ---
@@ -82,8 +82,8 @@
 
 | 产出物 | 路径 |
 |--------|------|
-| 迭代计划 | `.claude/iterations/{sprint-name}/iteration-plan.md` |
-| 看板 | `.claude/iterations/{sprint-name}/sprint-status.md` |
+| 迭代计划 | `.claude/iterations/sprint-latest/iteration-plan.md` |
+| 看板 | `.claude/iterations/sprint-latest/sprint-status.md` |
 
 ---
 

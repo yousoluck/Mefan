@@ -33,7 +33,7 @@
 
 ### 2.1 检查阶段 1 产出物
 
-1. 读取 `.claude/iterations/{sprint-name}/session-status.md`
+1. 读取 `.claude/iterations/session-status.md`
 2. 确认阶段 1 已完成（状态为 ✅）
 3. 若不存在或阶段 1 未完成，报错退出：
    ```
@@ -55,7 +55,7 @@
 
 **触发时机**：在激活 `qa-stage2.md` 之前
 
-1. 检查 `.claude/iterations/{sprint-name}/adr/upgrade-*.md` 是否存在
+1. 检查 `.claude/iterations/sprint-latest/adr/upgrade-*.md` 是否存在
 2. 若不存在，报错：
    ```
    [自动检查] architect-stage2 产出物不存在：adr/upgrade-*.md 未找到
@@ -67,7 +67,7 @@
 
 **触发时机**：在激活 `pm-stage2.md` 之前
 
-1. 检查 `.claude/iterations/{sprint-name}/test-plan/upgrade-*.md` 是否存在
+1. 检查 `.claude/iterations/sprint-latest/test-plan/upgrade-*.md` 是否存在
 2. 若不存在，报错：
    ```
    [自动检查] qa-stage2 产出物不存在：test-plan/upgrade-*.md 未找到
@@ -86,7 +86,7 @@
 - **职责**：架构师执行完整的架构设计工作（方案对比、详细设计、参考实现定位、一致性合规检查、设计冲突升级、输出 ADR）
 - **引用技能**：`.claude/skills/graphify-query-cheatsheet.md`
 - **引用规则**：`.claude/rules/scenario-upgrade/consistency-first.md`、`.claude/rules/scenario-upgrade/api-compatibility.md`、`.claude/rules/scenario-upgrade/reference-module.md`
-- **产出物**：`.claude/iterations/{sprint-name}/adr/upgrade-YYYY-MM-DD-title.md`
+- **产出物**：`.claude/iterations/sprint-latest/adr/upgrade-YYYY-MM-DD-title.md`
 - **完成后**：更新 session-status.md 中阶段 2 Architect 完成状态为"✅"
 
 ### 步骤 2：QA 主导测试策略设计
@@ -95,7 +95,7 @@
 - **激活 Agent**：`agents/qa-stage2.md`
 - **职责**：QA 执行完整的测试策略设计（回归测试范围、新增测试场景、质量门槛设定、人工测试指南标记、输出测试计划）
 - **引用规则**：`.claude/rules/global/quality-gates.md`
-- **产出物**：`.claude/iterations/{sprint-name}/test-plan/upgrade-YYYY-MM-DD-title.md`
+- **产出物**：`.claude/iterations/sprint-latest/test-plan/upgrade-YYYY-MM-DD-title.md`
 - **完成后**：更新 session-status.md 中阶段 2 QA 完成状态为"✅"
 
 ### 步骤 3：PM 执行硬性审查
@@ -127,8 +127,8 @@
 
 | 产出物 | 路径 |
 |--------|------|
-| ADR | `.claude/iterations/{sprint-name}/adr/upgrade-YYYY-MM-DD-title.md` |
-| 测试计划 | `.claude/iterations/{sprint-name}/test-plan/upgrade-YYYY-MM-DD-title.md` |
+| ADR | `.claude/iterations/sprint-latest/adr/upgrade-YYYY-MM-DD-title.md` |
+| 测试计划 | `.claude/iterations/sprint-latest/test-plan/upgrade-YYYY-MM-DD-title.md` |
 
 ---
 

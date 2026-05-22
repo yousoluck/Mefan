@@ -1,8 +1,8 @@
 # Session Status Template
 
-> 文件路径：`.claude/iterations/{sprint-name}/session-status.md`
+> 文件路径：`.claude/iterations/session-status.md`
 > 更新时机：每个阶段完成后由 PM 更新
-> **iteration name = sprint name**，统一使用 `{sprint-name}` 格式（如 `sprint-2026-05-14`）
+> **作用**：跨 sprint 全局追踪，记录所有 sprint 的状态和产出
 
 ---
 
@@ -69,14 +69,28 @@
 |------|--------|------|------|---------|
 | 00 | tech-stack-profile.md | `.claude/context/` | ✅ | |
 | 00 | consistency-baseline.md | `.claude/context/` | ✅ | |
-| 01 | requirements.md | `.claude/iterations/{sprint-name}/requirements/` | ✅ | |
-| 02 | adr.md | `.claude/iterations/{sprint-name}/adr/` | ✅ | |
-| 02 | test-plan.md | `.claude/iterations/{sprint-name}/test-plan/` | ✅ | |
-| 03 | iteration-plan.md | `.claude/iterations/{sprint-name}/` | ✅ | |
-| 03 | sprint-status.md | `.claude/iterations/{sprint-name}/` | ✅ | |
-| 04 | task-summary/T{NNN}.md | `.claude/iterations/{sprint-name}/task-summary/` | ⏳ | |
-| 05 | quality-report.md | `.claude/iterations/{sprint-name}/test-results/` | ✅ | |
-| 06 | iteration-retrospective.md | `.claude/iterations/{sprint-name}/` | ✅ | |
+| 01 | requirements.md | `.claude/iterations/sprint-latest/requirements/` | ✅ | |
+| 02 | adr.md | `.claude/iterations/sprint-latest/adr/` | ✅ | |
+| 02 | test-plan.md | `.claude/iterations/sprint-latest/test-plan/` | ✅ | |
+| 03 | iteration-plan.md | `.claude/iterations/sprint-latest/` | ✅ | |
+| 03 | sprint-status.md | `.claude/iterations/sprint-latest/` | ✅ | |
+| 04 | task-summary/T{NNN}.md | `.claude/iterations/sprint-latest/task-summary/` | ⏳ | |
+| 05 | quality-report.md | `.claude/iterations/sprint-latest/test-results/` | ✅ | |
+| 06 | iteration-retrospective.md | `.claude/iterations/sprint-latest/` | ✅ | |
+
+---
+
+## 历史 Sprint 索引
+
+> 归档已完成迭代，由 PM 在每次新 sprint 创建时更新
+> **路径基准**：`.claude/iterations/`
+
+| Sprint 名称 | 开始日期 | 结束日期 | 状态 | 关键产出 |
+|------------|---------|---------|------|---------|
+| sprint-1 | | | ✅ Done | |
+| sprint-2 | | | ✅ Done | |
+
+**更新时机**：每次新 sprint 创建时，将上一个 sprint 追加到此表，并从 sprint-latest 重命名归档
 
 ---
 

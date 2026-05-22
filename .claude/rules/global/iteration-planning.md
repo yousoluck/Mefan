@@ -98,7 +98,7 @@ To Do → In Progress → In Review → Done
 
 ## 迭代计划文档要求
 
-在 `iterations/{sprint-name}/iteration-plan.md` 中必须包含：
+在 `.claude/iterations/sprint-latest/iteration-plan.md` 中必须包含：
 
 1. **User Story清单**：所有计划的US
 2. **任务拆解表**：所有US对应的任务

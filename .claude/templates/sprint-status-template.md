@@ -1,6 +1,6 @@
 # Sprint 看板
 
-> 文件：`.claude/iterations/{sprint-name}/sprint-status.md`
+> 文件：`.claude/iterations/sprint-latest/sprint-status.md`
 > 创建时机：阶段 3（03-plan）创建
 > 更新时机：任务状态变更时（由开发者/QA 更新）
 > **sprint name = iteration name**

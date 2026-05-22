@@ -6,10 +6,10 @@
 - `sprint-status.md`（获取任务完成状态）
 - `task-summary/` 目录（获取本次实现的功能清单）
 - `iteration-plan.md`（获取原始计划）
-- 需求文档 `.claude/iterations/{sprint-name}/requirements/*.md`
+- 需求文档 `.claude/iterations/sprint-latest/requirements/*.md`
 
 ## 输出
-- `.claude/iterations/{sprint-name}/test-results/manual-test-guide.md`
+- `.claude/iterations/sprint-latest/test-results/manual-test-guide.md`
 - 必须使用 `.claude/templates/manual-test-guide-template.md`
 
 ## 操作步骤

@@ -1,5 +1,5 @@
 # 迭代总结
-> 文件：`.claude/iterations/{sprint-name}/iteration-retrospective.md`
+> 文件：`.claude/iterations/sprint-latest/iteration-retrospective.md`
 
 ## 1. 迭代概览
 - 用户故事：计划 X / 完成 Y

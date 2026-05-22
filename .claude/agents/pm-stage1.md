@@ -1,3 +1,10 @@
+---
+name: pm-stage1
+description: 项目经理阶段 1，主导需求澄清审查，校验分析师输出的需求文档
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+run_in_background: false
+---
+
 # 项目经理 Agent · 阶段 1
 
 ## 角色定位

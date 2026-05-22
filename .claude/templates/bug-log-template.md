@@ -1,5 +1,5 @@
 # 缺陷记录
-> 文件：`.claude/iterations/{sprint-name}/bug-log/YYYY-MM-DD.md` 或 `.claude/iterations/{sprint-name}/bug-log/<bug-id>.md`
+> 文件：`.claude/iterations/sprint-latest/bug-log/YYYY-MM-DD.md` 或 `.claude/iterations/sprint-latest/bug-log/<bug-id>.md`
 
 ## 缺陷信息
 - **缺陷 ID**：

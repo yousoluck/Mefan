@@ -186,7 +186,7 @@ Human Gate 是阶段分界线，AI 无法自行跨越。Command 在工作流中�
 2. 若值不为 `upgrade`，报错退出
 
 ### PM-操作-2：session-status 初始化
-1. 检查 `iterations/{sprint-name}/session-status.md` 是否存在
+1. 检查 `.claude/iterations/session-status.md` 是否存在
 2. 若不存在，使用模板生成
 3. 初始化阶段 0 完成记录（状态 ⏳）
 ```

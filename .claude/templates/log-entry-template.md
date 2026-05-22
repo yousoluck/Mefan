@@ -1,9 +1,9 @@
 # 日志条目模板
-> 文件：`.claude/iterations/{sprint-name}/logs/mefan-log.md`（追加写入）
+> 文件：`.claude/iterations/sprint-latest/logs/mefan-log.md`（追加写入）
 > 用途：每次记录一行日志，按此格式追加到文件末尾
 
 ## 使用说明
-- **文件位置**：`iterations/{sprint-name}/logs/mefan-log.md`
+- **文件位置**：`iterations/sprint-latest/logs/mefan-log.md`
 - **写入方式**：追加模式，每次写入一行，不覆盖已有内容
 - **写入时机**：阶段进入/退出、Human Gate 审批、异常发生、关键决策
 

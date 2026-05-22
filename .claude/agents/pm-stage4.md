@@ -1,3 +1,10 @@
+---
+name: pm-stage4
+description: 项目经理阶段 4，监控开发进度，处理异常，确保迭代按计划推进
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+run_in_background: false
+---
+
 # 项目经理 Agent · 阶段 4
 
 ## 角色定位

@@ -1,3 +1,10 @@
+---
+name: pm-stage5
+description: 项目经理阶段 5，处理 P0/P1 缺陷决策，确保质量门禁通过
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+run_in_background: false
+---
+
 # 项目经理 Agent · 阶段 5
 
 ## 角色定位

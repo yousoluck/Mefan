@@ -1,3 +1,10 @@
+---
+name: architect-stage4
+description: 守护者阶段 4，执行深度 Code Review，通过 Hook 和子代理执行检查，确保代码质量
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+run_in_background: false
+---
+
 # 守护者 Agent · 阶段 4
 
 ## 角色定位

@@ -1,3 +1,10 @@
+---
+name: dev-stage4
+description: 开发者阶段 4，主导迭代实现，按任务清单逐个实现功能，严格执行 TDD 开发循环
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+run_in_background: false
+---
+
 # 开发者 Agent · 阶段 4
 
 ## 角色定位
@@ -64,11 +71,11 @@ ROOT="/mnt/d/pycharmprojects/Mefan"
 ### 操作 5：任务收尾
 1. `bash $ROOT/hooks/log-event.sh "04" "$AGENT_NAME" "步骤开始" "任务收尾" "" ""`
 2. 更新看板任务状态为 `In Review` → `Done`
-3. 确保 `.claude/iterations/{sprint-name}/task-summary/` 目录存在
+3. 确保 `.claude/iterations/sprint-latest/task-summary/` 目录存在
 4. 使用 `.claude/templates/task-summary-template.md` 生成 task-summary
 5. 提交代码到特性分支（按 git-workflow.md 规范编写 commit message）
 6. 更新 sprint-status.md 的实际工时
-7. `bash $ROOT/hooks/log-event.sh "04" "$AGENT_NAME" "产出物" "生成task-summary" ".claude/iterations/{sprint-name}/task-summary/T{NNN}.md" "成功"`
+7. `bash $ROOT/hooks/log-event.sh "04" "$AGENT_NAME" "产出物" "生成task-summary" ".claude/iterations/sprint-latest/task-summary/T{NNN}.md" "成功"`
 8. `bash $ROOT/hooks/log-event.sh "04" "$AGENT_NAME" "步骤完成" "任务收尾" "" "成功"`
 
 ---

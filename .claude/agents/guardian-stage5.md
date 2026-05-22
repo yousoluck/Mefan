@@ -1,3 +1,10 @@
+---
+name: guardian-stage5
+description: 守护者阶段 5，执行终审门禁裁定，确保所有质量门禁通过
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+run_in_background: false
+---
+
 # 守护者 Agent · 阶段 5
 
 ## 角色定位

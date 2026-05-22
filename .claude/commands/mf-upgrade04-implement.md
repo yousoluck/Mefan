@@ -34,7 +34,7 @@
 
 ### 2.1 检查阶段 3 产出物
 
-1. 读取 `.claude/iterations/{sprint-name}/session-status.md`
+1. 读取 `.claude/iterations/session-status.md`
 2. 确认阶段 3 已完成（状态为 ✅）
 3. 若不存在或阶段 3 未完成，报错退出：
    ```
@@ -47,7 +47,7 @@
 
 **触发时机**：在激活 `pm-stage4.md` 之前
 
-1. 检查 `.claude/iterations/{sprint-name}/task-summary/T{NNN}.md` 是否存在（至少一个）
+1. 检查 `.claude/iterations/sprint-latest/task-summary/T{NNN}.md` 是否存在（至少一个）
 2. 若不存在，报错：
    ```
    [自动检查] dev-stage4 产出物不存在：task-summary/T{NNN}.md 未找到
@@ -67,8 +67,8 @@
 - **引用技能**：`.claude/skills/tdd-red-green-refactor.md`、`.claude/skills/git-workflow.md`、`.claude/skills/query-third-party-docs.md`
 - **引用规则**：`.claude/rules/scenario-upgrade/consistency-first.md`、`.claude/rules/scenario-upgrade/api-compatibility.md`、`.claude/rules/global/hook-vs-guardian.md`
 - **产出物**：
-  - `.claude/iterations/{sprint-name}/task-summary/T{NNN}.md`
-  - `.claude/iterations/{sprint-name}/test-results/unit-T{NNN}.log`
+  - `.claude/iterations/sprint-latest/task-summary/T{NNN}.md`
+  - `.claude/iterations/sprint-latest/test-results/unit-T{NNN}.log`
   - interception-analysis.md（仅 Hook 拦截 ≥2 次时）
 - **完成后**：更新 session-status.md 中阶段 4 Dev 完成状态为"✅"
 
@@ -93,9 +93,9 @@
 
 | 产出物 | 路径 |
 |--------|------|
-| task-summary/T{NNN}.md | `.claude/iterations/{sprint-name}/task-summary/T{NNN}.md` |
-| test-results/unit-T{NNN}.log | `.claude/iterations/{sprint-name}/test-results/unit-T{NNN}.log` |
-| interception-analysis.md | `.claude/iterations/{sprint-name}/interception-analysis.md`（仅 Hook 拦截 ≥2 次时） |
+| task-summary/T{NNN}.md | `.claude/iterations/sprint-latest/task-summary/T{NNN}.md` |
+| test-results/unit-T{NNN}.log | `.claude/iterations/sprint-latest/test-results/unit-T{NNN}.log` |
+| interception-analysis.md | `.claude/iterations/sprint-latest/interception-analysis.md`（仅 Hook 拦截 ≥2 次时） |
 
 ---
 

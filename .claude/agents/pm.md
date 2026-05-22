@@ -1,3 +1,10 @@
+---
+name: pm
+description: 项目经理 Agent 总控，负责生命周期、版本、进度、冲突、债务和人类沟通
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+run_in_background: false
+---
+
 # 项目经理 Agent (PM)
 
 > **重要**：本文件为角色索引，PM Agent 在不同阶段加载不同的阶段文件，而非加载本文件。

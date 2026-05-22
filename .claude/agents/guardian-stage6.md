@@ -1,3 +1,10 @@
+---
+name: guardian-stage6
+description: 守护者阶段 6，执行进化提案的验证性审阅，确保提案符合框架质量标准
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+run_in_background: false
+---
+
 # 守护者 Agent · 阶段 6
 
 ## 角色定位

@@ -1,3 +1,10 @@
+---
+name: analyst-stage3
+description: 分析师阶段 3，辅助 PM 执行任务拆解，将 ADR 中的实现步骤拆解为原子任务
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+run_in_background: false
+---
+
 # 分析师 Agent · 阶段 3
 
 ## 角色定位

@@ -1,3 +1,10 @@
+---
+name: pm-stage6
+description: 项目经理阶段 6，主导迭代总结与进化，负责汇总迭代数据、评估技术债务、审阅进化提案、更新版本
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+run_in_background: false
+---
+
 # 项目经理 Agent · 阶段 6
 
 ## 角色定位
@@ -35,7 +42,7 @@ ROOT="/mnt/d/pycharmprojects/Mefan"
 
 ### 操作 2：迭代总结撰写
 1. `bash $ROOT/hooks/log-event.sh "06" "$AGENT_NAME" "步骤开始" "迭代总结撰写" "" ""`
-2. 确保 `.claude/iterations/{sprint-name}/` 目录存在
+2. 确保 `.claude/iterations/sprint-latest/` 目录存在
 3. 使用 `.claude/templates/iteration-retrospective-template.md` 输出 iteration-retrospective.md
 4. 内容包含：
    - 迭代概览：用户故事数、任务完成率、工时偏差
@@ -44,7 +51,7 @@ ROOT="/mnt/d/pycharmprojects/Mefan"
    - 做得不好的地方：至少列出 3 个问题案例
    - 技术债务评估
    - 待改进项清单
-5. `bash $ROOT/hooks/log-event.sh "06" "$AGENT_NAME" "产出物" "生成迭代总结" ".claude/iterations/{sprint-name}/iteration-retrospective.md" "成功"`
+5. `bash $ROOT/hooks/log-event.sh "06" "$AGENT_NAME" "产出物" "生成迭代总结" ".claude/iterations/sprint-latest/iteration-retrospective.md" "成功"`
 6. `bash $ROOT/hooks/log-event.sh "06" "$AGENT_NAME" "步骤完成" "迭代总结撰写" "" "成功"`
 
 ### 操作 3：进化提案审批

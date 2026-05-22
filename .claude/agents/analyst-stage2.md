@@ -1,3 +1,10 @@
+---
+name: analyst-stage2
+description: 分析师阶段 2，辅助任务拆解，为阶段 3 的迭代计划提供输入
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+run_in_background: false
+---
+
 # 分析师 Agent · 阶段 2
 
 ## 角色定位

@@ -1,3 +1,10 @@
+---
+name: pm-stage3
+description: 项目经理阶段 3，主导迭代计划与任务排期，创建迭代计划、初始化看板、执行冲突裁决
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+run_in_background: false
+---
+
 # 项目经理 Agent · 阶段 3
 
 ## 角色定位
@@ -39,23 +46,23 @@ ROOT="/mnt/d/pycharmprojects/Mefan"
 
 ### 操作 3：生成迭代计划
 1. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "步骤开始" "生成迭代计划" "" ""`
-2. 确保 `.claude/iterations/{sprint-name}/` 目录存在
-3. 创建 `.claude/iterations/{sprint-name}/iteration-plan.md`，使用模板
+2. 确保 `.claude/iterations/sprint-latest/` 目录存在
+3. 创建 `.claude/iterations/sprint-latest/iteration-plan.md`，使用模板
 4. 填入：
    - 用户故事列表（从需求文档提取）
    - 任务清单（从冲突裁决结果）
    - WIP 限制（默认 2）
    - 里程碑检查点（至少 2 个）
    - 进度警戒线（每个任务）
-5. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "产出物" "生成迭代计划" ".claude/iterations/{sprint-name}/iteration-plan.md" "成功"`
+5. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "产出物" "生成迭代计划" ".claude/iterations/sprint-latest/iteration-plan.md" "成功"`
 6. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "步骤完成" "生成迭代计划" "" "成功"`
 
 ### 操作 4：初始化看板
 1. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "步骤开始" "初始化看板" "" ""`
-2. 创建 `.claude/iterations/{sprint-name}/sprint-status.md`，使用模板
+2. 创建 `.claude/iterations/sprint-latest/sprint-status.md`，使用模板
 3. 将所有任务初始化为 `To Do` 状态
 4. 看板列：任务ID、描述、状态、负责人、计划工时、实际工时、风险标记、技术债务
-5. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "产出物" "生成看板" ".claude/iterations/{sprint-name}/sprint-status.md" "成功"`
+5. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "产出物" "生成看板" ".claude/iterations/sprint-latest/sprint-status.md" "成功"`
 6. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "步骤完成" "初始化看板" "" "成功"`
 
 ### 操作 5：自检与反向校验

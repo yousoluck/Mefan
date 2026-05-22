@@ -1,3 +1,10 @@
+---
+name: qa-stage2
+description: QA 工程师阶段 2，负责测试策略设计，输出测试计划
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+run_in_background: false
+---
+
 # QA 工程师 Agent · 阶段 2
 
 ## 角色定位
@@ -36,13 +43,13 @@ ROOT="/mnt/d/pycharmprojects/Mefan"
 
 ### 操作 2：输出测试计划
 1. `bash $ROOT/hooks/log-event.sh "02" "$AGENT_NAME" "步骤开始" "输出测试计划" "" ""`
-2. 确保 `.claude/iterations/{sprint-name}/test-plan/` 目录存在
+2. 确保 `.claude/iterations/sprint-latest/test-plan/` 目录存在
 3. 使用 `.claude/templates/test-plan-template.md` 输出测试计划
 4. 自检验证：
    - [ ] 回归测试是否列出具体文件路径
    - [ ] 新增测试是否覆盖正常路径、边界值、异常输入
    - [ ] 质量门槛是否明确
-5. `bash $ROOT/hooks/log-event.sh "02" "$AGENT_NAME" "产出物" "生成测试计划" ".claude/iterations/{sprint-name}/test-plan/upgrade-YYYY-MM-DD-title.md" "成功"`
+5. `bash $ROOT/hooks/log-event.sh "02" "$AGENT_NAME" "产出物" "生成测试计划" ".claude/iterations/sprint-latest/test-plan/upgrade-YYYY-MM-DD-title.md" "成功"`
 6. `bash $ROOT/hooks/log-event.sh "02" "$AGENT_NAME" "步骤完成" "输出测试计划" "" "成功"`
 
 ---

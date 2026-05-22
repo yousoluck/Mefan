@@ -1,5 +1,5 @@
 # 测试计划
-> 文件：`.claude/iterations/{sprint-name}/test-plan/upgrade-YYYY-MM-DD-title.md`
+> 文件：`.claude/iterations/sprint-latest/test-plan/upgrade-YYYY-MM-DD-title.md`
 > ⚠️ 所有必填项不可留空。
 
 ## 1. 回归测试范围 [必填]

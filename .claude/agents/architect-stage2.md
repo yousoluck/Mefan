@@ -1,3 +1,10 @@
+---
+name: architect-stage2
+description: 架构师阶段 2，主导架构设计与测试策略，负责设计架构方案、输出 ADR、自检验证
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+run_in_background: false
+---
+
 # 架构师 Agent · 阶段 2
 
 ## 角色定位
@@ -74,13 +81,13 @@ ROOT="/mnt/d/pycharmprojects/Mefan"
 
 ### 操作 7：输出 ADR（自检验证）
 1. `bash $ROOT/hooks/log-event.sh "02" "$AGENT_NAME" "步骤开始" "输出ADR" "" ""`
-2. 确保 `.claude/iterations/{sprint-name}/adr/` 目录存在
+2. 确保 `.claude/iterations/sprint-latest/adr/` 目录存在
 3. 使用 `.claude/templates/adr-template.md` 输出 ADR
 4. 自检验证：
    - [ ] 接口签名符合项目风格
    - [ ] 数据流是否与现有模块无循环引用
    - [ ] 所有新增 API 是否向后兼容
-5. `bash $ROOT/hooks/log-event.sh "02" "$AGENT_NAME" "产出物" "生成ADR" ".claude/iterations/{sprint-name}/adr/upgrade-YYYY-MM-DD-title.md" "成功"`
+5. `bash $ROOT/hooks/log-event.sh "02" "$AGENT_NAME" "产出物" "生成ADR" ".claude/iterations/sprint-latest/adr/upgrade-YYYY-MM-DD-title.md" "成功"`
 6. `bash $ROOT/hooks/log-event.sh "02" "$AGENT_NAME" "步骤完成" "输出ADR" "" "成功"`
 
 ---

@@ -9,8 +9,8 @@
 - **执行 Agent**：PM (`agents/pm.md`)，负责判断当前阶段、拉起对应 Command、断点续跑。
 
 ## 2. 前置输入（必须读取）
-- `.claude/iterations/{sprint-name}/session-status.md`（阶段状态 + US 状态 + 产出物追踪）
-- `.claude/iterations/{sprint-name}/sprint-status.md`（task 进度）
+- `.claude/iterations/session-status.md`（阶段状态 + US 状态 + 产出物追踪）
+- `.claude/iterations/sprint-latest/sprint-status.md`（task 进度）
 - `.claude/iterations/mefan-log.md`（用于确认断点）
 
 **执行前检查**：
@@ -20,7 +20,7 @@
 ## 3. 执行流程
 
 ### 3.1 断点检查
-读取 `.claude/iterations/{sprint-name}/session-status.md`：
+读取 `.claude/iterations/session-status.md`：
 
 1. **读取 `## 自动推进状态`**：
    - 当前阶段：N

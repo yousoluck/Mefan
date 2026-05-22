@@ -19,7 +19,7 @@
 
 ### 1. 发现Bug（QA/开发者/人类）
 
-发现Bug后，提交到 `iterations/{sprint-name}/bug-log/manual-YYYY-MM-DD.md`：
+发现Bug后，提交到 `.claude/iterations/sprint-latest/bug-log/manual-YYYY-MM-DD.md`：
 
 ```markdown
 ## Bug记录

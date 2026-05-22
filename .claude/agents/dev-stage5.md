@@ -1,3 +1,10 @@
+---
+name: dev-stage5
+description: 开发者阶段 5，负责修复被驳回的缺陷
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+run_in_background: false
+---
+
 # 开发者 Agent · 阶段 5
 
 ## 角色定位
