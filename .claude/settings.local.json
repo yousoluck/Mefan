@@ -1,0 +1,34 @@
+{
+  "cleanupPeriodDays": 36500,
+  "permissions": {
+    "allow": [
+      "Bash(for skill:*)",
+      "Bash(do echo:*)",
+      "Read(//mnt/d/pycharmprojects/mefan/.claude/skills/$skill/**)",
+      "Bash(done)",
+      "Bash(bash /mnt/d/pycharmprojects/mefan/.claude/hooks/conversation-log.sh \"assistant\" \"继续之前的工作：更新 architect-stage0.md 的通用骨架调查部分（新增目录结构、数据库架构、API设计、错误处理、命名规范、模块耦合、代码复用、测试规范、部署环境等调查项），以及更新 frontend-redux Skill 新增组件间状态传递、页面间状态传递、API数据处理流程、数据库模式调查等章节。\" \"完成 architect-stage0.md 操作 2.4 通用骨架调查部分扩展（8个调查分类），完成 frontend-redux Skill v1.1.0 更新（新增4个调查章节）\" \"更新 architect-stage0.md 第2.4节通用骨架调查（8个调查分类），更新 frontend-redux/SKILL.md（版本升至1.1.0，新增组件间/页面间状态传递、API数据处理、数据库模式调查章节）\")"
+    ]
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/conversation-log.sh capture"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/conversation-log.sh finalize"
+          }
+        ]
+      }
+    ]
+  }
+}
