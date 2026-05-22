@@ -2,113 +2,404 @@
 
 > **当前阶段**：阶段 0（会话初始化）
 > **主导角色**：项目经理 (PM)
-> **辅助角色**：架构师 (Architect)
+> **辅助角色**：架构师 (Architect)、需求分析师 (Analyst)
 > **前置条件**：无（首次进入迭代）
+> **执行模式**：PM → Architect → Analyst 串行执行（各 Agent 完成前，下一个 Agent 不得开始）
 
 ---
 
-## 0. 日志声明（自动追加）
+## 0. 概述
 
-执行本阶段所有步骤时，必须使用 `.claude/hooks/log-event.sh` 记录日志：
-- 进入阶段：`bash .claude/hooks/log-event.sh "00" "$AGENT_NAME" "阶段进入" "阶段0开始" "" "成功"`
-- 结束阶段：`bash .claude/hooks/log-event.sh "00" "$AGENT_NAME" "阶段退出" "阶段0完成" "" "成功"`
-- 产出文件：`bash .claude/hooks/log-event.sh "00" "$AGENT_NAME" "产出物" "生成 <文件>" "<文件>" "成功"`
-- 异常：`bash .claude/hooks/log-event.sh "00" "$AGENT_NAME" "异常" "<描述>" "" "失败"`
+本阶段由 PM Agent 主导，执行环境确认和上下文建立。只有当 PM Agent 完成所有任务后，Architect Agent 才开始执行技术栈分析和一致性基线提取。Analyst Agent 在 Architect 完成后执行需求澄清对话，产出 feature.md。
 
 ---
 
-## 1. 规则加载（按需引用，非集中声明）
+## 1. 日志声明
 
-> 以下规则在本步骤执行时**按需读取**，不在阶段开头集中加载。
+执行本 playbook 时，必须使用 `.claude/hooks/log-event.sh` 记录日志：
+- 进入阶段：`bash .claude/hooks/log-event.sh "00" "PM" "阶段进入" "阶段0开始" "" "成功"`
+- 结束阶段：`bash .claude/hooks/log-event.sh "00" "PM" "阶段退出" "阶段0完成" "" "成功"`
+
+---
+
+## 1.1 知识图谱准备
+
+> **重要**：阶段 0 执行前，必须先确认知识图谱存在
+
+**知识图谱生成**：
+如果 `.claude/context/knowledge.grap` 不存在，先运行 graphify 生成：
+
+```bash
+# 检查 knowledge.grap 是否存在
+if [ ! -f "$ROOT/.claude/context/knowledge.grap" ]; then
+  echo "[Warning] knowledge.grap 不存在，建议先运行 graphify scan"
+  echo "如果没有 graphify，阶段 0 Agent 会标注'手动分析'继续执行"
+fi
+```
+
+**如果 knowledge.grap 不存在**：
+- PM Agent 会输出警告但继续执行
+- Architect Agent 会标注"手动分析 [Graphify不可用]"
+- Analyst Agent 会标注"手动分析"
+
+---
+
+## 2. 规则加载
+
+按需引用（不在阶段开头集中声明）：
 
 | 规则/技能 | 用途 | 引用时机 |
 |-----------|------|---------|
-| `.claude/rules/global/session-init.md` | 阶段初始化三原则 | 步骤 2 开始前 |
-| `.claude/skills/graphify-query-cheatsheet.md` | graphify 命令查询方式 | 步骤 3.2 需要执行 graphify 时 |
+| `.claude/rules/global/session-init.md` | 阶段初始化三原则 | PM 步骤执行前 |
+| `.claude/agents/pm-stage0.md` | PM 阶段0完整业务流程 | PM Agent 执行时 |
+| `.claude/agents/architect-stage0.md` | Architect 阶段0完整业务流程 | Architect Agent 执行时 |
+| `.claude/agents/analyst-stage0.md` | Analyst 阶段0完整业务流程 | Analyst Agent 执行时 |
 
 ---
 
-## 2. 环境确认
+## 3. 执行流程
 
-**执行者**：PM
+### 3.1 阶段进入日志
 
-### 2.1 确认 SCENARIO
+```bash
+bash .claude/hooks/log-event.sh "00 Init" "PM" "PM Agent开始执行" "PM 初始化项目开始" "" "进行中"
+```
 
-读取 `SCENARIO` 变量，确认值为 `upgrade`。若未定义，报错退出。
+### 3.2 PM Agent 执行（阶段 0 业务逻辑）
 
-### 2.2 确定迭代目录
+**前置条件**：无
+**执行文件**：`.claude/agents/pm-stage0.md`
 
-1. 检查是否存在 `iterations/sprint-YYYY-MM-DD/` 目录（YYYY-MM-DD 为当前日期）
-2. 若不存在，**报错退出**（要求用户预先创建）
-3. 记录本次 iteration 名称（如 `sprint-2026-05-16`）
+激活 PM Agent（串行，等待完成）：
 
-### 2.3 创建/读取 session-status.md
+```
+Agent: pm-stage0.md
+run_in_background: false
+```
 
-> **规则**：`session-status.md` 创建在 `iterations/{sprint-name}/session-status.md`
+激活后等待 PM Agent 完成，记录日志：
 
-1. 检查 `iterations/{sprint-name}/session-status.md` 是否存在
-2. 若不存在，使用 `.claude/templates/session-status-template.md` 生成
-3. 若存在，读取并作为当前状态基础
-4. 在 session-status.md 中初始化阶段 0 完成记录（状态标记为 ⏳）
+```bash
+bash .claude/hooks/log-event.sh "00" "PM" "产出物" "PM阶段0完成" ".claude/agents/pm-stage0.md" "成功"
+bash .claude/hooks/log-event.sh "00" "PM" "步骤完成" "PM环境确认完成" "" "成功"
+```
+
+#### 3.2.1 Human Gate 确认（PM 阶段）
+> PM Agent 完成执行后，必须等待用户确认才能继续
+
+**一、session-status.md 状态检查**
+
+| 检查项 | 期望状态 | 检查位置 |
+|--------|---------|---------|
+| 阶段 00 完成时间 | 已填写（时间戳） | `## 阶段完成记录` 表格 |
+| 阶段 00 产出物状态 | ✅ | `## 阶段完成记录` 表格 |
+| 当前阶段 | 0 | `## 自动推进状态` 表格 |
+| 已完成阶段 | 包含 0 | `## 自动推进状态` 表格 |
+| 迭代概览 - 迭代名称 | sprint-latest | `## 迭代概览` 表格 |
+| 迭代概览 - 开始日期 | 当天日期 | `## 迭代概览` 表格 |
+| 迭代概览 - 场景 | upgrade | `## 迭代概览` 表格 |
+
+**二、迭代目录结构检查**
+
+| 检查项 | 期望状态 |
+|--------|---------|
+| `.claude/iterations/sprint-latest/` | 目录已创建 |
+| `.claude/iterations/session-status.md` | 文件已创建 |
+
+**三、project.md 文档检查**
+
+| 检查项 | 期望状态 | 路径 |
+|--------|---------|------|
+| project.md 是否生成 | ✅ | `.claude/context/project.md` |
+| 迭代历史版块 | 包含 `### 迭代 sprint-latest` | `## 迭代历史` |
+| sprint-latest 状态 | 🔍 进行中 | `### 迭代 sprint-latest` |
+| sprint-latest 开始日期 | 当天日期 | `### 迭代 sprint-latest` |
+
+**四、tech-stack-profile.md 文档检查**
+
+| 检查项 | 期望状态 | 路径 |
+|--------|---------|------|
+| tech-stack-profile.md 是否生成 | ✅ | `.claude/context/tech-stack-profile.md` |
+| 前端框架信息 | 已填写 | 核心框架章节 |
+| 后端框架信息 | 已填写 | 核心框架章节 |
+| 数据库信息 | 已填写 | 主数据库章节 |
+
+**五、确认选项**
+
+**快速验证命令**：
+```bash
+# 检查 session-status.md 阶段完成记录
+grep -A1 "会话初始化" .claude/iterations/session-status.md
+
+# 检查 project.md 迭代历史
+grep "### 迭代 sprint-latest" .claude/context/project.md
+
+# 检查 tech-stack-profile.md 是否存在
+ls -la .claude/context/tech-stack-profile.md
+
+# 检查迭代目录
+ls -la .claude/iterations/sprint-latest/
+```
+
+**回复选项**：
+- `继续` - 所有检查项通过，允许 Architect-Stage0 开始执行
+- `补充` - 列出需要补充的信息
+- `暂停` - 暂停阶段 0，等待进一步指示
 
 ---
 
-## 3. 技术栈与一致性基线分析
+### 3.3 Architect Agent 执行（阶段 0 技术分析）
 
-**执行者**：Architect
+**前置条件**：PM Agent 全部完成
+**执行文件**：`.claude/agents/architect-stage0.md`
 
-### 3.1 技术栈分析
+激活 Architect Agent（串行，等待完成）：
 
-**引用技能**：`.claude/skills/graphify-query-cheatsheet.md`（了解 graphify 用法）
+```
+Agent: architect-stage0.md
+run_in_background: false
+```
 
-1. 扫描项目根目录依赖文件：`package.json`、`pom.xml`、`requirements.txt`、`build.gradle` 等
-2. **若发现依赖文件**：提取前端框架、状态管理、后端框架、数据库、中间件及版本号
-3. **若未发现任何依赖文件**：
-   - 向用户询问项目类型和技术栈
-   - 在输出中标注 **"人工补充"**，逐条记录用户提供的技术栈
-4. 输出 `.claude/context/tech-stack-profile.md`，**必须使用** `.claude/templates/tech-stack-profile-template.md`
+激活后等待 Architect Agent 完成，记录日志：
 
-### 3.2 一致性基线提取
+```bash
+bash .claude/hooks/log-event.sh "00" "Architect" "步骤开始" "Architect开始技术栈分析" "" "成功"
+# Architect Agent 执行中...
+bash .claude/hooks/log-event.sh "00" "Architect" "产出物" "生成consistency-baseline.md" ".claude/context/consistency-baseline.md" "成功"
+bash .claude/hooks/log-event.sh "00" "Architect" "产出物" "生成dependencies-overview.md" ".claude/context/dependencies-overview.md" "成功"
+bash .claude/hooks/log-event.sh "00" "Architect" "步骤完成" "Architect技术分析完成" "" "成功"
+```
 
-**引用技能**：`.claude/skills/graphify-query-cheatsheet.md`
+#### 3.3.1 Human Gate 确认（Architect 阶段）
+> Architect Agent 完成执行后，必须等待用户确认才能继续
 
-1. 执行 `graphify query "most common patterns in the project"`
-2. 执行 `graphify similar <核心模块>`（若无核心模块，跳过）
-3. **若 graphify 查询失败**：
-   - 手动扫描 `src/` 下前 5 个高频目录
-   - 识别代码组织模式、命名规则、错误处理范式
-   - 在输出中标注 **"手动分析"**
-4. **强制证据要求**：每条基线必须附带至少 1 条证据（文件路径 + 模式描述 或 graphify 节点名）
-5. 输出 `.claude/context/consistency-baseline.md`，**必须使用** `.claude/templates/consistency-baseline-template.md`
+**一、session-status.md 状态检查**
 
-### 3.3 依赖全景图（可选）
+| 检查项 | 期望状态 | 检查位置 |
+|--------|---------|---------|
+| 阶段 00（会话初始化）完成时间 | 已填写（时间戳） | `## 阶段完成记录` 表格 |
+| 阶段 00 产出物状态 | ✅ | `## 阶段完成记录` 表格 |
+| consistency-baseline.md 产出物状态 | ✅ 已生成 / ⏳ 已存在 | `## 产出物追踪表` |
+| dependencies-overview.md 产出物状态 | ✅ 已生成 / ⏳ 已存在 | `## 产出物追踪表` |
 
-1. 执行 `graphify dependents <核心模块>`（若 graphify 可用）
-2. 将结果摘要**追加到** session-status.md 的"依赖全景图"段
-3. 若 graphify 不可用，在 session-status.md 中标注"依赖全景图暂不可用"
+**二、consistency-baseline.md 文档检查**
+
+| 检查项 | 期望状态 | 路径 |
+|--------|---------|------|
+| 文件是否存在 | ✅ | `.claude/context/consistency-baseline.md` |
+| 设计模式数量 | ≥ 5 条 | 章节中每条规则必须有证据 |
+| 错误处理规则 | 已填写 | 错误处理章节 |
+| 命名规范 | 已填写 | 命名规范章节 |
+| 反模式 | ≥ 2 条 | 反模式章节 |
+| 代码示例 | 有证据（文件路径+行号） | 每条规则 |
+
+**三、dependencies-overview.md 文档检查**
+
+| 检查项 | 期望状态 | 路径 |
+|--------|---------|------|
+| 文件是否存在 | ✅ | `.claude/context/dependencies-overview.md` |
+| 核心模块数量 | ≥ 3 个 | 核心模块章节 |
+| 模块依赖关系图 | Mermaid 格式 | 依赖关系图章节 |
+| 外部依赖清单 | 已填写 | 外部依赖章节 |
+| 循环依赖检测 | 已完成（或标注不可用） | 关键发现章节 |
+
+**四、project.md 更新检查**
+
+| 检查项 | 期望状态 | 路径 |
+|--------|---------|------|
+| consistency-baseline.md 详细文档状态 | ✅ 已生成 | `### 迭代 sprint-latest` → `#### 详细文档` |
+| dependencies-overview.md 详细文档状态 | ✅ 已生成 | `### 迭代 sprint-latest` → `#### 详细文档` |
+
+**五、确认选项**
+
+**快速验证命令**：
+```bash
+# 检查 consistency-baseline.md 是否存在且有内容
+ls -la .claude/context/consistency-baseline.md
+grep -c "##" .claude/context/consistency-baseline.md
+
+# 检查 dependencies-overview.md 是否存在且有内容
+ls -la .claude/context/dependencies-overview.md
+grep -c "##" .claude/context/dependencies-overview.md
+
+# 检查 project.md 是否已更新
+grep -A1 "consistency-baseline.md" .claude/context/project.md
+grep -A1 "dependencies-overview.md" .claude/context/project.md
+```
+
+**回复选项**：
+- `继续` - 所有检查项通过，允许进入 PM 校验阶段
+- `补充` - 列出需要补充的信息，返回 Architect-Stage0 重新执行
+- `暂停` - 暂停阶段 0，等待进一步指示
 
 ---
 
-## 4. PM 校验
+### 3.4 PM 校验
 
-**执行者**：PM
+**执行者**：PM Agent（回跳执行校验）
 
-PM 在架构师完成步骤 3 后，执行以下校验：
+PM Agent 在 Architect 完成产出后，执行以下校验：
+- 技术栈完整性检查
+- 一致性基线有效性检查
+- 校验结果写入 session-status.md
 
-### 4.1 技术栈完整性
-- [ ] 是否有前端框架记录？
-- [ ] 是否有后端框架记录？
-- [ ] 是否列出所有主要直接依赖？
-- [ ] 若标注"人工补充"，是否逐条记录并标记清楚？
+#### 3.4.1 Human Gate 确认（PM 校验）
+> PM 校验完成后，必须等待用户确认才能进入 Analyst Agent
 
-### 4.2 一致性基线有效性
-- [ ] 每条基线是否至少有 1 条证据？
-- [ ] 随机抽查 1-2 条证据中的文件路径是否真实存在？
-- [ ] 基线条目是否可直接作为阶段 4 开发者的检查标准？
+**一、PM 校验结果检查**
 
-### 4.3 校验结果
-- **全部通过**：更新 session-status.md 产出物状态为"✅"
-- **未通过**：列出未通过项，通知架构师修正后重新校验
+| 检查项 | 期望状态 | 检查方法 |
+|--------|---------|---------|
+| 技术栈完整性 | 通过 | tech-stack-profile.md 包含前后端框架、数据库等核心信息 |
+| 一致性基线有效性 | 通过 | consistency-baseline.md 包含至少 5 条规则，每条有证据 |
+| 校验结果写入 | 已完成 | session-status.md 中有校验记录 |
+
+**二、session-status.md 状态检查**
+
+| 检查项 | 期望状态 | 检查位置 |
+|--------|---------|---------|
+| 阶段完成记录 | PM阶段00、Architect阶段00均为 ✅ | `## 阶段完成记录` 表格 |
+| 产出物追踪表 | 所有阶段 0 产出物状态为 ✅ | `## 产出物追踪表` |
+| 自动推进状态 - 当前阶段 | 0 | `## 自动推进状态` |
+| 自动推进状态 - 已完成阶段 | 包含 0 | `## 自动推进状态` |
+| 阻塞标记 | 无 | `## 自动推进状态` |
+
+**三、阶段 0 产出物完成度检查**
+
+| 产出物 | 路径 | 状态 | 检查要点 |
+|--------|------|------|---------|
+| session-status.md | `.claude/iterations/` | ✅ | 阶段完成记录、产出物追踪表已更新 |
+| project.md | `.claude/context/` | ✅ | 迭代历史、详细文档表格已更新 |
+| tech-stack-profile.md | `.claude/context/` | ✅ | 前端/后端框架、数据库信息已填写 |
+| consistency-baseline.md | `.claude/context/` | ✅/⏳ | 至少 5 条规则，有代码示例证据 |
+| dependencies-overview.md | `.claude/context/` | ✅/⏳ | 至少 3 个核心模块，有依赖图 |
+| feature.md | `.claude/iterations/sprint-latest/` | ⏳ 待生成 | Analyst-Stage0 尚未执行 |
+
+**四、确认选项**
+
+**快速验证命令**：
+```bash
+# 检查技术栈完整性
+grep -A5 "核心框架" .claude/context/tech-stack-profile.md | head -20
+
+# 检查一致性基线有效性
+grep -c "^##" .claude/context/consistency-baseline.md
+
+# 检查 session-status.md 校验记录
+grep -A5 "PM校验" .claude/iterations/session-status.md
+```
+
+**回复选项**：
+- `继续` - 所有检查项通过，允许 Analyst-Stage0 开始执行
+- `补充` - 列出需要补充的信息
+- `暂停` - 暂停阶段 0，等待进一步指示
+
+---
+
+### 3.5 Analyst Agent 执行（阶段 0 需求澄清）
+
+**前置条件**：PM 校验完成且用户确认
+**执行文件**：`.claude/agents/analyst-stage0.md`
+
+激活 Analyst Agent（串行，等待完成）：
+
+```
+Agent: analyst-stage0.md
+run_in_background: false
+```
+
+激活后等待 Analyst Agent 完成，记录日志：
+
+```bash
+bash .claude/hooks/log-event.sh "00" "Analyst" "步骤开始" "Analyst开始需求澄清" "" "成功"
+# Analyst Agent 执行中...
+bash .claude/hooks/log-event.sh "00" "Analyst" "产出物" "生成feature.md" ".claude/iterations/sprint-latest/feature.md" "成功"
+bash .claude/hooks/log-event.sh "00" "Analyst" "步骤完成" "Analyst需求澄清完成" "" "成功"
+```
+
+#### 3.5.1 Human Gate 确认（Analyst 阶段）
+> Analyst Agent 完成执行后，必须等待用户确认才能继续
+
+**一、session-status.md 状态检查**
+
+| 检查项 | 期望状态 | 检查位置 |
+|--------|---------|---------|
+| 阶段 00（Analyst）完成时间 | 已填写（时间戳） | `## 阶段完成记录` 表格 |
+| 阶段 00 产出物状态 | ✅ | `## 阶段完成记录` 表格 |
+| feature.md 产出物状态 | ✅ 已生成 | `## 产出物追踪表` |
+
+**二、feature.md 文档检查**
+
+| 检查项 | 期望状态 | 路径 |
+|--------|---------|------|
+| 文件是否存在 | ✅ | `.claude/iterations/sprint-latest/feature.md` |
+| 功能要点数量 | ≥ 1 | `## 功能要点列表` 表格 |
+| 功能要点优先级 | P0/P1/P2 已标注 | `## 功能要点列表` 表格 |
+| 澄清对话记录 | 已记录 | `## 澄清对话记录` 表格 |
+| 验收标准 | 有内容 | 每个功能要点的 `#### 9. 验收标准` |
+
+**三、project.md 更新检查**
+
+| 检查项 | 期望状态 | 路径 |
+|--------|---------|------|
+| feature.md 详细文档状态 | ✅ 已创建 | `### 迭代 sprint-latest` → `#### 详细文档` |
+| 迭代功能概述 | 已填写 | `### 迭代 sprint-latest` → `迭代功能概述` |
+| 功能要点数 | 已填写 | `### 迭代 sprint-latest` → `功能要点数` |
+
+**四、阶段 0 产出物完成度最终检查**
+
+| 产出物 | 路径 | 最终状态 | 检查要点 |
+|--------|------|----------|---------|
+| session-status.md | `.claude/iterations/` | ✅ | 阶段 00 (PM、Architect、Analyst) 完成记录 |
+| project.md | `.claude/context/` | ✅ | 迭代历史、详细文档表格、迭代概述 |
+| tech-stack-profile.md | `.claude/context/` | ✅ | 完整技术栈信息 |
+| consistency-baseline.md | `.claude/context/` | ✅/⏳ | 规则≥5条，有证据 |
+| dependencies-overview.md | `.claude/context/` | ✅/⏳ | 核心模块≥3个 |
+| feature.md | `.claude/iterations/sprint-latest/` | ✅ | 功能要点≥1，验收标准已定义 |
+
+**五、确认选项**
+
+**快速验证命令**：
+```bash
+# 检查 feature.md 是否存在
+ls -la .claude/iterations/sprint-latest/feature.md
+
+# 检查功能要点数量
+grep -c "^| [0-9]" .claude/iterations/sprint-latest/feature.md
+
+# 检查 project.md 是否已更新
+grep "迭代功能概述" .claude/context/project.md -A1
+grep "功能要点数" .claude/context/project.md -A1
+
+# 检查验收标准
+grep -c "验收标准" .claude/iterations/sprint-latest/feature.md
+```
+
+**回复选项**：
+- `继续` - 所有检查项通过，允许进入阶段退出
+- `补充` - 列出需要补充的信息，返回 Analyst-Stage0 重新执行
+- `暂停` - 暂停阶段 0，等待进一步指示
+
+---
+
+### 3.6 阶段退出
+
+```bash
+bash .claude/hooks/log-event.sh "00" "PM" "阶段退出" "阶段0完成" "" "成功"
+```
+
+---
+
+## 4. 产出物清单
+
+| 产出物 | 路径 | 状态 | 产出者 |
+|--------|------|------|--------|
+| session-status.md | `.claude/iterations/` | ⏳→✅ | PM |
+| project.md | `.claude/context/` | ⏳→✅ | PM |
+| tech-stack-profile.md | `.claude/context/` | ⏳→✅ | PM |
+| consistency-baseline.md | `.claude/context/` | ⏳→✅（可能跳过） | Architect |
+| dependencies-overview.md | `.claude/context/` | ⏳→✅（可能跳过） | Architect |
+| feature.md | `.claude/iterations/sprint-latest/` | ⏳→✅ | Analyst |
 
 ---
 
@@ -118,40 +409,26 @@ PM 在架构师完成步骤 3 后，执行以下校验：
 |---------|---------|
 | SCENARIO 未定义 | 报错退出 |
 | 迭代目录未创建 | 报错退出 |
-| graphify 查询失败 | 标注"手动分析"继续，不报错 |
+| PM Agent 执行失败 | 阻断，提交 Human Gate |
+| Architect Agent 执行失败 | 阻断，提交 Human Gate |
+| Analyst Agent 执行失败 | 阻断，提交 Human Gate |
 | PM 校验重试 3 次仍失败 | 提交 Human Gate |
 
 异常需记录到 session-status.md 的"异常记录"章节。
 
 ---
 
-## 6. 阶段结束
-
-PM 向用户输出三句话摘要：
-- 技术栈组件数量
-- 基线条目数 + 证据来源方式（自动/手动）
-- 依赖全景图状态
-
-等待 `[Human Gate]` 确认后，进入阶段 1。
-
----
-
-## 阶段 0 产出物
-
-| 产出物 | 路径 | 状态校验 |
-|--------|------|---------|
-| tech-stack-profile.md | `.claude/context/` | PM 校验通过后 ✅ |
-| consistency-baseline.md | `.claude/context/` | PM 校验通过后 ✅ |
-| session-status.md | `iterations/{sprint-name}/` | 阶段结束时 ⏳→✅ |
-
----
-
-## 关联文档
+## 6. 关联文档
 
 | 文档 | 路径 |
 |------|------|
+| PM Agent 阶段0 | `.claude/agents/pm-stage0.md` |
+| Architect Agent 阶段0 | `.claude/agents/architect-stage0.md` |
+| Analyst Agent 阶段0 | `.claude/agents/analyst-stage0.md` |
 | session-init 规则 | `.claude/rules/global/session-init.md` |
 | graphify 技能 | `.claude/skills/graphify-query-cheatsheet.md` |
 | tech-stack 模板 | `.claude/templates/tech-stack-profile-template.md` |
 | consistency-baseline 模板 | `.claude/templates/consistency-baseline-template.md` |
+| dependencies-overview 模板 | `.claude/templates/dependencies-overview-template.md` |
 | session-status 模板 | `.claude/templates/session-status-template.md` |
+| feature 模板 | `.claude/templates/feature-template.md` |

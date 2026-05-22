@@ -75,6 +75,34 @@
 
 ---
 
+## 迭代历史
+
+> 记录每次迭代的概述信息，详细文档在对应迭代目录下更新
+
+### 迭代 {iteration-name}
+
+| 字段 | 内容 |
+|------|------|
+| **迭代时间** | {start_date} - {end_date} |
+| **迭代功能概述** | {本次迭代完成的功能简要描述} |
+| **功能要点数** | {数量} |
+| **状态** | 🔍 进行中 / ✅ 已完成 |
+
+#### 详细文档（TODO 占位符）
+
+| 文档类型 | 文档名称 | 状态 | 路径 |
+|---------|---------|------|------|
+| 功能需求文档 | feature.md | ⏳ 待创建 | `.claude/iterations/{iteration-name}/feature.md` |
+| 软件设计文档 | software-design.md | ⏳ 待创建 | `.claude/iterations/{iteration-name}/software-design.md` |
+| 需求详细分析 | requirements.md | ⏳ 待创建 | `.claude/iterations/{iteration-name}/requirements.md` |
+| 测试用例 | test-cases.md | ⏳ 待创建 | `.claude/iterations/{iteration-name}/test-cases.md` |
+| 迭代计划 | iteration-plan.md | ⏳ 待创建 | `.claude/iterations/{iteration-name}/iteration-plan.md` |
+| 迭代回顾 | iteration-retrospective.md | ⏳ 待创建 | `.claude/iterations/{iteration-name}/iteration-retrospective.md` |
+
+> 注意：上述详细文档在后续阶段创建，当前仅为占位符
+
+---
+
 ## 待补充项
 
 > 以下字段需要从知识图谱补充，或标记为"人工补充"

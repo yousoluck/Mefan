@@ -22,9 +22,9 @@
 
 | 字段 | 内容 |
 |------|------|
-| **当前阶段** | N（0-6） |
-| **已完成阶段** | [0, 1, 2, ...] |
-| **阻塞标记** | {无 / 原因} |
+| **当前阶段** | 0 |
+| **已完成阶段** | [] |
+| **阻塞标记** | 无 |
 
 ---
 
@@ -34,15 +34,23 @@
 
 | 阶段 | 阶段名称 | 完成时间 | 产出物状态 | 备注 |
 |------|---------|---------|-----------|------|
-| 00 | 会话初始化 | | ✅/⏳/❌ | |
-| 01 | 需求澄清 | | ✅/⏳/❌ | |
-| 02 | 架构设计 | | ✅/⏳/❌ | |
-| 03 | 迭代计划 | | ✅/⏳/❌ | |
-| 04 | 迭代实现 | | ✅/⏳/❌ | |
-| 05 | 质量测试 | | ✅/⏳/❌ | |
-| 06 | 迭代总结 | | ✅/⏳/❌ | |
+| 00 | 会话初始化 | | ⏳ 进行中 | |
+| 01 | 需求澄清 | | ⏳ 待处理 | |
+| 02 | 架构设计 | | ⏳ 待处理 | |
+| 03 | 迭代计划 | | ⏳ 待处理 | |
+| 04 | 迭代实现 | | ⏳ 待处理 | |
+| 05 | 质量测试 | | ⏳ 待处理 | |
+| 06 | 迭代总结 | | ⏳ 待处理 | |
 
 **状态说明**：✅ 已完成 | ⏳ 进行中/待处理 | ❌ 失败/缺失
+
+**阶段 00 详细追踪说明**：
+> 阶段 00（会话初始化）由多个 Agent 串行执行完成，各 Agent 的工作记为子任务：
+> - PM Agent：环境初始化、上下文建立
+> - Architect Agent：技术栈分析（作为阶段 00 的一部分）
+> - Analyst Agent：需求澄清（作为阶段 00 的一部分）
+>
+> 各 Agent 完成时，在 **产出物追踪表** 中更新对应的产出物状态，在 **阶段完成记录** 中统一记录为阶段 00 完成。
 
 ---
 
@@ -67,16 +75,16 @@
 
 | 阶段 | 产出物 | 路径 | 状态 | 完成时间 |
 |------|--------|------|------|---------|
-| 00 | tech-stack-profile.md | `.claude/context/` | ✅ | |
-| 00 | consistency-baseline.md | `.claude/context/` | ✅ | |
-| 01 | requirements.md | `.claude/iterations/sprint-latest/requirements/` | ✅ | |
-| 02 | adr.md | `.claude/iterations/sprint-latest/adr/` | ✅ | |
-| 02 | test-plan.md | `.claude/iterations/sprint-latest/test-plan/` | ✅ | |
-| 03 | iteration-plan.md | `.claude/iterations/sprint-latest/` | ✅ | |
-| 03 | sprint-status.md | `.claude/iterations/sprint-latest/` | ✅ | |
-| 04 | task-summary/T{NNN}.md | `.claude/iterations/sprint-latest/task-summary/` | ⏳ | |
-| 05 | quality-report.md | `.claude/iterations/sprint-latest/test-results/` | ✅ | |
-| 06 | iteration-retrospective.md | `.claude/iterations/sprint-latest/` | ✅ | |
+| 00 | tech-stack-profile.md | `.claude/context/` | ⏳ 待生成 | |
+| 00 | consistency-baseline.md | `.claude/context/` | ⏳ 待生成 | |
+| 01 | requirements.md | `.claude/iterations/sprint-latest/requirements/` | ⏳ 待生成 | |
+| 02 | adr.md | `.claude/iterations/sprint-latest/adr/` | ⏳ 待生成 | |
+| 02 | test-plan.md | `.claude/iterations/sprint-latest/test-plan/` | ⏳ 待生成 | |
+| 03 | iteration-plan.md | `.claude/iterations/sprint-latest/` | ⏳ 待生成 | |
+| 03 | sprint-status.md | `.claude/iterations/sprint-latest/` | ⏳ 待生成 | |
+| 04 | task-summary/T{NNN}.md | `.claude/iterations/sprint-latest/task-summary/` | ⏳ 待生成 | |
+| 05 | quality-report.md | `.claude/iterations/sprint-latest/test-results/` | ⏳ 待生成 | |
+| 06 | iteration-retrospective.md | `.claude/iterations/sprint-latest/` | ⏳ 待生成 | |
 
 ---
 
@@ -88,7 +96,6 @@
 | Sprint 名称 | 开始日期 | 结束日期 | 状态 | 关键产出 |
 |------------|---------|---------|------|---------|
 | sprint-1 | | | ✅ Done | |
-| sprint-2 | | | ✅ Done | |
 
 **更新时机**：每次新 sprint 创建时，将上一个 sprint 追加到此表，并从 sprint-latest 重命名归档
 
@@ -121,17 +128,27 @@
 > 每个阶段完成后，PM 必须按此格式填写并更新 session-status
 
 ```markdown
-### 阶段 N 完成报告：{阶段名称}
+### 阶段 0 完成报告：会话初始化
 - **完成时间**：YYYY-MM-DD HH:mm
-- **执行摘要**：{一句话描述本阶段完成的核心内容}
+- **执行摘要**：完成知识图谱验证、迭代目录初始化、session-status.md 创建
 - **关键产出**：
-  - [产出1]：[路径] - ✅/⏳
-  - [产出2]：[路径] - ✅/⏳
-- **与上阶段的衔接**：{前置条件满足情况}
-- **发现的问题**：{无/描述}
-- **下一步**：进入阶段 N+1 的前置条件：{已满足/需补充}
-- **需要 Human Gate 确认的事项**：{事项列表}
+  - [session-status.md]：[.claude/iterations/session-status.md] - ✅
+  - [sprint-latest/]：[.claude/iterations/sprint-latest/] - ✅
+- **与上阶段的衔接**：首次运行，无前置阶段
+- **发现的问题**：无
+- **下一步**：进入阶段 1 的前置条件：tech-stack-profile.md + consistency-baseline.md
+- **需要 Human Gate 确认的事项**：无
 ```
+
+---
+
+### 阶段 1 完成报告：需求文档完成
+- **完成时间**：
+- **执行摘要**：
+- **关键产出**：
+- **与上阶段的衔接**：首次运行，无前置阶段
+- **发现的问题**：无
+- **下一步**：
 
 ---
 
