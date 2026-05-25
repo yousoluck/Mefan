@@ -77,7 +77,7 @@
 |------|--------|------|------|---------|
 | 00 | tech-stack-profile.md | `.claude/context/` | ⏳ 待生成 | |
 | 00 | consistency-baseline.md | `.claude/context/` | ⏳ 待生成 | |
-| 01 | requirements.md | `.claude/iterations/sprint-latest/requirements/` | ⏳ 待生成 | |
+| 01 | requirements.md | `.claude/iterations/sprint-latest/requirements.md` | ⏳ 待生成 | |
 | 02 | adr.md | `.claude/iterations/sprint-latest/adr/` | ⏳ 待生成 | |
 | 02 | test-plan.md | `.claude/iterations/sprint-latest/test-plan/` | ⏳ 待生成 | |
 | 03 | iteration-plan.md | `.claude/iterations/sprint-latest/` | ⏳ 待生成 | |
