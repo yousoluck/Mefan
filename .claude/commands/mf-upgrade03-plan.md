@@ -10,11 +10,11 @@
 
 ## 0. 概述
 
-本阶段由 PM Agent 主导，Analyst Agent 辅助，从已审批的 ADR 中提取任务清单，生成迭代计划（iteration-plan.md）和 Sprint 看板导出（sprint-status.md）。
+本阶段由 PM Agent 主导，Analyst Agent 辅助，从已审批的 ADR 中提取任务清单，生成 Sprint 状态文档（sprint-status.md）。
 
 **核心变化**：
-- `iteration-plan.md` 是单一数据源（任务领取 + 状态更新）
-- `sprint-status.md` 是从 iteration-plan.md 导出的看板视图，不单独维护
+- `sprint-status.md` 是单一数据源（任务领取 + 状态更新），包含 Plan + Status
+- 替代原来的 `iteration-plan.md` + `sprint-status.md` 分离模式
 
 **流程**：
 ```
@@ -112,7 +112,7 @@ echo "==================================="
 | 规则/技能 | 用途 | 引用时机 |
 |-----------|------|---------|
 | `.claude/rules/global/session-init.md` | 阶段初始化规则 | 前置条件检查前 |
-| `.claude/rules/global/iteration-planning.md` | 任务拆解标准、WIP限制、警戒线设置 | PM 生成迭代计划时 |
+| `.claude/rules/global/sprint-statusning.md` | 任务拆解标准、WIP限制、警戒线设置 | PM 生成迭代计划时 |
 | `.claude/rules/global/conflict-resolution.md` | 冲突裁决与串并行决策 | PM 冲突裁决时 |
 | `.claude/rules/scenario-upgrade/reuse-before-build.md` | 复用优先规则 | Analyst 标注可复用代码时 |
 | `.claude/agents/analyst-stage3.md` | Analyst 阶段3完整业务流程 | Analyst 执行时 |
@@ -158,28 +158,28 @@ bash .claude/hooks/log-event.sh "03" "Command" "Agent完成" "AnalystTask提取�
 
 | 检查维度 | 检查内容 | 期望状态 | 不通过处理 |
 |---------|---------|---------|-----------|
-| **Modular Group** | ADR 第 2.4 节是否正确映射到 iteration-plan.md 第 1 节 | 是 | 打回 Analyst 修复 |
-| **Task 清单** | ADR 中的 Task 是否已提取到 iteration-plan.md | 是 | 打回 Analyst 修复 |
+| **Modular Group** | ADR 第 2.4 节是否正确映射到 sprint-status.md 第 1 节 | 是 | 打回 Analyst 修复 |
+| **Task 清单** | ADR 中的 Task 是否已提取到 sprint-status.md | 是 | 打回 Analyst 修复 |
 | **US/MG 关联** | 每个 Task 是否关联到具体的 US 和 Modular Group | 是 | 打回 Analyst 补充 |
 | **Task 信息完整** | 每个 Task 是否有类型、工时、风险、Skills 引用 | 是 | 打回 Analyst 补充 |
 | **可复用标注** | 每个 Task 是否标注了可复用代码 | 是 | 打回 Analyst 补充 |
 
 **快速验证命令**：
 ```bash
-# 检查 iteration-plan.md 中的 Modular Group 数量
-grep -c "^| MG-" $ROOT/.claude/iterations/sprint-latest/iteration-plan.md
+# 检查 sprint-status.md 中的 Modular Group 数量
+grep -c "^| MG-" $ROOT/.claude/iterations/sprint-latest/sprint-status.md
 
-# 检查 iteration-plan.md 中的 Task 数量
-grep -c "^| T-" $ROOT/.claude/iterations/sprint-latest/iteration-plan.md
+# 检查 sprint-status.md 中的 Task 数量
+grep -c "^| T-" $ROOT/.claude/iterations/sprint-latest/sprint-status.md
 
 # 检查 Task 是否有 US/MG 关联
-grep "US-/MG-" $ROOT/.claude/iterations/sprint-latest/iteration-plan.md | head -5
+grep "US-/MG-" $ROOT/.claude/iterations/sprint-latest/sprint-status.md | head -5
 
 # 检查 Task 是否有工时信息
-grep "工时" $ROOT/.claude/iterations/sprint-latest/iteration-plan.md
+grep "工时" $ROOT/.claude/iterations/sprint-latest/sprint-status.md
 
 # 检查是否有 Skills 引用
-grep -c "Skills" $ROOT/.claude/iterations/sprint-latest/iteration-plan.md
+grep -c "Skills" $ROOT/.claude/iterations/sprint-latest/sprint-status.md
 ```
 
 **回复选项**：
@@ -215,12 +215,12 @@ bash .claude/hooks/log-event.sh "03" "Command" "Agent完成" "PM计划生成完�
 
 | 职责 | 说明 | 产出物 |
 |------|------|--------|
-| **冲突裁决** | 检测任务间的模块冲突，应用决策树（串行化/分模块/人类裁决） | iteration-plan.md 第 9 节 |
-| **WIP 限制设定** | 根据团队规模和核心模块数设定 WIP 限制 | iteration-plan.md 第 5 节 |
-| **里程碑设定** | 设置至少 2 个里程碑检查点 | iteration-plan.md 第 7 节 |
-| **进度警戒线** | 为每个任务设置进度警戒线（黄色/红色） | iteration-plan.md 第 2 节 |
-| **生成 iteration-plan.md** | 按模板生成迭代计划文档（单一数据源） | iteration-plan.md |
-| **生成 sprint-status.md** | 从 iteration-plan.md 导出看板视图 | sprint-status.md（导出） |
+| **冲突裁决** | 检测任务间的模块冲突，应用决策树（串行化/分模块/人类裁决） | sprint-status.md 第 9 节 |
+| **WIP 限制设定** | 根据团队规模和核心模块数设定 WIP 限制 | sprint-status.md 第 5 节 |
+| **里程碑设定** | 设置至少 2 个里程碑检查点 | sprint-status.md 第 7 节 |
+| **进度警戒线** | 为每个任务设置进度警戒线（黄色/红色） | sprint-status.md 第 2 节 |
+| **生成 sprint-status.md** | 按模板生成迭代计划文档（单一数据源） | sprint-status.md |
+| **生成 sprint-status.md** | 从 sprint-status.md 导出看板视图 | sprint-status.md（导出） |
 
 #### 4.3.3 Human Gate 确认（PM 产出）
 
@@ -230,8 +230,8 @@ bash .claude/hooks/log-event.sh "03" "Command" "Agent完成" "PM计划生成完�
 
 | 检查维度 | 检查内容 | 期望状态 | 不通过处理 |
 |---------|---------|---------|-----------|
-| **iteration-plan.md** | 是否按模板生成，包含所有必填章节（12 节） | 是 | 打回 PM 修正 |
-| **sprint-status.md** | 是否从 iteration-plan.md 导出（状态以 iteration-plan.md 为准） | 是 | 打回 PM 修正 |
+| **sprint-status.md** | 是否按模板生成，包含所有必填章节（12 节） | 是 | 打回 PM 修正 |
+| **sprint-status.md** | 是否从 sprint-status.md 导出（状态以 sprint-status.md 为准） | 是 | 打回 PM 修正 |
 | **Modular Group** | 是否完整映射，依赖关系是否正确 | 是 | 打回 PM 修正 |
 | **WIP 限制** | 是否合理设置（默认 2） | 是 | 打回 PM 调整 |
 | **里程碑** | 是否至少 2 个里程碑 | 是 | 打回 PM 添加 |
@@ -240,17 +240,17 @@ bash .claude/hooks/log-event.sh "03" "Command" "Agent完成" "PM计划生成完�
 
 **快速验证命令**：
 ```bash
-# 检查 iteration-plan.md 章节数量
-grep -c "^## " $ROOT/.claude/iterations/sprint-latest/iteration-plan.md
+# 检查 sprint-status.md 章节数量
+grep -c "^## " $ROOT/.claude/iterations/sprint-latest/sprint-status.md
 
 # 检查里程碑数量
-grep -c "^- \[ \] M" $ROOT/.claude/iterations/sprint-latest/iteration-plan.md
+grep -c "^- \[ \] M" $ROOT/.claude/iterations/sprint-latest/sprint-status.md
 
 # 检查 sprint-status.md 是否标记为导出
 grep "导出" $ROOT/.claude/iterations/sprint-latest/sprint-status.md
 
 # 检查 US 进度汇总
-grep "US-" $ROOT/.claude/iterations/sprint-latest/iteration-plan.md | grep "MG-" | head -5
+grep "US-" $ROOT/.claude/iterations/sprint-latest/sprint-status.md | grep "MG-" | head -5
 ```
 
 **回复选项**：
@@ -281,8 +281,8 @@ sed -i 's/| 3-迭代计划.*|/\| 3-迭代计划 | ✅ | $(date +%Y-%m-%d) |/' $R
 
 | 产出物 | 路径 | 状态 | 产出者 | 检查要点 |
 |--------|------|------|--------|---------|
-| **iteration-plan.md** | `.claude/iterations/sprint-latest/iteration-plan.md` | ✅ | Analyst + PM | 单一数据源：包含所有 US/Modular Group/Task，WIP、里程碑、警戒线、状态 |
-| **sprint-status.md** | `.claude/iterations/sprint-latest/sprint-status.md` | ✅ | PM（导出） | 看板视图，声明"状态以 iteration-plan.md 为准" |
+| **sprint-status.md** | `.claude/iterations/sprint-latest/sprint-status.md` | ✅ | Analyst + PM | 单一数据源：包含所有 US/Modular Group/Task，WIP、里程碑、警戒线、状态 |
+| **sprint-status.md** | `.claude/iterations/sprint-latest/sprint-status.md` | ✅ | PM（导出） | 看板视图，声明"状态以 sprint-status.md 为准" |
 | **session-status.md 更新** | `.claude/iterations/sprint-latest/session-status.md` | ✅ | PM | 阶段 3 完成记录 |
 
 ---
@@ -291,14 +291,14 @@ sed -i 's/| 3-迭代计划.*|/\| 3-迭代计划 | ✅ | $(date +%Y-%m-%d) |/' $R
 
 | 文档 | 更新者 | 更新内容 |
 |------|--------|---------|
-| **iteration-plan.md** | Dev（领任务+更新状态）、PM（更新进度） | Task 状态、US 进度、里程碑完成情况 |
-| **sprint-status.md** | 无（导出视图，不单独维护） | 由 iteration-plan.md 同步 |
+| **sprint-status.md** | Dev（领任务+更新状态）、PM（更新进度） | Task 状态、US 进度、里程碑完成情况 |
+| **sprint-status.md** | 无（导出视图，不单独维护） | 由 sprint-status.md 同步 |
 | **session-status.md** | PM | 阶段完成记录（阶段 03）、产出物追踪表 |
 
 **更新时机**：
-- Dev 领取任务时：更新 iteration-plan.md 第 2 节"任务看板"状态
-- Task 状态变更时：PM 同步更新 iteration-plan.md 第 8 节"US 进度汇总"
-- sprint-status.md 由 PM 在阶段 3 结束时导出，后续由 iteration-plan.md 自动同步
+- Dev 领取任务时：更新 sprint-status.md 第 2 节"任务看板"状态
+- Task 状态变更时：PM 同步更新 sprint-status.md 第 8 节"US 进度汇总"
+- sprint-status.md 由 PM 在阶段 3 结束时导出，后续由 sprint-status.md 自动同步
 
 ---
 
@@ -325,7 +325,7 @@ sed -i 's/| 3-迭代计划.*|/\| 3-迭代计划 | ✅ | $(date +%Y-%m-%d) |/' $R
 |------|------|------|
 | Analyst Agent 阶段3 | `.claude/agents/analyst-stage3.md` | Analyst 提取 Task + Modular Group |
 | PM Agent 阶段3 | `.claude/agents/pm-stage3.md` | PM 生成迭代计划和导出看板 |
-| iteration-plan.md 模板 | `.claude/templates/iteration-plan-template.md` | 迭代计划文档模板（单一数据源） |
+| sprint-status.md 模板 | `.claude/templates/sprint-status-template.md` | 迭代计划文档模板（单一数据源） |
 | sprint-status.md 模板 | `.claude/templates/sprint-status-template.md` | Sprint 看板模板（导出视图） |
 | ADR.md | `.claude/iterations/sprint-latest/ADR.md` | 阶段 2 产出，本阶段 Task 来源（含第 2.4 节 Modular Group） |
 | test-plan.md | `.claude/iterations/sprint-latest/test-plan.md` | 阶段 2 产出，本阶段测试关联 |
@@ -349,5 +349,5 @@ sed -i 's/| 3-迭代计划.*|/\| 3-迭代计划 | ✅ | $(date +%Y-%m-%d) |/' $R
 | 关联文档 | ✅ 有（含需更新的文档标注） | ✅ 有（含需更新的文档标注） |
 | **审核循环** | ✅ 有（≤3次） | ❌ 无（方案A简化） |
 | **多 Agent 协同** | ✅ 有（Architect + PM-Audit + QA） | ✅ 有（Analyst + PM） |
-| **Modular Group 支持** | ❌ 无（新增第 2.4 节） | ✅ 有（ADR 第 2.4 节 → iteration-plan 第 1 节） |
-| **单一数据源** | ❌ 无（iteration-plan + sprint-status 独立） | ✅ 有（iteration-plan 为单一数据源） |
+| **Modular Group 支持** | ❌ 无（新增第 2.4 节） | ✅ 有（ADR 第 2.4 节 → sprint-status 第 1 节） |
+| **单一数据源** | ❌ 无（sprint-status + sprint-status 独立） | ✅ 有（sprint-status 为单一数据源） |

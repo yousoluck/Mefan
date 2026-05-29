@@ -185,7 +185,7 @@ NEXT_SPRINT_NUM=$((SPRINT_COUNT + 1))
    | 软件设计文档 | software-design.md | ⏳ 待创建 | `.claude/iterations/sprint-latest/software-design.md` |
    | 需求详细分析 | requirements.md | ⏳ 待创建 | `.claude/iterations/sprint-latest/requirements.md` |
    | 测试用例 | test-cases.md | ⏳ 待创建 | `.claude/iterations/sprint-latest/test-cases.md` |
-   | 迭代计划 | iteration-plan.md | ⏳ 待创建 | `.claude/iterations/sprint-latest/iteration-plan.md` |
+   | Sprint 状态 | sprint-status.md | ⏳ 待创建 | `.claude/iterations/sprint-latest/sprint-status.md` |
    | 迭代回顾 | iteration-retrospective.md | ⏳ 待创建 | `.claude/iterations/sprint-latest/iteration-retrospective.md` |
    ```
 

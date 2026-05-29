@@ -138,6 +138,7 @@ bash .claude/hooks/log-event.sh "02" "Command" "Agent完成" "Architect产出完
 | **ADR 第 2.4 节** | ADR 是否包含 Modular Group 划分（User Story 分组与依赖） | 存在 | 打回 Architect 补充 |
 | **自检清单** | Architect 是否已完成自检（含 Modular Group 检查） | 自检通过 | 打回 Architect 修复 |
 | **产出完整性** | ADR 是否覆盖所有 User Story，US 依赖矩阵是否准确 | 覆盖所有 US | 打回 Architect 补充 |
+| **Task 伪代码** | Task 是否包含伪代码（符合 consistency-baseline，标注复用代码和 Skill 引用） | 是 | 打回 Architect 补充 |
 
 **快速验证命令**：
 ```bash

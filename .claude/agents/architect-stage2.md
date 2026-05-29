@@ -187,6 +187,7 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "生
 6. **受影响模块分析**（按4类分类，标注变更原因）
 7. **实现步骤**：
    - Task 拆分（原子级，关联 US/MG）
+   - **Task 伪代码（必须符合 consistency-baseline 命名约定，标注复用代码和 Skill 引用）**
    - Task 依赖与优先级
    - Skill 引用
 8. **错误处理与边界设计**
@@ -220,6 +221,10 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "生
 - 每个 Task 可在 2-4 小时内完成
 - Task 之间如有依赖，明确标注
 - 按优先级排序：P0 > P1 > P2
+- **Task 必须包含伪代码**，伪代码要求：
+  - 符合 consistency-baseline.md 中的命名约定（目录、文件名、方法名）
+  - 标注可复用代码（参考模块、工具方法）
+  - 引用所需 Skills（如 `@superpowers/ship-discipline`）
 
 #### 3.6 Skill 引用
 根据 consistency-baseline.md 中的 Skill 清单，引用实现所需的 Skill
@@ -250,7 +255,10 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "自
 - [ ] 是否有完整的 API 设计（签名、参数、返回值、错误码）
 - [ ] 是否识别了所有受影响模块（4类）
 - [ ] 每个受影响模块是否标注了变更原因
-- [ ] **Task 是否关联到 US/Modular Group**
+- [ ] **Task 伪代码是否符合 consistency-baseline（命名、目录结构）**
+- [ ] **Task 伪代码是否标注了可复用代码（参考模块、工具方法）**
+- [ ] **Task 伪代码是否引用了正确的 Skills（包含外部 Skills 如 @superpowers/xxx）**
+- [ ] Task 是否关联到 US/Modular Group
 - [ ] Task 是否原子化（2-4小时可完成）
 - [ ] Task 依赖关系是否清晰
 - [ ] Task 优先级是否标注
@@ -407,7 +415,8 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "更
 2. ADR 是否覆盖所有 User Story
 3. **Modular Group 划分是否合理（后端 API + 前端 UI 配对，依赖关系正确）**
 4. **US 依赖矩阵是否准确**
-5. 自检清单是否全部通过
+5. **Task 伪代码是否符合 consistency-baseline（命名、可复用代码、Skill 引用）**
+6. 自检清单是否全部通过
 
 **回复选项**：
 

@@ -243,13 +243,25 @@ src/
 
 ### 7.1 Task 拆分
 > 将实现拆分为原子级 Task（2-4 小时可完成）
+>
+> **伪代码要求**：
+> - 必须符合 consistency-baseline.md 中的命名约定（目录、文件名、方法名）
+> - 优先复用现有模块的工具方法，禁止重写
+> - 如需使用外部 Skills，在 Skill 引用列标注（如 `@superpowers/ship-discipline`）
+> - 伪代码需体现与参考模块的复用关系
 
-| Task ID | 关联 US/MG | 描述 | 优先级 | 依赖 | 预计工时 |
-|---------|-----------|------|--------|------|----------|
-| T-001 | US-01 / MG-001 | | P0 | - | |
-| T-002 | US-01 / MG-001 | | P1 | T-001 | |
+| Task ID | 关联 US/MG | 伪代码 | 描述 | 优先级 | 依赖 | 预计工时 | 可复用代码 | Skill引用 |
+|---------|-----------|--------|------|--------|------|----------|-----------|----------|
+| T-001 | US-01 / MG-001 | ```java<br>// 参考: PostService.findById() at src/service/PostService.java L45-80<br>// 复用: BaseEntity.id 生成模式<br>// 命名: 符合 project-entity-pattern.md<br><br>public class Comment extends BaseEntity {<br>    private Long id;           // 复用 id 模式<br>    private Long postId;       // 符合 consistency-baseline<br>    private String content;    // 命名遵循 camelCase<br>    // ...<br>}<br>``` | 创建 Comment 实体，继承 BaseEntity | P0 | - | 2h | BaseEntity.java (id生成模式) | project-entity-pattern.md |
+| T-002 | US-01 / MG-001 | ```java<br>// 参考: PostRepository.java at src/repository/PostRepository.java<br>// 复用: PageHelper 分页工具<br>// 命名: 符合 project-mybatis-pattern.md<br><br>public interface CommentRepository {<br>    // 复用 findByPostId() 查询模式<br>    PageHelper<Comment> findByPostId(Long postId, PageRequest request);<br>    // 复用 save() 模式<br>    void save(Comment comment);<br>}<br>``` | 创建 Comment Repository | P1 | T-001 | 1h | PostRepository.java, PageHelper | project-mybatis-pattern.md |
+| T-003 | US-01 / MG-001 | ```java<br>// 参考: PostService.java L45-80 findById() 模式<br>// 复用: PostService.transactionTemplate 事务模式<br>// 命名: 遵循 project-service-pattern.md<br><br>public class CommentServiceImpl implements CommentService {<br>    // 复用 PostService 的事务管理模式<br>    @Transactional<br>    public Comment create(CommentDTO dto) {<br>        // 复用 findById 验证 post 存在性<br>        Post post = postService.findById(dto.getPostId());<br>        // ...<br>    }<br>}<br>``` | 创建 CommentService | P1 | T-002 | 3h | PostService.java (事务模式, findById) | project-service-pattern.md |
 
 **关联说明**：每个 Task 必须关联到具体的 US 和 Modular Group
+
+**伪代码规范**：
+- 语言：根据 tech-stack-profile.md 确定（如 Java、Python、TypeScript）
+- 风格：符合 consistency-baseline.md 中的项目规范
+- 注释：标注参考模块和复用点
 
 ### 7.2 Task 依赖与优先级
 > 标注 Task 之间的依赖关系
@@ -406,6 +418,9 @@ T-004 (P1)
 - [ ] 是否有详细的数据模型设计
 - [ ] 是否有完整的 API 设计
 - [ ] 是否识别了所有受影响模块
+- [ ] **Task 伪代码是否符合 consistency-baseline（命名、目录结构）**
+- [ ] **Task 伪代码是否标注了可复用代码（参考模块、工具方法）**
+- [ ] **Task 伪代码是否引用了正确的 Skills（包含外部 Skills 如 @superpowers/xxx）**
 - [ ] Task 是否原子化
 - [ ] Task 是否关联到 US/MG
 - [ ] Task 依赖是否清晰

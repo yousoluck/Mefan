@@ -33,7 +33,7 @@ AGENT_NAME="Analyst"
 ROOT="/mnt/d/pycharmprojects/Mefan"
 ADR_PATH="$ROOT/.claude/iterations/sprint-latest/ADR.md"
 TEST_PLAN_PATH="$ROOT/.claude/iterations/sprint-latest/test-plan.md"
-ITERATION_PLAN_PATH="$ROOT/.claude/iterations/sprint-latest/iteration-plan.md"
+SPRINT_STATUS_PATH="$ROOT/.claude/iterations/sprint-latest/sprint-status.md"
 ```
 
 ---
@@ -140,13 +140,13 @@ ITERATION_PLAN_PATH="$ROOT/.claude/iterations/sprint-latest/iteration-plan.md"
 
 ---
 
-### 操作 4：生成 iteration-plan.md 草案
+### 操作 4：生成 sprint-status.md 草案
 
 1. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤开始" "生成迭代计划草案" "" ""`
 2. 确保 `.claude/iterations/sprint-latest/` 目录存在
-3. 创建 `iteration-plan.md`，按模板填写：
+3. 创建 `sprint-status.md`，按模板填写：
 
-**iteration-plan.md 章节结构（合并版）**：
+**sprint-status.md 章节结构（单一数据源版）**：
 
 ```markdown
 # 迭代计划（合并版）
@@ -204,7 +204,7 @@ ITERATION_PLAN_PATH="$ROOT/.claude/iterations/sprint-latest/iteration-plan.md"
 ## 12. 关联文档
 ```
 
-**注意**：iteration-plan.md 是单一数据源，Dev 领任务 + 更新状态都在这里。sprint-status.md 从本文件导出。
+**注意**：sprint-status.md 是单一数据源，Dev 领任务 + 更新状态都在这里。包含 Plan（MG划分、US列表、Task看板）+ Status（US生命周期7状态）。
 
 4. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "产出物" "生成迭代计划草案" "$ITERATION_PLAN_PATH" "成功"`
 5. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤完成" "生成迭代计划草案" "" "成功"`
