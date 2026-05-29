@@ -135,8 +135,9 @@ bash .claude/hooks/log-event.sh "02" "Command" "Agent完成" "Architect产出完
 | 检查维度 | 检查内容 | 期望状态 | 不通过处理 |
 |---------|---------|---------|-----------|
 | **ADR 生成** | ADR.md 是否已生成在 `.claude/iterations/sprint-latest/ADR.md` | 存在 | 打回 Architect 修复 |
-| **自检清单** | Architect 是否已完成自检 | 自检通过 | 打回 Architect 修复 |
-| **产出完整性** | ADR 是否覆盖所有 User Story | 覆盖所有 US | 打回 Architect 补充 |
+| **ADR 第 2.4 节** | ADR 是否包含 Modular Group 划分（User Story 分组与依赖） | 存在 | 打回 Architect 补充 |
+| **自检清单** | Architect 是否已完成自检（含 Modular Group 检查） | 自检通过 | 打回 Architect 修复 |
+| **产出完整性** | ADR 是否覆盖所有 User Story，US 依赖矩阵是否准确 | 覆盖所有 US | 打回 Architect 补充 |
 
 **快速验证命令**：
 ```bash
@@ -146,8 +147,14 @@ ls .claude/iterations/sprint-latest/ADR.md
 # 检查 ADR.md 章节数量
 grep -c "^## " .claude/iterations/sprint-latest/ADR.md
 
+# 检查是否包含 Modular Group（第 2.4 节）
+grep -c "Modular Group" .claude/iterations/sprint-latest/ADR.md
+
 # 检查是否包含所有 User Story
 grep "^## US-" .claude/iterations/sprint-latest/ADR.md
+
+# 检查 US 依赖矩阵
+grep "| MG-" .claude/iterations/sprint-latest/ADR.md | head -10
 ```
 
 **回复选项**：

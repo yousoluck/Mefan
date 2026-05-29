@@ -79,12 +79,14 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "读
 
 ---
 
-### 操作 2.2：分析受影响模块（基于 knowledge.grap）
+### 操作 2.2：分析受影响模块 + US Modular Group（基于 knowledge.grap）
 
-> **目的**：通过 knowledge.grap 分析所有受影响模块
+> **目的**：
+> 1. 通过 knowledge.grap 分析所有受影响模块
+> 2. 分析 US 之间的依赖关系，划分 Modular Group
 
 ```bash
-bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "分析受影响模块" "" ""
+bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "分析受影响模块+ModularGroup" "" ""
 ```
 
 #### 2.1 已有模块增加对新模块的依赖
@@ -121,8 +123,29 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "分
 - **业务变更**：由于业务逻辑变化导致的变更
 - **数据变更**：由于数据模型变化导致的变更
 
+#### 2.6 User Story 依赖分析与 Modular Group 划分 [新增]
+
+> 本节用于阶段 3 迭代计划的 Modular Group 划分
+
+使用 requirements.md 中的 US 列表，分析 US 之间的依赖关系：
+1. 识别每个 US 依赖哪些其他 US（前置 US）
+2. 识别每个 US 被哪些其他 US 依赖（后继 US）
+3. 按业务边界将 US 划分到同一个 Modular Group（MG）
+4. 确保同一 Group 内包含相关的后端 API + 前端 UI
+5. 确定 Group 之间的依赖关系
+
+**Modular Group 划分原则**：
+- 同一 Group 内的 US 可一起开发测试
+- 被依赖的 Group 先开发（如：数据模型 → 业务逻辑 → 前端 UI）
+- 可独立开发的 Group 可并行执行
+- 每个 Group 应能在 1-2 天内完成
+
+**输出格式**：
+- 第 2.4 节"User Story 分组与依赖"（见 ADR 模板）
+- 包含 MG 划分表、US 依赖矩阵、开发顺序建议
+
 ```bash
-bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "分析受影响模块" "" "成功"
+bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "分析受影响模块+ModularGroup" "" "成功"
 ```
 
 ---
@@ -141,7 +164,7 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "生
 
 **必须包含的章节**：
 1. 基本信息
-2. 上下文（背景、需求摘要、决策驱动因素）
+2. 上下文（背景、需求摘要、决策驱动因素、**User Story 分组与依赖**）
 3. 方案对比（至少两个方案）
 4. **总体设计框架**（重点新增）：
    - 前端设计
@@ -163,7 +186,7 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "生
    - 与现有模块交互
 6. **受影响模块分析**（按4类分类，标注变更原因）
 7. **实现步骤**：
-   - Task 拆分（原子级）
+   - Task 拆分（原子级，关联 US/MG）
    - Task 依赖与优先级
    - Skill 引用
 8. **错误处理与边界设计**
@@ -220,11 +243,14 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "自
 
 - [ ] 是否覆盖所有 User Story
 - [ ] 每个 US 是否有独立的设计章节
+- [ ] **Modular Group 是否完整划分（第 2.4 节）**
+- [ ] **US 依赖矩阵是否准确（第 2.4 节）**
 - [ ] 是否有完整的数据模型设计
 - [ ] 是否有完整的数据库表设计
 - [ ] 是否有完整的 API 设计（签名、参数、返回值、错误码）
 - [ ] 是否识别了所有受影响模块（4类）
 - [ ] 每个受影响模块是否标注了变更原因
+- [ ] **Task 是否关联到 US/Modular Group**
 - [ ] Task 是否原子化（2-4小时可完成）
 - [ ] Task 依赖关系是否清晰
 - [ ] Task 优先级是否标注
@@ -377,9 +403,11 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "更
 
 **等待用户确认以下内容**：
 
-1. ADR 是否按模板完整生成
+1. ADR 是否按模板完整生成（含第 2.4 节 Modular Group）
 2. ADR 是否覆盖所有 User Story
-3. 自检清单是否全部通过
+3. **Modular Group 划分是否合理（后端 API + 前端 UI 配对，依赖关系正确）**
+4. **US 依赖矩阵是否准确**
+5. 自检清单是否全部通过
 
 **回复选项**：
 
