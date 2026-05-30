@@ -82,6 +82,17 @@ ls -la "$ROOT/.claude/testplans/" 2>/dev/null || echo "[Info] testplans 目录�
 2. API 变更清单
 3. 错误码定义
 4. 风险分析
+5. Task 伪代码文件路径列表（用于理解每个 Task 的实现细节）
+
+```bash
+# 提取 Task 伪代码文件路径
+echo "[QA-Stage2] 检查伪代码目录..."
+PSEUDO_CODE_DIR="$ROOT/.claude/iterations/sprint-latest/pseudocode"
+if [ -d "$PSEUDO_CODE_DIR" ]; then
+  echo "[QA-Stage2] 伪代码目录存在：$PSEUDO_CODE_DIR"
+  ls "$PSEUDO_CODE_DIR/" 2>/dev/null || echo "[Info] 伪代码目录为空"
+fi
+```
 
 从 requirements.md 中提取：
 1. User Story 列表

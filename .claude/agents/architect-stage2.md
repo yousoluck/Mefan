@@ -187,7 +187,7 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "生
 6. **受影响模块分析**（按4类分类，标注变更原因）
 7. **实现步骤**：
    - Task 拆分（原子级，关联 US/MG）
-   - **Task 伪代码（必须符合 consistency-baseline 命名约定，标注复用代码和 Skill 引用）**
+   - **Task 伪代码（独立文件，存放在 pseudocode/ 目录）**
    - Task 依赖与优先级
    - Skill 引用
 8. **错误处理与边界设计**
@@ -200,6 +200,28 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "生
 15. 受影响模块清单
 16. 决策时间
 17. **附录**（自检清单、变更历史）
+
+#### 3.2 创建伪代码目录与文件
+
+> **目的**：为每个 Task 生成独立的伪代码文件
+
+```bash
+# 创建伪代码目录
+mkdir -p $ROOT/.claude/iterations/sprint-latest/pseudocode
+
+# 统计需要生成的伪代码文件数量
+TASK_COUNT=$(grep -c "^| T-" $ROOT/.claude/iterations/sprint-latest/ADR.md || echo "0")
+echo "[Architect-Stage2] 需要生成 $TASK_COUNT 个伪代码文件"
+```
+
+**伪代码文件命名规范**：
+- 格式：`T-{NNN}-{task-name}.md`
+- 示例：`T-001-comment-entity.md`、`T-002-comment-repository.md`
+
+**生成伪代码文件时**：
+1. 按 3.5.4 节的完整示例格式生成
+2. 包含所有七类注释块（[P1]/[P2]/[P4]/[P6]/[P7]/[P8]/[P9]）
+3. 包含 Dev Agent 实现提示章节
 
 #### 3.2 数据模型设计
 > 描述核心数据模型的定义、关系、约束
@@ -217,18 +239,275 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "生
 - 响应体 Schema
 - 错误码
 
-#### 3.5 Task 拆分原则
-- 每个 Task 可在 2-4 小时内完成
-- Task 之间如有依赖，明确标注
-- 按优先级排序：P0 > P1 > P2
-- **Task 必须包含伪代码**，伪代码要求：
-  - 符合 consistency-baseline.md 中的命名约定（目录、文件名、方法名）
-  - 标注可复用代码（参考模块、工具方法）
-  - 引用所需 Skills（如 `@superpowers/ship-discipline`）
+#### 3.5 Task 拆分原则与伪代码生成规范
 
-#### 3.6 Skill 引用
-根据 consistency-baseline.md 中的 Skill 清单，引用实现所需的 Skill
+##### 3.5.1 拆分粒度
 
+| 维度 | 标准 | 说明 |
+|------|------|------|
+| **时间粒度** | 每个 Task 2-4 小时 | 开发者视角可独立完成 |
+| **依赖标注** | Task 间依赖必须明确标注 | 在"依赖"列填写前置 Task ID |
+| **优先级排序** | P0 > P1 > P2 | 核心功能优先 |
+| **关联映射** | 每个 Task 必须关联 US/MG | 确保可追溯 |
+
+##### 3.5.2 伪代码生成流程（按此顺序执行）
+
+> **原则**：伪代码不是"描述做什么"，而是"用项目的命名规范和代码模式，描述具体怎么实现"
+
+**步骤 1：收集上下文（从 requirements.md）**
+
+| 收集项 | 来源章节 | 提取内容 |
+|--------|---------|---------|
+| 相似模块参考 | US-{NNN} → "相似功能模块分析" | 参考文件路径、行号范围、关键方法 |
+| 强制复用模块 | US-{NNN} → "复用功能模块" | 模块名、必须调用的接口列表 |
+
+**步骤 2：收集 Skill 清单（从 consistency-baseline.md）**
+
+| Skill 类别 | 来源章节 | 提取内容 |
+|-----------|---------|---------|
+| 开发流程 Skills | consistency-baseline → 第五部分 5.2 | `project-tdd-pattern.md`, `project-code-review-checklist.md` |
+| 技术栈 Skills | consistency-baseline → 第五部分 5.3 | `project-tech-*.md` 按框架选择 |
+| 业务模块 Skills | consistency-baseline → 第五部分 5.4 | `project-{module}.md` 如已存在 |
+| 中间件 Skills | consistency-baseline → 第五部分 5.5 | `project-middleware-*.md` 按需选择 |
+
+**步骤 3：按优先级生成伪代码**
+
+| 优先级 | Skill 来源 | 在伪代码中的体现方式 |
+|--------|-----------|---------------------|
+| **P1** | requirements.md "相似功能模块分析" | 在伪代码注释中标注 `// 参考: Post.java L45-80 的 findById() 模式` |
+| **P2** | requirements.md "复用功能模块" | 在伪代码中直接调用 `XXXService.findById()`，禁止重新实现 |
+| **P3** | consistency-baseline "开发流程 Skills" | 伪代码结构符合 TDD 流程（先写接口定义，再写实现） |
+| **P4** | consistency-baseline "技术栈 Skills" | 注解、配置符合 `project-tech-*.md` 规范（如 @Transactional） |
+| **P5** | consistency-baseline "业务模块 Skills" | 符合 `project-{module}.md` 的接口约定和返回值类型 |
+| **P6** | consistency-baseline "中间件 Skills" | 符合 `project-middleware-*.md` 的调用范式（如分页参数） |
+| **P7** | ADR.md 第 8 节 "错误处理与边界设计" | 在伪代码中标注错误场景和异常处理逻辑 |
+| **P8** | ADR.md 第 9 节 "风险与非功能设计" | 在伪代码中标注风险缓解措施 |
+| **P9** | ADR.md 第 9 节 "性能与安全设计" | 在伪代码中标注性能优化和安全防护措施 |
+
+##### 3.5.3 伪代码注释规范
+
+每个伪代码必须包含以下注释块（按顺序）：
+
+```java
+// ========== [P1] 相似模块参考 ==========
+// 来源：requirements.md US-001 "相似功能模块分析"
+// 模块：Post 实体（src/entity/Post.java L20-45）
+// 复用点：id 生成模式、@ManyToOne 关系映射
+
+// ========== [P2] 强制复用模块 ==========
+// 来源：requirements.md US-001 "复用功能模块"
+// 必须调用：BaseEntity.getId()、UserService.findById()
+// 禁止重新实现：用户鉴权逻辑
+
+// ========== [P4] 技术栈 Skill ==========
+// Skill：project-tech-lombok.md
+// 体现：@Getter @Setter @Builder 注解使用
+
+// ========== [P6] 中间件 Skill ==========
+// Skill：project-middleware-database.md
+// 体现：Page<?> 分页返回类型、PageRequest 参数模式
+
+// ========== [P7] 错误与异常处理 ==========
+// 来源：ADR.md 第 8 节"错误处理与边界设计"
+// 错误场景 1：Comment 不存在 → 抛出 CommentNotFoundException
+// 错误场景 2：用户无权限 → 抛出 AccessDeniedException
+// 边界处理：空列表返回空 Page 对象（非 null）
+
+// ========== [P8] 风险处理 ==========
+// 来源：ADR.md 第 9 节"风险与非功能设计"
+// 风险 1：数据库连接超时 → 使用连接池 + 重试机制
+// 风险 2：并发写入冲突 → 使用乐观锁（@Version）
+
+// ========== [P9] 非功能性处理 ==========
+// 来源：ADR.md 第 9 节"性能与安全设计"
+// 性能：分页查询（每页 20 条）+ 索引优化
+// 安全：用户输入校验（@Valid）+ SQL 注入防护
+```
+
+##### 3.5.4（补充）技术栈判断与伪代码语言选择
+
+> **重要**：伪代码示例中的语言必须根据项目的技术栈确定，不得固定使用某一种语言
+
+**判断步骤**：
+
+```bash
+# 1. 读取 tech-stack-profile.md 确定技术栈
+TECH_STACK=$(grep -A 5 "后端框架" .claude/context/tech-stack-profile.md | grep -v "后端框架" | head -1)
+echo "[Architect] 技术栈：$TECH_STACK"
+
+# 2. 根据技术栈确定伪代码语言
+case "$TECH_STACK" in
+  *"Spring"*|*"Java"*|*"Kotlin"*)
+    LANG="java"
+    ;;
+  *"Flask"*|*"FastAPI"*|*"Django"*|*"Python"*)
+    LANG="python"
+    ;;
+  *"Express"*|*"NestJS"*|*"Node"*)
+    LANG="typescript"
+    ;;
+  *)
+    LANG="java"  # 默认值
+    ;;
+esac
+echo "[Architect] 伪代码语言：$LANG"
+```
+
+**技术栈与伪代码语言对应表**：
+
+| 技术栈类型 | 技术栈示例 | 伪代码语言 | 关键规范 Skill |
+|-----------|-----------|------------|--------------|
+| Java/Spring | Spring Boot, Spring Cloud | Java | project-tech-springboot.md |
+| Python/Flask | Flask, FastAPI, Django | Python | project-tech-flask.md |
+| Python/其他 | FastAPI, Pyramid | Python | project-tech-fastapi.md |
+| TypeScript/Node | Express, NestJS | TypeScript | project-tech-typescript.md |
+| Go | Gin, Echo | Go | project-tech-go.md |
+| C#/.NET | ASP.NET Core | C# | project-tech-dotnet.md |
+
+**示例中的 Java 仅用于演示**：实际生成时必须替换为对应语言的代码
+
+##### 3.5.4 完整示例：Task T-001 创建 Comment 实体（Java 技术栈）
+
+> **前提**：假设 tech-stack-profile.md 确定的技术栈为 Java/Spring Boot
+
+**Task 描述**：创建 Comment 实体类，继承 BaseEntity，实现与 Post 的多对一关系
+
+**步骤 1：收集上下文**
+```bash
+# 读取 requirements.md 中 US-001 的相似模块分析
+grep -A 10 "相似功能模块分析" .claude/iterations/sprint-latest/requirements.md
+# 输出：
+# | 功能描述 | 参考文件 | 行号范围 | 业务流程 | 复用的关键方法 |
+# | 评论功能参考帖子功能 | src/entity/Post.java | L20-50 | 发布→查询 | findById(), findAll() |
+
+# 读取 requirements.md 中 US-001 的复用功能模块
+grep -A 10 "复用功能模块" .claude/iterations/sprint-latest/requirements.md
+# 输出：
+# | 模块名称 | 文件名 | 必须复用的接口 |
+# | 用户服务 | src/service/UserService.java | findById(Long id) |
+```
+
+**步骤 2：收集 Skills**
+```bash
+# 从 consistency-baseline.md 第五部分收集
+grep -A 5 "5.2 技术栈 Skills" .claude/context/consistency-baseline.md
+# 输出：project-tech-lombok.md, project-tech-mybatis.md
+
+grep -A 5 "5.4 中间件 Skills" .claude/context/consistency-baseline.md
+# 输出：project-middleware-database.md（分页规范）
+```
+
+**步骤 3：生成伪代码**
+
+```java
+// ========== [P1] 相似模块参考 ==========
+// 来源：requirements.md US-001 "相似功能模块分析"
+// 模块：Post 实体（src/entity/Post.java L20-50）
+// 复用点：
+//   - id 字段定义方式（private Long id;）
+//   - @ManyToOne 关系映射注解（@JoinColumn）
+//   - 与 BaseEntity 的继承关系
+//   - 字段命名遵循 camelCase
+
+// ========== [P2] 强制复用模块 ==========
+// 来源：requirements.md US-001 "复用功能模块"
+// 必须调用：UserService.findById(Long userId) - 获取评论者信息
+// 禁止重新实现：用户信息查询、用户鉴权
+
+// ========== [P4] 技术栈 Skill ==========
+// Skill：project-tech-lombok.md
+// 体现：
+//   - @Entity @Table 注解（Spring JPA 规范）
+//   - @Getter @Setter（Lombok 注解，替代 getter/setter 手动编写）
+//   - @Builder 模式（如需要链式构建）
+//   - 构造方法注解使用 @RequiredArgsConstructor
+
+// ========== [P6] 中间件 Skill ==========
+// Skill：project-middleware-database.md
+// 体现：
+//   - 分页返回类型：Page<Comment>（不是 List<Comment>）
+//   - 分页参数：Pageable（不是 (int page, int size)）
+//   - 遵循 JPA Repository 命名规范（findByPostId）
+
+// ========== 伪代码开始 ==========
+package com.example.entity;
+
+import lombok.*;
+import javax.persistence.*;
+import org.springframework.data.domain.*;
+
+@Entity
+@Table(name = "comments")
+@Getter
+@Setter
+@NoArgsConstructor
+@RequiredArgsConstructor
+@Builder
+public class Comment extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;               // 复用：BaseEntity.id 生成模式（参考 Post.java L22）
+
+    @Column(name = "post_id", nullable = false)
+    private Long postId;           // 外键字段，命名符合 camelCase
+
+    @Column(name = "user_id", nullable = false)
+    private Long userId;           // 复用：UserEntity 用户关联模式
+
+    @Column(name = "content", nullable = false, length = 1000)
+    private String content;       // 字段长度来自业务需求（1000字限制）
+
+    @Column(name = "created_at")
+    private Long createdAt;       // 时间戳使用 Long（毫秒），参考 project-middleware-database.md
+
+    @Column(name = "updated_at")
+    private Long updatedAt;
+
+    // 关系映射：多对一（多个评论属于一个帖子）
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id", insertable = false, updatable = false)
+    private Post post;             // 参考：Post.java L30-35 的 @ManyToOne 实现
+
+    // 关系映射：多对一（多个评论属于一个用户）
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private User user;            // 复用：UserService.findById() 在 Service 层调用
+}
+// ========== 伪代码结束 ==========
+
+// ========== Dev Agent 实现提示 ==========
+// 1. 首先阅读参考文件：src/entity/Post.java L20-50（相似模块）
+// 2. 阅读 Skill：.claude/skills/project-tech-lombok.md（Lombok 规范）
+// 3. 阅读 Skill：.claude/skills/project-middleware-database.md（分页规范）
+// 4. 按本伪代码实现，注意：
+//    - 继承 BaseEntity 后无需定义 id 字段（已在父类定义）
+//    - 时间戳字段使用 Long 类型毫秒值
+//    - @ManyToOne 使用 LAZY 加载避免 N+1 问题
+```
+
+##### 3.5.5 伪代码与 Skill 引用对应表
+
+在 ADR.md 表格中，Skill 引用列的填写规范：
+
+| Skill 类别 | 填写格式 | 示例 |
+|-----------|---------|------|
+| 开发流程 Skill | `{Skill 文件名}` | `project-tdd-pattern.md` |
+| 技术栈 Skill | `{Skill 文件名}` | `project-tech-lombok.md` |
+| 业务模块 Skill | `{Skill 文件名}` | `project-comment-module.md` |
+| 中间件 Skill | `{Skill 文件名}` | `project-middleware-database.md` |
+| 外部 Skill | `{来源}/{Skill 文件名}` | `@superpowers/ship-discipline` |
+
+##### 3.5.6 常见错误与纠正
+
+| 错误类型 | 错误示例 | 正确做法 |
+|---------|---------|---------|
+| 缺少参考来源 | `// 实现评论功能` | `// 参考：Post.java L20-50 的实体定义模式` |
+| 跳过复用模块 | `// 自己实现用户查询` | `// 必须调用：UserService.findById(userId)` |
+| Skill 引用不清 | `project-tech-*.md` | `project-tech-lombok.md` |
+| 伪代码过于简略 | `create Comment entity` | 包含完整的类结构、字段类型、注解、关系映射 |
+| 未标注行号 | `// 参考 Post.java` | `// 参考：Post.java L20-50` |
+  
 ```bash
 bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "产出物" "生成ADR" ".claude/iterations/sprint-latest/ADR.md" "成功"
 bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "生成ADR文档" "" "成功"
@@ -258,6 +537,8 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "自
 - [ ] **Task 伪代码是否符合 consistency-baseline（命名、目录结构）**
 - [ ] **Task 伪代码是否标注了可复用代码（参考模块、工具方法）**
 - [ ] **Task 伪代码是否引用了正确的 Skills（包含外部 Skills 如 @superpowers/xxx）**
+- [ ] **Task 伪代码文件是否独立生成（pseudocode/ 目录下）**
+- [ ] **伪代码文件数量与 Task 数量是否一致**
 - [ ] Task 是否关联到 US/Modular Group
 - [ ] Task 是否原子化（2-4小时可完成）
 - [ ] Task 依赖关系是否清晰
@@ -416,7 +697,8 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "更
 3. **Modular Group 划分是否合理（后端 API + 前端 UI 配对，依赖关系正确）**
 4. **US 依赖矩阵是否准确**
 5. **Task 伪代码是否符合 consistency-baseline（命名、可复用代码、Skill 引用）**
-6. 自检清单是否全部通过
+6. **Task 伪代码文件是否独立生成（pseudocode/ 目录下，每个 Task 一个文件）**
+7. 自检清单是否全部通过
 
 **回复选项**：
 

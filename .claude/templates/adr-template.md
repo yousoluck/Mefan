@@ -242,28 +242,144 @@ src/
 ## 7. 实现步骤 [必填]
 
 ### 7.1 Task 拆分
-> 将实现拆分为原子级 Task（2-4 小时可完成）
->
-> **伪代码要求**：
-> - 必须符合 consistency-baseline.md 中的命名约定（目录、文件名、方法名）
-> - 优先复用现有模块的工具方法，禁止重写
-> - 如需使用外部 Skills，在 Skill 引用列标注（如 `@superpowers/ship-discipline`）
-> - 伪代码需体现与参考模块的复用关系
 
-| Task ID | 关联 US/MG | 伪代码 | 描述 | 优先级 | 依赖 | 预计工时 | 可复用代码 | Skill引用 |
-|---------|-----------|--------|------|--------|------|----------|-----------|----------|
-| T-001 | US-01 / MG-001 | ```java<br>// 参考: PostService.findById() at src/service/PostService.java L45-80<br>// 复用: BaseEntity.id 生成模式<br>// 命名: 符合 project-entity-pattern.md<br><br>public class Comment extends BaseEntity {<br>    private Long id;           // 复用 id 模式<br>    private Long postId;       // 符合 consistency-baseline<br>    private String content;    // 命名遵循 camelCase<br>    // ...<br>}<br>``` | 创建 Comment 实体，继承 BaseEntity | P0 | - | 2h | BaseEntity.java (id生成模式) | project-entity-pattern.md |
-| T-002 | US-01 / MG-001 | ```java<br>// 参考: PostRepository.java at src/repository/PostRepository.java<br>// 复用: PageHelper 分页工具<br>// 命名: 符合 project-mybatis-pattern.md<br><br>public interface CommentRepository {<br>    // 复用 findByPostId() 查询模式<br>    PageHelper<Comment> findByPostId(Long postId, PageRequest request);<br>    // 复用 save() 模式<br>    void save(Comment comment);<br>}<br>``` | 创建 Comment Repository | P1 | T-001 | 1h | PostRepository.java, PageHelper | project-mybatis-pattern.md |
-| T-003 | US-01 / MG-001 | ```java<br>// 参考: PostService.java L45-80 findById() 模式<br>// 复用: PostService.transactionTemplate 事务模式<br>// 命名: 遵循 project-service-pattern.md<br><br>public class CommentServiceImpl implements CommentService {<br>    // 复用 PostService 的事务管理模式<br>    @Transactional<br>    public Comment create(CommentDTO dto) {<br>        // 复用 findById 验证 post 存在性<br>        Post post = postService.findById(dto.getPostId());<br>        // ...<br>    }<br>}<br>``` | 创建 CommentService | P1 | T-002 | 3h | PostService.java (事务模式, findById) | project-service-pattern.md |
+> **伪代码独立文件规范**：
+> - 伪代码存放目录：`.claude/iterations/sprint-latest/pseudocode/`
+> - 文件命名格式：`T-{NNN}-{task-name}.md`
+> - 每个 Task 对应一个伪代码文件
+> - ADR.md 表格中"伪代码"列填写文件路径引用
+
+**伪代码文件目录结构**：
+```
+.claude/iterations/sprint-latest/
+├── ADR.md                              # 主文档
+└── pseudocode/                         # 伪代码目录
+    ├── T-001-comment-entity.md         # Task T-001 伪代码
+    ├── T-002-comment-repository.md    # Task T-002 伪代码
+    └── T-003-comment-service.md        # Task T-003 伪代码
+```
+
+**Task 拆分表格**：
+
+| Task ID | 关联 US/MG | 描述 | 优先级 | 依赖 | 预计工时 | 可复用代码 | Skill引用 | 伪代码文件 |
+|---------|-----------|------|--------|------|----------|-----------|----------|-----------|
+| T-001 | US-01 / MG-001 | 创建 Comment 实体 | P0 | - | 2h | BaseEntity.java (id生成模式) | project-tech-lombok.md, project-middleware-database.md | [T-001-comment-entity.md](./pseudocode/T-001-comment-entity.md) |
+| T-002 | US-01 / MG-001 | 创建 Comment Repository | P1 | T-001 | 1h | PostRepository.java, PageHelper | project-mybatis-pattern.md | [T-002-comment-repository.md](./pseudocode/T-002-comment-repository.md) |
+| T-003 | US-01 / MG-001 | 创建 CommentService | P1 | T-002 | 3h | PostService.java (事务模式) | project-service-pattern.md | [T-003-comment-service.md](./pseudocode/T-003-comment-service.md) |
 
 **关联说明**：每个 Task 必须关联到具体的 US 和 Modular Group
 
 **伪代码规范**：
 - 语言：根据 tech-stack-profile.md 确定（如 Java、Python、TypeScript）
 - 风格：符合 consistency-baseline.md 中的项目规范
-- 注释：标注参考模块和复用点
+- 注释：按 architect-stage2.md 3.5.3 节的注释规范（P1/P2/P4/P6/P7/P8/P9 七类注释块）
 
-### 7.2 Task 依赖与优先级
+### 7.2 伪代码文件内容模板
+
+> 每个伪代码文件必须包含以下章节
+
+```markdown
+# T-{NNN}：{Task 描述}
+
+## 基本信息
+
+| 字段 | 内容 |
+|------|------|
+| **Task ID** | T-{NNN} |
+| **关联 US/MG** | US-{XX} / MG-{XXX} |
+| **优先级** | P0/P1/P2 |
+| **预计工时** | Xh |
+| **依赖 Task** | T-{XXX} |
+
+## Skill 依赖
+
+| Skill 文件 | 来源 | 在伪代码中的体现 |
+|-----------|------|-----------------|
+| project-tech-lombok.md | consistency-baseline 第五部分 5.3 | @Getter/@Setter 注解 |
+| project-middleware-database.md | consistency-baseline 第五部分 5.5 | Page<> 分页返回类型 |
+
+## 上下文引用
+
+### [P1] 相似模块参考
+- **来源**：requirements.md US-{XX} "相似功能模块分析"
+- **参考文件**：`src/entity/Post.java` L20-50
+- **复用点**：id 生成模式、@ManyToOne 关系映射
+
+### [P2] 强制复用模块
+- **来源**：requirements.md US-{XX} "复用功能模块"
+- **必须调用**：`UserService.findById(Long userId)`
+- **禁止重新实现**：用户信息查询、用户鉴权
+
+### [P7] 错误与异常处理
+- **来源**：ADR.md 第 8 节"错误处理与边界设计"
+- **错误场景 1**：实体不存在 → 抛出 `{EntityName}NotFoundException`
+- **错误场景 2**：用户无权限 → 抛出 `AccessDeniedException`
+- **边界处理**：空列表返回空 `Page` 对象（非 null）
+
+### [P8] 风险处理
+- **来源**：ADR.md 第 9 节"风险与非功能设计"
+- **风险 1**：数据库连接超时 → 使用连接池 + 重试机制
+- **风险 2**：并发写入冲突 → 使用乐观锁（@Version）
+- **风险 3**：缓存穿透 → 空值缓存 + 布隆过滤器
+
+### [P9] 非功能性处理
+- **来源**：ADR.md 第 9 节"性能与安全设计"
+- **性能**：分页查询（每页 20 条）+ 索引优化
+- **安全**：用户输入校验（@Valid）+ SQL 注入防护
+- **日志**：操作日志记录（@Slf4j）+ 敏感数据脱敏
+
+## 伪代码
+
+```java
+// ========== [P1] 相似模块参考 ==========
+// 来源：requirements.md US-001 "相似功能模块分析"
+// 模块：Post 实体（src/entity/Post.java L20-50）
+// 复用点：id 生成模式、@ManyToOne 关系映射
+
+// ========== [P2] 强制复用模块 ==========
+// 来源：requirements.md US-001 "复用功能模块"
+// 必须调用：UserService.findById(Long userId)
+
+// ========== [P4] 技术栈 Skill ==========
+// Skill：project-tech-lombok.md
+// 体现：@Getter @Setter @Builder 注解
+
+// ========== [P6] 中间件 Skill ==========
+// Skill：project-middleware-database.md
+// 体现：Page<Comment> 分页返回类型
+
+// ========== [P7] 错误与异常处理 ==========
+// 来源：ADR.md 第 8 节"错误处理与边界设计"
+// 错误场景：实体不存在 → 抛出 {EntityName}NotFoundException
+// 边界处理：空列表返回空 Page 对象（非 null）
+
+// ========== [P8] 风险处理 ==========
+// 来源：ADR.md 第 9 节"风险与非功能设计"
+// 风险：并发冲突 → 乐观锁（@Version）；数据库超时 → 重试机制
+
+// ========== [P9] 非功能性处理 ==========
+// 来源：ADR.md 第 9 节"性能与安全设计"
+// 性能：分页 + 索引；安全：@Valid 校验；日志：@Slf4j 记录
+
+// ========== 伪代码开始 ==========
+public class Comment extends BaseEntity {
+    // ... 完整代码
+}
+// ========== 伪代码结束 ==========
+```
+
+## Dev Agent 实现提示
+
+1. 首先阅读参考文件：`src/entity/Post.java` L20-50（相似模块）
+2. 阅读 Skill：`.claude/skills/project-tech-lombok.md`
+3. 阅读 Skill：`.claude/skills/project-middleware-database.md`
+4. 阅读 ADR 第 8 节"错误处理与边界设计"（对应 P7 错误与异常处理）
+5. 阅读 ADR 第 9 节"风险与非功能设计"（对应 P8 风险处理、P9 非功能性处理）
+6. 按本文件伪代码实现
+```
+
+### 7.3 Task 依赖与优先级
+
 > 标注 Task 之间的依赖关系
 
 ```
@@ -272,12 +388,15 @@ T-001 (P0) → T-002 (P1) → T-003 (P2)
 T-004 (P1)
 ```
 
-### 7.3 Skill 引用
-> 根据 consistency-baseline 引用需要的 Skill
+### 7.4 Skill 引用总表
+
+> 根据 consistency-baseline 引用本次迭代用到的所有 Skill
 
 | Skill 文件 | 使用范围 | 使用原因 |
 |------------|----------|----------|
-| | | |
+| project-tech-lombok.md | T-001 实体创建 | 注解规范 |
+| project-middleware-database.md | T-001, T-002 | 分页规范 |
+| project-mybatis-pattern.md | T-002 Repository | ORM 映射规范 |
 
 ---
 
@@ -421,6 +540,8 @@ T-004 (P1)
 - [ ] **Task 伪代码是否符合 consistency-baseline（命名、目录结构）**
 - [ ] **Task 伪代码是否标注了可复用代码（参考模块、工具方法）**
 - [ ] **Task 伪代码是否引用了正确的 Skills（包含外部 Skills 如 @superpowers/xxx）**
+- [ ] **Task 伪代码文件是否独立生成（.claude/iterations/sprint-latest/pseudocode/）**
+- [ ] **伪代码文件数量与 Task 数量一致**
 - [ ] Task 是否原子化
 - [ ] Task 是否关联到 US/MG
 - [ ] Task 依赖是否清晰

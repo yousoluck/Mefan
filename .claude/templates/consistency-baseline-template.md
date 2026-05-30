@@ -419,6 +419,88 @@
 
 ---
 
+## 第五部分：项目 Skills 清单
+
+> **用途**：供 Arch-Stage2 生成 Task 伪代码时引用，为 Dev Agent 提供完整的 Skill 索引
+>
+> **来源**：
+> 1. **Superpowers 官方 Skills**：`@superpowers/*`（从 GitHub/npm 集成）
+> 2. **Mefan 自定义 Skills**：`.claude/skills/project-*.md`
+> 3. **动态生成的 Skills**：由 arch-stage0 扫描项目后生成
+>
+> **更新时机**：阶段 0 初始化时生成，Skill 目录变化时更新
+
+### 5.1 Superpowers 官方 Skills（集成）
+
+> **说明**：Superpowers 是标准化开发规范框架，提供跨语言的通用技能。集成方式：直接引用 `@superpowers/{skill-name}`
+
+| Skill 名称 | 来源 | 描述 | 官方文档 |
+|-----------|------|------|---------|
+| @superpowers/tdd-mastery | superpowers | TDD 开发流程：测试先行、RED-GREEN、重构 | https://superpowers.github.io |
+| @superpowers/ship-discipline | superpowers | 防御性编程：异常处理、空指针防护、边界检查 | https://superpowers.github.io |
+| @superpowers/api-design | superpowers | API 设计规范：RESTful 风格、版本控制、错误码规范 | https://superpowers.github.io |
+| @superpowers/code-review | superpowers | Code Review 标准：命名、复杂度、安全检查清单 | https://superpowers.github.io |
+| @superpowers/git-conventions | superpowers | Git 提交规范：conventional commits、分支命名 | https://superpowers.github.io |
+
+**集成优先级**：
+- Superpowers Skills 作为**强制基础**，所有项目都必须引用
+- Mefan 自定义 Skills 作为**补充扩展**，针对特定框架或业务场景
+
+### 5.2 开发流程 Skills（强制）
+
+| Skill 文件 | 描述 | 适用的业务场景 | 关键要点 |
+|-----------|------|--------------|---------|
+| project-tdd-pattern.md | TDD 开发流程 | 所有后端服务开发 | 测试先行、RED-GREEN、重构 |
+| project-code-review-checklist.md | Code Review 标准 | 所有代码提交 | 命名、复杂度、安全检查 |
+| project-commit-convention.md | 提交规范 | Git 提交 | conventional commit 格式 |
+
+### 5.3 技术栈 Skills（按框架）
+
+| Skill 文件 | 框架 | 描述 | 关键模式 |
+|-----------|------|------|---------|
+| project-tech-springboot.md | Spring Boot | Spring Boot 开发规范 | 注解使用、配置加载、自动装配 |
+| project-tech-mybatis.md | MyBatis | MyBatis 开发规范 | 映射文件、动态 SQL、分页 |
+| project-tech-lombok.md | Lombok | Lombok 使用规范 | @Getter/@Setter/@Builder 使用场景 |
+| project-tech-redis.md | Redis | Redis 使用规范 | key 命名、过期策略、序列化 |
+| project-tech-springcloud.md | Spring Cloud | 微服务规范 | 服务注册、负载均衡、熔断 |
+
+### 5.4 业务模块 Skills（按模块）
+
+| Skill 文件 | 业务模块 | 描述 | 核心接口 |
+|-----------|---------|------|---------|
+| project-user-module.md | 用户模块 | 用户注册/登录/鉴权 | login(), logout(), getCurrentUser() |
+| project-order-module.md | 订单模块 | 订单创建/查询/取消 | create(), findById(), cancel() |
+| project-payment-module.md | 支付模块 | 支付流程 | pay(), refund(), callback() |
+| project-notification-module.md | 通知模块 | 消息通知 | send(), broadcast() |
+
+**说明**：如果某业务模块尚无对应的 Skill 文件，Arch-Stage2 在 Task 伪代码中标注"无对应业务 Skill"，由 Dev Agent 自行参考 consistency-baseline 的通用规范。
+
+### 5.5 中间件 Skills（按类型）
+
+| Skill 文件 | 中间件 | 描述 | 关键规范 |
+|-----------|------|------|---------|
+| project-middleware-database.md | 数据库 | SQL/ORM 规范 | 分页、索引、事务处理 |
+| project-middleware-cache.md | 缓存 | Redis 缓存规范 | key 命名、过期策略、穿透/击穿 |
+| project-middleware-mq.md | 消息队列 | MQ 规范 | 消息格式、消费确认、幂等性 |
+| project-middleware-http.md | HTTP | 外部 API 调用 | 超时、重试、熔断 |
+
+### 5.6 外部 Skills（按需）
+
+| Skill 文件 | 来源 | 描述 | 使用场景 |
+|-----------|------|------|---------|
+| @superpowers/ship-discipline | superpowers | 通用开发规范 | 防御性编程、异常处理 |
+| @superpowers/api-design | superpowers | API 设计规范 | RESTful 风格、版本控制 |
+
+### 5.7 Skills 索引表
+
+| Skill 文件 | 描述 | 适用的业务场景 | 关键要点 |
+|-----------|------|--------------|---------|
+| project-tdd-pattern.md | TDD 开发流程 | 所有后端服务开发 | 测试先行、RED-GREEN、重构 |
+| project-code-review-checklist.md | Code Review 标准 | 所有代码提交 | 命名、复杂度、安全检查 |
+| project-commit-convention.md | 提交规范 | Git 提交 | conventional commit 格式 |
+
+---
+
 ## 参考链接
 
 | 文档 | 链接 | 说明 |

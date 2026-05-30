@@ -52,10 +52,31 @@ REVIEW_LOG_PATH="$ROOT/.claude/iterations/sprint-latest/reviews/review-log.md"
 
 1. `bash $ROOT/.claude/hooks/log-event.sh "04" "$AGENT_NAME" "步骤开始" "读取前置文档" "" ""`
 2. 读取 `sprint-status.md`，确定要开发的 MG 列表
-3. 读取 `ADR.md`，找到当前 MG 关联的 Task 及其伪代码
-4. 读取 `consistency-baseline.md`，了解代码规范
-5. 读取 `review-log.md`（如存在），了解之前的问题记录
-6. `bash $ROOT/.claude/hooks/log-event.sh "04" "$AGENT_NAME" "步骤完成" "读取前置文档" "" "成功"`
+3. 读取 `ADR.md`，找到当前 MG 关联的 Task 及其**伪代码文件路径**
+4. 读取 `pseudocode/` 目录下的所有 Task 伪代码文件（如存在）
+5. **读取 requirements.md**，获取当前 MG 关联的 User Story 完整上下文：
+   ```bash
+   # 读取当前 MG 关联的所有 US 背景
+   US_LIST=$(grep "| MG-$MG_ID" "$ROOT/.claude/iterations/sprint-latest/ADR.md" | awk '{print $2}' | sort -u)
+   for US in $US_LIST; do
+     echo "[Dev] 读取 US 背景：$US"
+     # 读取 requirements.md 中对应 US 的完整描述
+   done
+   ```
+6. **读取 ADR.md 相关章节**，获取 API 设计和非功能性要求：
+   - 第 5.4 节：API 设计（接口签名、参数、返回值）
+   - 第 5.5 节：接口输入输出 Schema
+   - 第 8 节：错误处理与边界设计
+   - 第 9 节：风险与非功能设计
+   ```bash
+   # 提取当前 MG 关联的 API 设计
+   grep -A 20 "### API" "$ROOT/.claude/iterations/sprint-latest/ADR.md" | head -50
+   # 提取错误码定义
+   grep -A 10 "错误场景" "$ROOT/.claude/iterations/sprint-latest/ADR.md" | head -30
+   ```
+7. 读取 `consistency-baseline.md`，了解代码规范和 Skills 清单（第五部分）
+8. 读取 `review-log.md`（如存在），了解之前的问题记录
+9. `bash $ROOT/.claude/hooks/log-event.sh "04" "$AGENT_NAME" "步骤完成" "读取前置文档" "" "成功"`
 
 ---
 
@@ -78,18 +99,71 @@ REVIEW_LOG_PATH="$ROOT/.claude/iterations/sprint-latest/reviews/review-log.md"
 
 1. `bash $ROOT/.claude/hooks/log-event.sh "04" "$AGENT_NAME" "步骤开始" "实现功能" "$MG_ID" ""`
 2. 对 MG 内每个 Task：
-   - 读取 ADR 中该 Task 的**伪代码**
-   - 读取 consistency-baseline.md 中的**命名约定**
-   - 读取 reference-module.md 中指定的**参考模块**
+   - 从 ADR.md Task 表格中获取**伪代码文件路径**（如 `pseudocode/T-001-comment-entity.md`）
+   - 读取该 Task 的**伪代码文件**，提取：
+     - `[P1]` 相似模块参考（参考文件、行号、复用点）
+     - `[P2]` 强制复用模块（必须调用的接口）
+     - `[P4]` 技术栈 Skill（注解、配置规范）
+     - `[P6]` 中间件 Skill（分页、缓存等范式）
+     - `[P7]` 错误与异常处理（来源：ADR 第 8 节）
+     - `[P8]` 风险处理（来源：ADR 第 9 节）
+     - `[P9]` 非功能性处理（性能/安全/日志）
+   - **读取 requirements.md 中对应 US 的完整背景**：
+     - API 接口设计（请求/响应 Schema）
+     - 错误码定义和异常场景
+     - 边界条件处理
+     - 非功能性需求（性能指标、安全要求）
+   - **交叉验证伪代码中的 P7/P8/P9 与 ADR 第 8/9 节的一致性**
+   - 根据伪代码文件中列出的 **Skill 引用**，读取对应的 Skill 文件：
+     - `project-tech-*.md` → 技术栈规范
+     - `project-middleware-*.md` → 中间件使用规范
+     - `project-*-module.md` → 业务模块规范（如有）
+   - 读取 `consistency-baseline.md` 中的**命名约定**（目录、文件名、方法名）
+   - 读取 `reference-module.md` 中指定的**参考模块**（如有）
 3. 遵循以下原则：
    - **严格按 ADR 伪代码实现**，不得随意修改架构
    - **复用现有模块**的工具方法和代码模式
    - **命名必须符合** consistency-baseline.md（目录、文件名、方法名）
    - **禁止重写**已有工具方法
+   - **错误处理必须符合** ADR 第 8 节定义的错误码和异常场景
+   - **非功能性实现必须满足** ADR 第 9 节定义的性能/安全指标
 4. 实现过程中如发现问题：
-   - 查阅 ADR 或咨询 Tech Lead
+   - 查阅 ADR 伪代码文件或咨询 Tech Lead
    - 不得自行突破 ADR 设计
 5. `bash $ROOT/.claude/hooks/log-event.sh "04" "$AGENT_NAME" "实现功能" "$MG_ID:T-001完成" "" "成功"`
+
+### 操作 3.1：伪代码文件读取规范
+
+> **目的**：规范如何从独立伪代码文件中提取关键信息
+
+**读取步骤**：
+
+```bash
+# 1. 从 ADR.md Task 表格中提取伪代码文件路径
+PSEUDO_CODE_DIR="$ROOT/.claude/iterations/sprint-latest/pseudocode"
+TASK_PSEUDO_FILE="$PSEUDO_CODE_DIR/T-{NNN}-{task-name}.md"
+
+# 2. 读取伪代码文件
+if [ -f "$TASK_PSEUDO_FILE" ]; then
+  echo "[Dev] 读取伪代码文件：$TASK_PSEUDO_FILE"
+else
+  echo "[Dev] 伪代码文件不存在：$TASK_PSEUDO_FILE"
+  echo "[Dev] 尝试从 ADR.md 中直接读取内联伪代码（兼容旧格式）"
+fi
+
+# 3. 提取 Skill 引用并读取对应 Skill 文件
+# Skill 文件路径：.claude/skills/{skill-name}
+# 示例：project-tech-lombok.md → .claude/skills/project-tech-lombok.md
+```
+
+**伪代码文件中关键信息的提取位置**：
+
+| 信息类型 | 在伪代码文件中的章节 | 提取方式 |
+|---------|---------------------|---------|
+| 相似模块参考 | `## 上下文引用` → `### [P1] 相似模块参考` | 提取参考文件路径和行号 |
+| 强制复用模块 | `## 上下文引用` → `### [P2] 强制复用模块` | 提取必须调用的接口 |
+| Skill 引用 | `## Skill 依赖` | 提取 Skill 文件名，读取对应文件 |
+| Dev Agent 实现提示 | `## Dev Agent 实现提示` | 按步骤执行 |
 
 ---
 
@@ -159,7 +233,9 @@ bash $ROOT/.claude/hooks/check-tdd-rhythm.sh "$MG_ID"
 
 | 异常场景 | 处理方式 |
 |---------|---------|
+| 伪代码文件不存在 | 检查 ADR.md Task 表格中的文件路径，尝试降级读取 ADR 内联伪代码 |
 | ADR 伪代码不明确 | 记录问题，通知 PM，暂停等待回复 |
+| Skill 文件不存在 | 跳过该 Skill，参考 consistency-baseline 通用规范 |
 | 发现参考模块有误 | 记录问题，通知 PM，暂停等待回复 |
 | Hook 拦截第 1 次 | 开发者根据违规列表自行修复 |
 | Hook 拦截第 2 次 | 必须编写 interception-analysis.md |

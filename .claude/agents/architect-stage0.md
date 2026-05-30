@@ -291,7 +291,57 @@ fi
 | Docker 配置 | 检测 `Dockerfile`、`docker-compose.yml` | 容器化配置 |
 | CI/CD 配置 | 检测 `.github/workflows/`、`Jenkinsfile` | 持续集成配置 |
 
-#### 2.5 输出 consistency-baseline.md
+#### 2.6 生成 Skills 清单（第五部分）
+
+> **目的**：扫描 `.claude/skills/` 目录，生成 Skills 索引供 Arch-Stage2 使用
+>
+> **输出位置**：consistency-baseline.md 第五部分"项目 Skills 清单"
+
+```bash
+# 扫描 skills 目录生成清单
+SKILLS_DIR="$ROOT/.claude/skills"
+echo "[Architect-Stage0] 扫描 Skills 目录：$SKILLS_DIR"
+
+# 检查 skills 目录是否存在
+if [ ! -d "$SKILLS_DIR" ]; then
+  echo "[Architect-Stage0] Skills 目录不存在，跳过 Skills 清单生成"
+else
+  # 扫描开发流程 Skills
+  echo "=== 开发流程 Skills ==="
+  ls $SKILLS_DIR/project-tdd*.md 2>/dev/null || echo "未找到 project-tdd-pattern.md"
+  ls $SKILLS_DIR/project-code-review*.md 2>/dev/null || echo "未找到 project-code-review-checklist.md"
+
+  # 扫描技术栈 Skills
+  echo "=== 技术栈 Skills ==="
+  ls $SKILLS_DIR/project-tech-*.md 2>/dev/null || echo "未找到 project-tech-*.md"
+
+  # 扫描业务模块 Skills
+  echo "=== 业务模块 Skills ==="
+  ls $SKILLS_DIR/project-*-module.md 2>/dev/null || echo "未找到 project-*-module.md"
+
+  # 扫描中间件 Skills
+  echo "=== 中间件 Skills ==="
+  ls $SKILLS_DIR/project-middleware-*.md 2>/dev/null || echo "未找到 project-middleware-*.md"
+fi
+```
+
+**生成 Skills 清单的操作步骤**：
+
+1. **扫描 Skills 目录**：按类别扫描 `.claude/skills/` 下的文件
+2. **分类整理**：按开发流程、技术栈、业务模块、中间件、外部分类
+3. **提取元数据**：读取每个 Skill 文件的第一行描述
+4. **生成索引表**：输出"Skill 文件 → 类别 → 优先级 → 适用 Task 类型"映射
+
+**Skill 优先级定义**（供 Arch-Stage2 Task 伪代码引用）：
+
+| 优先级 | 类别 | 说明 |
+|--------|------|------|
+| P3 | 开发流程 Skills | 所有 Task 都必须遵守（TDd、Code Review） |
+| P4 | 技术栈 Skills | 按框架选择（Spring Boot、Lombok、MyBatis） |
+| P5 | 业务模块 Skills | 按业务模块选择（如存在） |
+| P6 | 中间件 Skills | 按需选择（数据库、缓存、MQ） |
+
+#### 2.7 输出 consistency-baseline.md
 ```bash
 # 仅当文件不存在时执行
 if [ ! -f "$ROOT/.claude/context/consistency-baseline.md" ]; then
@@ -395,6 +445,7 @@ bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤开始" "反向�
 | 每个章节是否至少有一条有效数据？ | 不能全部为 [人工补充] | 返回操作 0.2 补充 |
 | 设计模式是否有代码示例？ | 证据中必须包含文件路径和行号 | 返回操作 0.2 补充 |
 | 反模式是否明确列出禁止做法？ | 至少包含 2 条反模式 | 返回操作 0.2 补充 |
+| Skills 清单（第五部分）是否完整？ | 必须包含开发流程、技术栈、中间件 Skills | 返回操作 2.6 补充 |
 | dependencies-overview 是否包含核心模块？ | 至少列出 3 个核心模块的依赖 | 返回操作 0.3 补充 |
 
 ```bash
@@ -406,8 +457,9 @@ bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤完成" "反向�
 
 **等待用户确认以下内容**：
 1. consistency-baseline.md 是否包含足够的规则和证据
-2. dependencies-overview.md 是否准确反映项目依赖
-3. 是否继续进入下一阶段或需要补充
+2. **Skills 清单（第五部分）是否完整可用**
+3. dependencies-overview.md 是否准确反映项目依赖
+4. 是否继续进入下一阶段或需要补充
 
 **回复选项**：
 - `继续` - 允许进入下一阶段

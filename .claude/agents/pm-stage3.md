@@ -46,17 +46,27 @@ SESSION_STATUS_PATH="$ROOT/.claude/iterations/sprint-latest/session-status.md"
 
 ### 操作 1：读取前置文档
 
-1. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "步骤开始" "读取前置文档" "" ""`
+1. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤开始" "读取前置文档" "" ""`
 2. 读取 `sprint-status.md`（Analyst 草案），了解 Task 清单
 3. 读取 `ADR.md`，了解需求背景、User Story、详细设计
-4. 读取 `session-status.md`，了解当前活跃任务和历史冲突
-5. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "步骤完成" "读取前置文档" "" "成功"`
+4. 读取 `pseudocode/` 目录下的所有 Task 伪代码文件（如存在）：
+   ```bash
+   PSEUDO_CODE_DIR="$ROOT/.claude/iterations/sprint-latest/pseudocode"
+   if [ -d "$PSEUDO_CODE_DIR" ]; then
+     echo "[PM-Stage3] 读取伪代码目录：$PSEUDO_CODE_DIR"
+     ls "$PSEUDO_CODE_DIR/" 2>/dev/null || echo "[Info] 伪代码目录为空"
+   fi
+   ```
+   - 从伪代码文件中提取 Task 的实现细节和依赖关系
+   - 用于理解每个 Task 的具体实现方案
+5. 读取 `session-status.md`，了解当前活跃任务和历史冲突
+6. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤完成" "读取前置文档" "" "成功"`
 
 ---
 
 ### 操作 2：冲突裁决与串并行决策
 
-1. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "步骤开始" "冲突裁决" "" ""`
+1. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤开始" "冲突裁决" "" ""`
 2. 分析 `sprint-status.md` 中 Task 的模块依赖关系
 3. 检测每个任务的模块冲突：
    - 两个 Task 修改同一文件的同一区域 → 核心冲突
@@ -66,39 +76,39 @@ SESSION_STATUS_PATH="$ROOT/.claude/iterations/sprint-latest/session-status.md"
    - **分模块**（若可拆分）：将任务拆分以消除冲突
    - **人类裁决**：无法自行解决则生成《冲突裁决申请书》
 5. 记录所有核心冲突及决议到 `sprint-status.md` 第 9 节（冲突记录）
-6. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "步骤完成" "冲突裁决" "" "成功"`
+6. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤完成" "冲突裁决" "" "成功"`
 
 ---
 
 ### 操作 3：设定 WIP 限制
 
-1. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "步骤开始" "设定WIP限制" "" ""`
+1. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤开始" "设定WIP限制" "" ""`
 2. 根据团队规模和安全并行数公式设定 WIP：
    ```
    安全并行数 = min(可用开发者数, 核心模块数 × 1)
    ```
 3. 默认 WIP 限制 = 2
 4. 记录到 `sprint-status.md` 第 5 节（WIP 限制）
-5. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "步骤完成" "设定WIP限制" "" "成功"`
+5. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤完成" "设定WIP限制" "" "成功"`
 
 ---
 
 ### 操作 4：设定里程碑
 
-1. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "步骤开始" "设定里程碑" "" ""`
+1. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤开始" "设定里程碑" "" ""`
 2. 设置至少 2 个里程碑检查点：
    - M1：基础设施完成（Entity、Repository、DTO 等基础模块）
    - M2：核心功能完成（Service、Controller 业务逻辑）
    - M3：测试完成（单元测试、集成测试）
 3. 里程碑应关联具体 Task
 4. 记录到 `sprint-status.md` 第 7 节（里程碑）
-5. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "步骤完成" "设定里程碑" "" "成功"`
+5. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤完成" "设定里程碑" "" "成功"`
 
 ---
 
 ### 操作 5：设置进度警戒线
 
-1. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "步骤开始" "设置进度警戒线" "" ""`
+1. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤开始" "设置进度警戒线" "" ""`
 2. 为每个 Task 设置进度警戒线：
    - **黄色警戒**：完成度 50% 时，进度应 ≥ 50%
    - **红色警戒**：完成度 80% 时，进度应 ≥ 80%
@@ -108,13 +118,13 @@ SESSION_STATUS_PATH="$ROOT/.claude/iterations/sprint-latest/session-status.md"
    | 黄色 | 完成度50%时进度 < 50% | PM 提醒开发者，检查是否有阻塞 |
    | 红色 | 完成度80%时进度 < 80% | PM 生成提案（缩小范围/延期/加资源） |
 4. 记录到 `sprint-status.md` 任务清单的"警戒线触发点"列
-5. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "步骤完成" "设置进度警戒线" "" "成功"`
+5. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤完成" "设置进度警戒线" "" "成功"`
 
 ---
 
 ### 操作 6：生成 sprint-status.md（定稿）
 
-1. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "步骤开始" "生成迭代计划定稿" "" ""`
+1. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤开始" "生成迭代计划定稿" "" ""`
 2. 读取 `sprint-status.md`（Analyst 草案）
 3. 补充以下内容：
    - 第 1 节（User Story 分组与 Modular Group）：从 ADR 第 2.4 节提取，已完成
@@ -122,14 +132,14 @@ SESSION_STATUS_PATH="$ROOT/.claude/iterations/sprint-latest/session-status.md"
    - 第 7 节（里程碑）：已完成
    - 第 9 节（冲突记录）：已完成
 4. 确保所有必填章节完整（12 节）
-5. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "产出物" "生成迭代计划" "$SPRINT_STATUS_PATH" "成功"`
-6. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "步骤完成" "生成迭代计划定稿" "" "成功"`
+5. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "产出物" "生成迭代计划" "$SPRINT_STATUS_PATH" "成功"`
+6. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤完成" "生成迭代计划定稿" "" "成功"`
 
 ---
 
 ### 操作 7：自检与反向校验
 
-1. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "步骤开始" "自检与反向校验" "" ""`
+1. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤开始" "自检与反向校验" "" ""`
 2. 检查：
    - [ ] **Modular Group 是否完整划分**（第 1 节）
    - [ ] **US 依赖矩阵是否准确**（第 1.2 节）
@@ -142,16 +152,16 @@ SESSION_STATUS_PATH="$ROOT/.claude/iterations/sprint-latest/session-status.md"
    - [ ] sprint-status.md 是否包含完整生命周期状态（第 8 节）
 3. **全部通过**：更新 session-status.md 中阶段 3 产出物状态为"✅"
 4. **未通过**：列出未通过项，打回给 Analyst 或自行修正
-5. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "步骤完成" "自检与反向校验" "" "成功"`
+5. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤完成" "自检与反向校验" "" "成功"`
 
 ---
 
 ### 操作 9：通知进入阶段 4
 
-1. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "步骤开始" "通知进入阶段4" "" ""`
+1. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤开始" "通知进入阶段4" "" ""`
 2. 审查通过后，更新 session-status.md 中阶段 4 状态为"🔄 进行中"
 3. 通知相关 Agent 可以开始阶段 4（/mf-upgrade:04-implement）
-4. `bash $ROOT/hooks/log-event.sh "03" "$AGENT_NAME" "步骤完成" "通知进入阶段4" "" "成功"`
+4. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤完成" "通知进入阶段4" "" "成功"`
 
 ---
 
