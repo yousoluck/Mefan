@@ -390,7 +390,7 @@ COMPLETE_TIME=$(date +"%Y-%m-%d %H:%m:%S")
 # 更新 test-plan.md 产出物状态和完成时间（仅在审核通过时）
 if [ "$CONCLUSION" = "通过" ]; then
   sed -i "s/| 02 | test-plan.md | .claude/iterations/sprint-latest/test-plan.md | ⏳ 待生成 |/| 02 | test-plan.md | .claude/iterations/sprint-latest/test-plan.md | ✅ 已审核 | $COMPLETE_TIME |/g" \
-     "$ROOT/.claude/iterations/sprint-latest/session-status.md"
+     "$ROOT/.claude/iterations/session-status.md"
 fi
 ```
 
@@ -415,7 +415,7 @@ fi
 ```
 
 ```bash
-bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "产出物" "更新session-status" ".claude/iterations/sprint-latest/session-status.md" "成功"
+bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "产出物" "更新session-status" ".claude/iterations/session-status.md" "成功"
 bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "session-status更新" "" "成功"
 ```
 

@@ -468,7 +468,7 @@ bash .claude/hooks/log-event.sh "02" "Command" "阶段退出" "阶段2完成" ""
 | **review-log.md** | `.claude/iterations/sprint-latest/reviews/review-log.md` | ✅ | PM-Audit | 跨阶段问题追踪 |
 | **test-plan.md** | `.claude/iterations/sprint-latest/test-plan.md` | ✅ | QA | 测试策略和用例 |
 | **testplan-review.md** | `.claude/iterations/sprint-latest/reviews/testplan-review.md` | ✅ | PM-Audit-TP | test-plan 审核问题汇总 |
-| **session-status.md 更新** | `.claude/iterations/sprint-latest/session-status.md` | ✅ | 各Agent | 阶段完成记录 |
+| **session-status.md 更新** | `.claude/iterations/session-status.md` | ✅ | 各Agent | 阶段完成记录 |
 | **project.md 更新** | `.claude/context/project.md` | ✅ | Architect/PM-Audit | 迭代历史状态 |
 
 ---

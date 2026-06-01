@@ -37,7 +37,7 @@ AGENT_NAME="PM"
 ROOT="/mnt/d/pycharmprojects/Mefan"
 ADR_PATH="$ROOT/.claude/iterations/sprint-latest/ADR.md"
 SPRINT_STATUS_PATH="$ROOT/.claude/iterations/sprint-latest/sprint-status.md"
-SESSION_STATUS_PATH="$ROOT/.claude/iterations/sprint-latest/session-status.md"
+SESSION_STATUS_PATH="$ROOT/.claude/iterations/session-status.md"
 ```
 
 ---
@@ -150,9 +150,68 @@ SESSION_STATUS_PATH="$ROOT/.claude/iterations/sprint-latest/session-status.md"
    - [ ] 进度警戒线是否已设置
    - [ ] 里程碑是否至少 2 个
    - [ ] sprint-status.md 是否包含完整生命周期状态（第 8 节）
-3. **全部通过**：更新 session-status.md 中阶段 3 产出物状态为"✅"
+3. **全部通过**：进入操作 8
 4. **未通过**：列出未通过项，打回给 Analyst 或自行修正
 5. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤完成" "自检与反向校验" "" "成功"`
+
+---
+
+### 操作 8：更新 session-status.md 和 project.md
+
+> **目的**：记录阶段 3 PM 完成状态（参考 pm-stage1.md 操作 1.5 和 pm-stage0.md 操作 0.5）
+
+```bash
+bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤开始" "更新 session-status 和 project" "" ""
+```
+
+#### 8.1 更新 session-status.md
+
+```bash
+# 获取当前时间戳
+COMPLETE_TIME=$(date +"%Y-%m-%d %H:%m:%S")
+
+# 更新阶段完成记录表格
+sed -i "s/| 03 | 迭代计划 |.*| ⏳ 待处理 |/| 03 | 迭代计划 | $COMPLETE_TIME | ✅ 已完成 | /g" \
+   "$ROOT/.claude/iterations/session-status.md"
+
+# 更新产出物追踪表：sprint-status.md
+sed -i "s/| 03 | sprint-status.md | .claude/iterations/sprint-latest/ | ⏳ 待生成 |/| 03 | sprint-status.md | .claude/iterations/sprint-latest/sprint-status.md | ✅ 已生成 | $COMPLETE_TIME |/g" \
+   "$ROOT/.claude/iterations/session-status.md"
+
+# 更新自动推进状态
+sed -i "s/| \*\*当前阶段\*\* | 2 |/| \*\*当前阶段\*\* | 3 |/g" \
+   "$ROOT/.claude/iterations/session-status.md"
+sed -i "s/| \*\*已完成阶段\*\* | \[1, 2\] |/| \*\*已完成阶段\*\* | [1, 2, 3] |/g" \
+   "$ROOT/.claude/iterations/session-status.md"
+```
+
+#### 8.2 记录 PM 阶段完成报告
+
+在 `session-status.md` 的 `## PM 阶段完成报告（标准化格式）` 章节下，新增：
+
+```markdown
+### 阶段 3 完成报告：迭代计划（PM-Stage3）
+- **完成时间**：{当前时间戳}
+- **执行摘要**：完成迭代计划生成、冲突裁决、WIP限制设定、里程碑设定
+- **关键产出**：
+  - [sprint-status.md]：[.claude/iterations/sprint-latest/sprint-status.md] - ✅
+- **与上阶段的衔接**：依赖 Analyst-Stage3 的 Task 清单和 Modular Group
+- **下一步**：进入阶段 4 的前置条件：sprint-status.md 已生成
+- **需要 Human Gate 确认的事项**：无
+```
+
+#### 8.3 更新 project.md 中 sprint-latest 的详细文档状态
+
+```bash
+# 更新 project.md 中 sprint-status.md 的状态
+sed -i "s/| Sprint 状态 | sprint-status.md | ⏳ 待创建 |/| Sprint 状态 | sprint-status.md | ✅ 已生成 | .claude/iterations/sprint-latest/sprint-status.md |/g" \
+   "$ROOT/.claude/context/project.md"
+```
+
+```bash
+bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "产出物" "更新 session-status.md 和 project.md" "" "成功"
+bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤完成" "更新 session-status 和 project" "" "成功"
+```
 
 ---
 

@@ -394,7 +394,7 @@ COMPLETE_TIME=$(date +"%Y-%m-%d %H:%m:%S")
 
 # 更新 test-plan 生成状态（等待 PM 审核）
 sed -i "s/| 02 | test-plan.md | .claude/iterations/sprint-latest/test-plan.md | ⏳ 待生成 |/| 02 | test-plan.md | .claude/iterations/sprint-latest/test-plan.md | ⏳ 审核中 | $COMPLETE_TIME |/g" \
-   "$ROOT/.claude/iterations/sprint-latest/session-status.md"
+   "$ROOT/.claude/iterations/session-status.md"
 ```
 
 #### 7.2 记录 QA 阶段完成报告
@@ -417,7 +417,7 @@ sed -i "s/| 02 | test-plan.md | .claude/iterations/sprint-latest/test-plan.md | 
 ```
 
 ```bash
-bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "产出物" "更新session-status" ".claude/iterations/sprint-latest/session-status.md" "成功"
+bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "产出物" "更新session-status" ".claude/iterations/session-status.md" "成功"
 bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "session-status更新" "" "成功"
 ```
 

@@ -82,7 +82,7 @@
 
 ```bash
 # 检查 session-status.md 中阶段 3 状态
-if ! grep -q "阶段 3.*✅" "$ROOT/.claude/iterations/sprint-latest/session-status.md" 2>/dev/null; then
+if ! grep -q "阶段 03.*✅" "$ROOT/.claude/iterations/session-status.md" 2>/dev/null; then
   echo "[Error] 阶段 3 尚未完成，阶段 4 无法开始"
   exit 1
 fi
@@ -123,7 +123,7 @@ grep -q "^| T-" "$ROOT/.claude/iterations/sprint-latest/sprint-status.md" || {
 ```bash
 # 更新 session-status.md
 sed -i "s/| 04 | 迭代实现 |.*| ⏳ 待开始 |/| 04 | 迭代实现 | $(date +"%Y-%m-%d %H:%m") | 🔄 进行中 |/g" \
-  "$ROOT/.claude/iterations/sprint-latest/session-status.md"
+  "$ROOT/.claude/iterations/session-status.md"
 
 # 安装 Git hooks（确保自动化检查可用）
 bash .claude/hooks/install-hooks.sh
@@ -490,7 +490,7 @@ Open → In Progress → Fixed → Verified → Closed
 | QA-Fix Agent（阶段4） | `agents/qa-fix-stage4.md` |
 | PM Agent（阶段4） | `agents/pm-stage4.md` |
 | Sprint 状态 | `.claude/iterations/sprint-latest/sprint-status.md` |
-| Session 状态 | `.claude/iterations/sprint-latest/session-status.md` |
+| Session 状态 | `.claude/iterations/session-status.md` |
 | 审查日志 | `.claude/iterations/sprint-latest/reviews/review-log.md` |
 | ADR | `.claude/iterations/sprint-latest/ADR.md` |
 | Test Plan | `.claude/iterations/sprint-latest/test-plan.md` |

@@ -25,9 +25,9 @@ Open → In Progress → Fixed → Verified → Closed
 
 | 阶段 | 循环限制 |
 |------|----------|
-| Arch-Check | 3次 |
+| Code-Review | 3次 |
 | QA-Test-Coding | 3次 |
-| Arch-Test-Check | 3次 |
+| Test-Code-Review | 3次 |
 | Testing Bug | 3次 |
 
 ---

@@ -3,9 +3,9 @@
 > 文件：`.claude/iterations/sprint-latest/human-gate-report.md`
 > 用途：当检查循环达到3次上限或发现P0缺陷时，报告给人类决策
 > 触发条件：
-> - Arch-Check 循环 3 次未通过
+> - Code-Review 循环 3 次未通过
 > - QA-Test-Coding 循环 3 次未通过
-> - Arch-Test-Check 循环 3 次未通过
+> - TestCode-Review 循环 3 次未通过
 > - Testing 循环 3 次未通过
 > - 发现 P0 缺陷
 
@@ -26,7 +26,7 @@
 
 | 条件 | 说明 |
 |------|------|
-| **触发类型** | Arch-Check 循环超限 / QA-Test-Coding 循环超限 / Arch-Test-Check 循环超限 / Testing 循环超限 / P0缺陷 |
+| **触发类型** | Code-Review 循环超限 / QA-Test-Coding 循环超限 / Test-Code-Review 循环超限 / Testing 循环超限 / P0缺陷 |
 | **MG ID** | MG-XXX |
 | **循环次数** | 3/3 |
 

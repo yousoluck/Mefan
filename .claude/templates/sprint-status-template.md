@@ -39,7 +39,7 @@
 |----|---------|-----------|-----------|
 | US-01 | - | US-02, US-03 | ✅ |
 | US-02 | US-01 | US-04 | ❌ |
-| US-03 | - | - | ✅ |
+| US-03 | US-01 | - | ❌ |
 | US-04 | US-02, US-03 | - | ❌ |
 | US-05 | US-02, US-03 | - | ❌ |
 
@@ -71,7 +71,7 @@
 
 **状态流转（Task级）**：To Do → In Progress → In Review → Done
 
-**生命周期流转（US/MG级）**：🏃 Dev → 🔍 Self-Check → 🏛️ Arch-Check → 🧪 QA-Test-Coding → 🔬 Arch-Test-Check → ✅ Testing → 🎉 Close
+**生命周期流转（US/MG级）**：🏃 Dev → 🔍 Self-Check → 🏛️ Code-Review → 🧪 Test-Coding → 🔬 Test-Code-Review → ✅ Testing → 🎉 Close
 
 **状态说明**：
 - To Do：任务待开始（可领取）
@@ -82,9 +82,9 @@
 **生命周期状态说明**：
 - 🏃 Dev：开发中
 - 🔍 Self-Check：自我检查
-- 🏛️ Arch-Check：架构检查
+- 🏛️ Code-Review：检查代码
 - 🧪 QA-Test-Coding：QA 测试编码
-- 🔬 Arch-Test-Check：测试审查
+- 🔬 Test-Code-Review：检查测试代码
 - ✅ Testing：测试执行
 - 🎉 Close：完成
 
@@ -181,15 +181,15 @@
 
 ### 8.1 US 7状态生命周期
 
-| 状态 | 说明 | 触发条件 |
-|------|------|---------|
-| 🏃 **Dev** | 开发中 | Dev 领取任务开始开发 |
-| 🔍 **Self-Check** | 自我检查 | 代码提交等待 self-check |
-| 🏛️ **Arch-Check** | 架构检查 | Self-Check 通过，等待 Arch 检查 |
-| 🧪 **QA-Test-Coding** | 测试编码 | Arch-Check 通过，QA 编写测试代码 |
-| 🔬 **Arch-Test-Check** | 测试审查 | QA 测试编码完成，等待 Arch 审查 |
-| ✅ **Testing** | 测试执行 | Arch-Test-Check 通过，执行模块测试 |
-| 🎉 **Close** | 完成 | 测试通过，US 结束 |
+| 状态 | 说明     | 触发条件 |
+|------|--------|---------|
+| 🏃 **Dev** | 开发中    | Dev 领取任务开始开发 |
+| 🔍 **Self-Check** | 自我检查   | 代码提交等待 self-check |
+| 🏛️ **Code-Review** | 检查代码   | Self-Check 通过，等待 Arch 检查 |
+| 🧪 **QA-Test-Coding** | 测试编码   | Code-Review 通过，QA 编写测试代码 |
+| 🔬 **Test-Code-Review** | 检查测试代码 | QA 测试编码完成，等待 Arch 审查 |
+| ✅ **Testing** | 测试执行   | Test-Code-Review 通过，执行模块测试 |
+| 🎉 **Close** | 完成     | 测试通过，US 结束 |
 
 ### 8.2 US 进度汇总
 
@@ -225,19 +225,19 @@
 - -: 未开始
 
 **循环限制**：
-- Arch Code Check: 3次 → Human Gate
+- Code Review: 3次 → Human Gate
 - QA Test Coding: 3次 → Human Gate
-- Arch Test Check: 3次 → Human Gate
+- Test Code Review: 3次 → Human Gate
 - Testing Bug: 3次 → Technical Debt
 
 **更新时机**：每个状态转换时由负责的 Agent 更新
 
-| Agent | 负责更新状态 |
-|-------|-------------|
-| Dev | Dev, Self Check |
-| Arch | Arch Code Check, Arch Test Check |
-| QA | QA Test Coding, Testing |
-| PM | Close |
+| Agent | 负责更新状态                        |
+|-------|-------------------------------|
+| Dev | Dev, Self Check               |
+| Arch | Code Review, Test Code Review |
+| QA | QA Test Coding, Testing       |
+| PM | Close                         |
 
 ---
 
@@ -294,4 +294,4 @@
 |------|------|------|
 | ADR | `.claude/iterations/sprint-latest/ADR.md` | 阶段 2 产出，本计划 Task 来源 |
 | test-plan | `.claude/iterations/sprint-latest/test-plan.md` | 阶段 2 产出，本计划测试关联 |
-| Session 状态 | `.claude/iterations/sprint-latest/session-status.md` | 阶段状态追踪（与本文件不同用途） |
+| Session 状态 | `.claude/iterations/session-status.md` | 阶段状态追踪（与本文件不同用途） |

@@ -34,7 +34,7 @@ PM 在阶段 4 执行以下职责：
 ```bash
 AGENT_NAME="PM"
 ROOT="/mnt/d/pycharmprojects/Mefan"
-SESSION_STATUS_PATH="$ROOT/.claude/iterations/sprint-latest/session-status.md"
+SESSION_STATUS_PATH="$ROOT/.claude/iterations/session-status.md"
 SPRINT_STATUS_PATH="$ROOT/.claude/iterations/sprint-latest/sprint-status.md"
 REVIEW_LOG_PATH="$ROOT/.claude/iterations/sprint-latest/reviews/review-log.md"
 BUGS_PATH="$ROOT/.claude/iterations/sprint-latest/bugs.md"
@@ -220,7 +220,7 @@ BUGS_PATH="$ROOT/.claude/iterations/sprint-latest/bugs.md"
 |--------|------|------|
 | 阶段 4 完成报告 | `.claude/iterations/sprint-latest/stage4-completion-report.md` | 开发测试汇总 |
 | Human Gate 异常报告 | `.claude/iterations/sprint-latest/human-gate-report.md` | 异常情况报告 |
-| session-status.md 更新 | `.claude/iterations/sprint-latest/session-status.md` | 阶段状态 |
+| session-status.md 更新 | `.claude/iterations/session-status.md` | 阶段状态 |
 
 ---
 
@@ -229,7 +229,7 @@ BUGS_PATH="$ROOT/.claude/iterations/sprint-latest/bugs.md"
 | 文档 | 路径 |
 |------|------|
 | Sprint 状态 | `.claude/iterations/sprint-latest/sprint-status.md` |
-| Session 状态 | `.claude/iterations/sprint-latest/session-status.md` |
+| Session 状态 | `.claude/iterations/session-status.md` |
 | review-log.md | `.claude/iterations/sprint-latest/reviews/review-log.md` |
 | bugs.md | `.claude/iterations/sprint-latest/bugs.md` |
 | Project | `.claude/context/project.md` |

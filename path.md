@@ -1,1 +1,1 @@
-cd /mnt/d/pycharmprojects/Mefan/.claude
+cd /mnt/d/pycharmprojects/Mefan/

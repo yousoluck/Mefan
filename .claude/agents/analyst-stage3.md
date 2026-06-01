@@ -13,9 +13,7 @@ Analyst 在阶段 3 从已审批的 ADR 中提取任务清单，并为每个 Tas
 
 ## 需要的技能
 
-- `.claude/skills/graphify-query-cheatsheet.md`                    # Mefan 自有
-- `.claude/skills/sub-feature-splitting.md`                        # 任务拆分技能
-- `@superpowers/task-decomposition`                               # 外部技能（预留格式）
+- `.claude/skills/graphify-query-cheatsheet.md`                    # 图谱查询：定位可复用代码时使用（如 ADR 中无可复用代码列时查询相似模块）
 
 ## 需要的规则
 
@@ -81,58 +79,73 @@ SPRINT_STATUS_PATH="$ROOT/.claude/iterations/sprint-latest/sprint-status.md"
 
 #### 3.1 关联 Test Plan（如果 test-plan.md 存在）
 
+> **关联路径**：test-plan.md 是按 US 关联测试用例的，Task 需要通过 US 间接关联
+
+**关联逻辑**：
+1. 从 test-plan.md 读取每个 TC 关联的 US（如 TC-F-001 → US-01）
+2. 从 ADR 读取每个 Task 关联的 US（如 T-001 → US-01）
+3. 推导 Task-TC 关联：同一 US 下的 TC 关联到该 US 下的所有 Task
+
+```markdown
 | Task ID | 关联测试用例 | 说明 |
 |---------|-------------|------|
-| T-001 | TC-F-001, TC-I-001 | 创建评论功能 |
-| T-002 | TC-F-002 | 查询评论列表 |
+| T-001 | TC-F-001 | TC 关联 US-01，Task T-001 也关联 US-01 |
+```
 
 > 如果 test-plan.md 不存在，跳过此步骤并记录"未关联 Test Plan"
+> 注意：Analyst 不重新分析测试用例，只做 Task-US-TC 的映射关联
 
 #### 3.2 引用 Skills
 
-基于 ADR 第 11 节和 consistency-baseline，引用需要的 Skills：
+> **直接引用 ADR 第 11 节和第 7.4 节**，不要重写表格
 
+从 ADR.md 提取：
+- 第 11 节（Skill 引用）：本次迭代引用的 Skills 清单
+- 第 7.4 节（Skill 引用总表）：每个 Task 关联的 Skill
+
+如果 ADR 中没有 Skill 引用总表，则：
+- 参考 consistency-baseline.md 中定义的 Skills
+- 按优先级引用（技术栈 Skills → 中间件 Skills → 业务模块 Skills）
+
+示例：
+```markdown
 | Task ID | 引用的 Skill | 使用原因 |
 |---------|-------------|----------|
-| T-001 | project-service-pattern.md | Service 层实现 |
-| T-002 | project-mybatis-pattern.md | Mapper 规范 |
+| T-001 | project-tech-lombok.md | ADR 第 11 节定义 |
+| T-002 | project-mybatis-pattern.md | ADR 第 11 节定义 |
+```
 
 #### 3.3 标注可复用代码
 
-基于 ADR 第 11 节和 consistency-baseline，标注可复用代码：
+> **直接引用 ADR Task 表格的"可复用代码"列**（ADR.md 第 7.1 节）
 
-| Task ID | 已有代码 | 复用方式 | 复用位置 |
-|---------|---------|----------|----------|
-| T-001 | PostService.java L45-80 | findById() 模式 | CommentServiceImpl |
-| T-002 | PageHelper | 分页工具 | CommentRepository |
+从 ADR.md 第 7.1 节 Task 表格的 `可复用代码` 列提取：
+- 每个 Task 的可复用代码信息已在上游阶段（ADR）填写
+- Analyst 只做提取和格式化，不重新分析
 
-#### 3.4 风险等级评估
+如果 ADR Task 表格没有"可复用代码"列，则：
+- 参考 ADR 伪代码文件的 `[P1] 相似模块参考`、`[P2] 强制复用模块` 章节
 
-| Task ID | 风险等级 | 风险原因 | 缓解措施 |
-|---------|---------|----------|----------|
-| T-001 | 🟡 中 | 涉及 PostService 修改 | 全量回归测试 |
-| T-002 | 🟢 低 | 纯新增模块 | - |
+#### 3.4 风险说明
 
-风险等级定义：
-- 🟢 低：纯新增模块，无依赖，风险可控
-- 🟡 中：有修改现有模块或涉及数据迁移
-- 🔴 高：涉及核心功能重构或多个模块联动
+> **直接从 ADR 第 9 节提取**，不要重写
 
-#### 3.5 预计工时估算
+从 ADR.md 第 9 节风险与非功能设计中提取每个 Task 的：
+- 风险等级
+- 风险原因
+- 缓解措施
 
-| Task ID | 任务类型 | 预计工时 | 估算依据 |
-|---------|---------|----------|----------|
-| T-001 | 编码 | 2h | 参考 PostService 实现 |
-| T-002 | 编码 | 3h | 参考 PostService + 分页 |
+#### 3.5 预计工时
 
-工时估算标准：
-- 编码任务：参考类似功能实现
-- 测试任务：编码工时的 50%
-- 文档任务：编码工时的 30%
+> **直接从 ADR Task 表格的"预计工时"列提取**
+
+从 ADR.md 第 7.1 节 Task 表格的 `预计工时` 列提取，不要重新估算。
 
 #### 3.6 输入输出明确化
 
-为每个 Task 明确：
+> **从 ADR 伪代码文件的"基本信息"节提取**
+
+从 `.claude/iterations/sprint-latest/pseudocode/T-{NNN}.md` 文件的 `## 基本信息` 章节提取：
 - **输入**：前置条件、数据依赖
 - **输出**：产出物、变更文件
 
@@ -144,70 +157,35 @@ SPRINT_STATUS_PATH="$ROOT/.claude/iterations/sprint-latest/sprint-status.md"
 
 1. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤开始" "生成迭代计划草案" "" ""`
 2. 确保 `.claude/iterations/sprint-latest/` 目录存在
-3. 创建 `sprint-status.md`，按模板填写：
+3. **直接引用模板**：
 
-**sprint-status.md 章节结构（单一数据源版）**：
+   ```bash
+   # 复制模板到目标位置
+   if [ ! -f "$SPRINT_STATUS_PATH" ]; then
+     cp $ROOT/.claude/templates/sprint-status-template.md "$SPRINT_STATUS_PATH"
+   fi
+   ```
 
-```markdown
-# 迭代计划（合并版）
+4. 按模板章节结构填写内容（**不要重写模板结构**，只填写数据）：
+   - 第 1 节（User Story 分组与 Modular Group）：**从 ADR 第 2.4 节提取**
+   - 第 2 节（任务看板）：**从 ADR 第 7.1 节 Task 表格提取**，补充状态为 To Do
+   - 第 3 节（Task 详细信息）：**从 ADR 伪代码文件提取**，见下方说明
 
-## 基本信息
-- **Sprint ID**: sprint-YYYY-MM-DD
-- **关联 ADR**: adr-YYYY-MM-DD-001
-- **创建时间**: YYYY-MM-DD HH:mm
-- **创建人**: Analyst
+   > **sprint-status-template.md 是单一数据源**，包含 Plan + Status
+   > **sprint-status 与 session-status 的区别**：
+   > - `session-status.md`：跨迭代全局追踪（7个阶段的阶段级记录）
+   > - `sprint-status.md`：单迭代内状态管理（Task级看板、US进度、7状态生命周期）
 
-## 1. User Story 分组与 Modular Group [必填]
-> 从 ADR 第 2.4 节提取
+5. **第 3 节 Task 详细信息**填写规则：
+   - 3.1 关联 Test Plan：从 test-plan.md 提取 TC-US 映射，再映射到 Task
+   - 3.2 引用的 Skills：直接从 ADR 第 7.4 节和第 11 节提取，**不要重写**
+   - 3.3 可复用代码：直接从 ADR 第 7.1 节 Task 表格的"可复用代码"列提取，**不要重写**
+   - 3.4 风险说明：从 ADR 第 9 节提取，**不要重写**
+   - 3.5 预计工时：从 ADR 第 7.1 节 Task 表格的"预计工时"列提取，**不要重写**
+   - 3.6 输入输出：从 ADR 伪代码文件的基本信息章节提取
 
-### 1.1 Modular Group 划分
-| Group ID | Group 名称 | 包含 US | 依赖关系 | 可独立开发 | 说明 |
-|----------|-----------|---------|----------|-----------|------|
-| MG-001 | {功能名称} | US-01, US-02 | 无 | ✅ | 后端 API + 前端 UI 打包 |
-
-### 1.2 US 依赖矩阵
-| US | 依赖 US | 被依赖 US | 可独立开发 |
-|----|---------|-----------|-----------|
-| US-01 | - | US-02 | ✅ |
-
-### 1.3 User Story 列表
-| US ID | 标题 | 优先级 | 所属 Group | 关联 Task 数 |
-|-------|------|--------|-----------|-------------|
-
-## 2. 任务看板 [必填]
-| Task ID | 关联 US/MG | 描述 | 类型 | 状态 | 负责人 | 计划工时 | 实际工时 | 依赖 | 风险 | 警戒线触发点 |
-|---------|-----------|------|------|------|--------|---------|---------|------|------|-------------|
-
-## 3. Task 详细信息
-> 每个 Task 的详细信息（Skills、可复用代码、关联测试用例）
-
-## 4. 状态汇总仪表盘
-> 当前进度统计
-
-## 5. WIP 限制 [必填]
-- 最大并行任务数：
-
-## 6. 并行策略
-
-## 7. 里程碑 [必填]
-- [ ] M1:
-- [ ] M2:
-
-## 8. User Story 进度汇总
-
-## 9. 冲突记录
-
-## 10. 更新规则
-
-## 11. 自检清单
-
-## 12. 关联文档
-```
-
-**注意**：sprint-status.md 是单一数据源，Dev 领任务 + 更新状态都在这里。包含 Plan（MG划分、US列表、Task看板）+ Status（US生命周期7状态）。
-
-4. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "产出物" "生成迭代计划草案" "$ITERATION_PLAN_PATH" "成功"`
-5. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤完成" "生成迭代计划草案" "" "成功"`
+6. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "产出物" "生成迭代计划草案" "$SPRINT_STATUS_PATH" "成功"`
+7. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤完成" "生成迭代计划草案" "" "成功"`
 
 ---
 

@@ -46,7 +46,7 @@
 
 ```bash
 # 检查 session-status.md 中阶段 2 状态
-if ! grep -q "阶段 2.*✅" "$ROOT/.claude/iterations/sprint-latest/session-status.md" 2>/dev/null; then
+if ! grep -q "阶段 02.*✅" "$ROOT/.claude/iterations/session-status.md" 2>/dev/null; then
   echo "[Error] 阶段 2 尚未完成，阶段 3 无法开始"
   echo "请先完成阶段 2 或运行 /mf-upgrade:02-arch-qa"
   exit 1
@@ -96,7 +96,7 @@ fi
 ```bash
 echo ""
 echo "========== 前置检查汇总 =========="
-echo "[前置检查] 阶段 2 完成状态：$(grep '阶段 2' $ROOT/.claude/iterations/sprint-latest/session-status.md | grep -o '✅' || echo '❌')"
+echo "[前置检查] 阶段 02 完成状态：$(grep '阶段 02' $ROOT/.claude/iterations/session-status.md | grep -o '✅' || echo '❌')"
 echo "[前置检查] ADR.md 存在：$(test -f $ROOT/.claude/iterations/sprint-latest/ADR.md && echo '✅' || echo '❌')"
 echo "[前置检查] ADR Modular Group：$(grep -q 'Modular Group' $ROOT/.claude/iterations/sprint-latest/ADR.md && echo '✅' || echo '⚠️')"
 echo "[前置检查] test-plan.md 存在：$(test -f $ROOT/.claude/iterations/sprint-latest/test-plan.md && echo '✅' || echo '⚠️')"
@@ -270,7 +270,7 @@ bash .claude/hooks/log-event.sh "03" "Command" "阶段退出" "阶段3完成" ""
 
 ```bash
 # 更新 session-status.md 阶段 3 状态
-sed -i 's/| 3-迭代计划.*|/\| 3-迭代计划 | ✅ | $(date +%Y-%m-%d) |/' $ROOT/.claude/iterations/sprint-latest/session-status.md
+sed -i 's/| 3-迭代计划.*|/\| 3-迭代计划 | ✅ | $(date +%Y-%m-%d) |/' $ROOT/.claude/iterations/session-status.md
 ```
 
 ---
@@ -283,7 +283,7 @@ sed -i 's/| 3-迭代计划.*|/\| 3-迭代计划 | ✅ | $(date +%Y-%m-%d) |/' $R
 |--------|------|------|--------|---------|
 | **sprint-status.md** | `.claude/iterations/sprint-latest/sprint-status.md` | ✅ | Analyst + PM | 单一数据源：包含所有 US/Modular Group/Task，WIP、里程碑、警戒线、状态 |
 | **sprint-status.md** | `.claude/iterations/sprint-latest/sprint-status.md` | ✅ | PM（导出） | 看板视图，声明"状态以 sprint-status.md 为准" |
-| **session-status.md 更新** | `.claude/iterations/sprint-latest/session-status.md` | ✅ | PM | 阶段 3 完成记录 |
+| **session-status.md 更新** | `.claude/iterations/session-status.md` | ✅ | PM | 阶段 3 完成记录 |
 
 ---
 
@@ -329,7 +329,7 @@ sed -i 's/| 3-迭代计划.*|/\| 3-迭代计划 | ✅ | $(date +%Y-%m-%d) |/' $R
 | sprint-status.md 模板 | `.claude/templates/sprint-status-template.md` | Sprint 看板模板（导出视图） |
 | ADR.md | `.claude/iterations/sprint-latest/ADR.md` | 阶段 2 产出，本阶段 Task 来源（含第 2.4 节 Modular Group） |
 | test-plan.md | `.claude/iterations/sprint-latest/test-plan.md` | 阶段 2 产出，本阶段测试关联 |
-| session-status.md | `.claude/iterations/sprint-latest/session-status.md` | 阶段状态追踪（需更新） |
+| session-status.md | `.claude/iterations/session-status.md` | 阶段状态追踪（需更新） |
 
 ---
 

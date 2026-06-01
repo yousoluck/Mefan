@@ -425,7 +425,7 @@ sed -i "s/| 02 | 架构设计 |.*| ⏳ 待处理 |/| 02 | 架构设计 | $COMPLE
 ```bash
 # 更新 ADR.md 产出物状态和完成时间
 sed -i "s/| 02 | ADR.md | .claude/iterations/sprint-latest/ADR.md | ⏳ 待生成 |/| 02 | ADR.md | .claude/iterations/sprint-latest/ADR.md | ✅ 已审核 | $COMPLETE_TIME |/g" \
-   "$ROOT/.claude/iterations/sprint-latest/session-status.md"
+   "$ROOT/.claude/iterations/session-status.md"
 ```
 
 #### 8.3 更新当前阶段和已完成阶段
@@ -434,9 +434,9 @@ sed -i "s/| 02 | ADR.md | .claude/iterations/sprint-latest/ADR.md | ⏳ 待生�
 # 审核通过后更新当前阶段
 if [ "$CONCLUSION" = "通过" ]; then
   sed -i "s/| \*\*当前阶段\*\* | 1 |/| **当前阶段** | 2 |/g" \
-     "$ROOT/.claude/iterations/sprint-latest/session-status.md"
+     "$ROOT/.claude/iterations/session-status.md"
   sed -i "s/| \*\*已完成阶段\*\* | \[1\] |/| **已完成阶段** | [1, 2] |/g" \
-     "$ROOT/.claude/iterations/sprint-latest/session-status.md"
+     "$ROOT/.claude/iterations/session-status.md"
 fi
 ```
 
@@ -462,7 +462,7 @@ fi
 ```
 
 ```bash
-bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "产出物" "更新session-status" ".claude/iterations/sprint-latest/session-status.md" "成功"
+bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "产出物" "更新session-status" ".claude/iterations/session-status.md" "成功"
 bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "session-status更新" "" "成功"
 ```
 
