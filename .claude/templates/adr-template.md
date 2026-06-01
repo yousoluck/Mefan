@@ -652,6 +652,22 @@ DROP TABLE IF EXISTS {table};
 - [ ] **可实施性**：Task 拆分是否合理（2-4 小时粒度）？
 - [ ] **风险评估**：是否识别了主要风险并有缓解措施？
 - [ ] **审核通过**：PM-Audit 是否已通过（adr-review.md 结论为"通过"）？
+- [ ] Modular Group 是否完整划分（2.4 节）
+- [ ] US 依赖矩阵是否准确（2.4 节）
+- [ ] 是否有详细的数据模型设计
+- [ ] 是否有完整的 API 设计
+- [ ] 是否识别了所有受影响模块
+- [ ] **Task 伪代码是否符合 consistency-baseline（命名、目录结构）**
+- [ ] **Task 伪代码是否标注了可复用代码（参考模块、工具方法）**
+- [ ] **Task 伪代码是否引用了正确的 Skills（包含外部 Skills 如 @superpowers/xxx）**
+- [ ] **Task 伪代码文件是否独立生成（.claude/iterations/sprint-latest/pseudocode/）**
+- [ ] **伪代码文件数量与 Task 数量一致**
+- [ ] Task 是否原子化
+- [ ] Task 是否关联到 US/MG
+- [ ] Task 依赖是否清晰
+- [ ] 是否有错误处理设计
+- [ ] 是否有风险分析
+- [ ] 是否引用了相关 Skills
 
 ### 18.2 变更历史
 | 日期 | 修改人 | 修改内容 | 版本 |
