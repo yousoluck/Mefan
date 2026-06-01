@@ -113,6 +113,14 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "读
 bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "修复问题" "" ""
 ```
 
+#### 3.0 更新 test-plan 状态为"修复中"
+
+```bash
+# 将 test-plan 状态更新为修复中，表示正在进行问题修复
+sed -i "s/| \*\*状态\*\* | 审核中/| **状态** | 修复中/g" "$ROOT/.claude/iterations/sprint-latest/test-plan.md"
+echo "[QA-Fix-Stage2] test-plan 状态已更新为：修复中"
+```
+
 #### 3.1 提取问题列表
 
 从 testplan-review.md 的"问题汇总"章节提取所有状态为 Open 或 Unfixed 的问题：
@@ -154,6 +162,14 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "修
 
 ```bash
 bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "修复问题" "" "$TOTAL_TO_FIX个问题已修复"
+```
+
+#### 3.3 修复完成后更新 test-plan 状态为"审核中"
+
+```bash
+# 修复完成后，将 test-plan 状态改回审核中，等待 PM 重新审核
+sed -i "s/| \*\*状态\*\* | 修复中/| **状态** | 审核中/g" "$ROOT/.claude/iterations/sprint-latest/test-plan.md"
+echo "[QA-Fix-Stage2] test-plan 状态已更新为：审核中（修复完成，等待 PM 重新审核）"
 ```
 
 ---

@@ -5,12 +5,37 @@
 
 ---
 
-## 0. 日志声明
+## 0. 概述
+
+本阶段由 PM Agent 主导迭代总结，进化教练 Agent 从迭代日志中提取改进模式生成进化提案，守护者 Agent 验证提案可合并性，PM Agent 最后生成项目全局进度报告。
+
+**流程**：
+```
+PM Agent → 迭代总结 + 技术债务汇总
+       ↓
+进化教练 Agent → 进化提案生成
+       ↓
+守护者 Agent → 提案验证
+       ↓
+PM Agent → 项目进度报告 + 版本更新
+```
+
+---
+
+## 1. 日志声明
 
 执行本阶段所有步骤时，必须使用 `.claude/hooks/log-event.sh` 记录日志：
-- 进入阶段：`bash .claude/hooks/log-event.sh "06" "$AGENT_NAME" "阶段进入" "阶段6开始" "" "成功"`
-- 结束阶段：`bash .claude/hooks/log-event.sh "06" "$AGENT_NAME" "阶段退出" "阶段6完成" "" "成功"`
-- 产出文件：`bash .claude/hooks/log-event.sh "06" "$AGENT_NAME" "产出物" "生成 <文件>" "<文件>" "成功"`
+
+| 事件类型 | 日志命令格式 |
+|---------|-------------|
+| 阶段进入 | `bash .claude/hooks/log-event.sh "06" "PM" "阶段进入" "阶段6开始" "" "成功"` |
+| PM 激活 | `bash .claude/hooks/log-event.sh "06" "PM" "Agent激活" "PM开始迭代总结" "" "进行中"` |
+| PM 完成 | `bash .claude/hooks/log-event.sh "06" "PM" "Agent完成" "PM迭代总结完成" "" "成功"` |
+| 进化教练激活 | `bash .claude/hooks/log-event.sh "06" "Coach" "Agent激活" "进化教练开始分析" "" "进行中"` |
+| 进化教练完成 | `bash .claude/hooks/log-event.sh "06" "Coach" "Agent完成" "进化教练提案完成" "" "成功"` |
+| 守护者激活 | `bash .claude/hooks/log-event.sh "06" "Guardian" "Agent激活" "守护者开始验证" "" "进行中"` |
+| 守护者完成 | `bash .claude/hooks/log-event.sh "06" "Guardian" "Agent完成" "守护者验证完成" "" "成功"` |
+| 阶段退出 | `bash .claude/hooks/log-event.sh "06" "PM" "阶段退出" "阶段6完成" "" "成功"` |
 
 ---
 
@@ -151,6 +176,23 @@
 | HARNESS_VERSION.md 更新失败 | 报错退出，检查文件权限 |
 | 提案合并时冲突 | 标注"冲突待解决"，阻止合并，提交 Human Gate |
 | 实验规则验证失败连续 3 次 | 撤销实验，标记为"不采纳"，记录教训 |
+
+---
+
+## 7. 状态更新职责
+
+> 阶段 6 需要更新以下文档，详见各 Agent 执行文件
+
+| 文档 | 更新者 | 更新内容 |
+|------|--------|---------|
+| **session-status.md** | PM, Coach, Guardian | 阶段完成记录、产出物追踪表（iteration-retrospective.md ✅）、自动推进状态、PM 阶段完成报告 |
+| **project.md** | PM | 迭代历史章节中迭代总结文档状态从 ⏳ 更新为 ✅ |
+
+**更新时机**：各 Agent 完成各自任务后，Human Gate 确认前
+
+| PM 完成迭代总结 | Coach 完成进化提案 | Guardian 完成验证 | PM 生成进度报告 |
+|-----------------|-------------------|------------------|-----------------|
+| 更新 retrospective ✅ | 更新 evolution-proposal ✅ | 更新 verification ✅ | 更新 PROJECT_STATUS.md ✅ |
 
 ---
 

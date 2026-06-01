@@ -10,15 +10,17 @@
 
 ## 0. 概述
 
-本阶段由架构师 Agent 主导，执行完整的架构设计，生成 ADR 文档。ADR 完成后交由 PM Agent 审核（最多3次循环），审核通过后由 QA Agent 执行测试策略设计，生成 test-plan 文档。
+本阶段由架构师 Agent 主导，执行完整的架构设计，生成 ADR 文档。ADR 完成后交由 PM Agent 审核（最多3次循环），审核通过后由 QA Agent 执行测试策略设计，生成 test-plan 文档。test-plan 文档完成后再次由 PM Agent 审核（最多3次循环）。
 
 **流程**：
 ```
 Architect Agent → 生成 ADR
        ↓
-PM Agent 审核（≤3次循环）
+PM Agent 审核 ADR（≤3次循环，含 Architecture-Fix 修复）
        ↓
 QA Agent → 生成 test-plan
+       ↓
+PM Agent 审核 test-plan（≤3次循环，含 QA-Fix 修复）
 ```
 
 ---
@@ -32,10 +34,16 @@ QA Agent → 生成 test-plan
 | 阶段进入 | `bash .claude/hooks/log-event.sh "02" "Command" "阶段进入" "阶段2开始" "" "成功"` |
 | Architect 激活 | `bash .claude/hooks/log-event.sh "02" "Command" "Agent激活" "Architect开始执行" "" "进行中"` |
 | Architect 完成 | `bash .claude/hooks/log-event.sh "02" "Command" "Agent完成" "Architect产出完成" "" "成功"` |
-| PM 审核激活 | `bash .claude/hooks/log-event.sh "02" "Command" "Agent激活" "PM开始审核" "" "进行中"` |
-| PM 审核完成 | `bash .claude/hooks/log-event.sh "02" "Command" "Agent完成" "PM审核完成" "" "成功"` |
+| PM 审核 ADR 激活 | `bash .claude/hooks/log-event.sh "02" "Command" "Agent激活" "PM开始审核ADR" "" "进行中"` |
+| PM 审核 ADR 完成 | `bash .claude/hooks/log-event.sh "02" "Command" "Agent完成" "PM审核ADR完成" "" "成功"` |
+| Architecture-Fix 激活 | `bash .claude/hooks/log-event.sh "02" "Command" "Agent激活" "Architecture-Fix开始修复" "" "进行中"` |
+| Architecture-Fix 完成 | `bash .claude/hooks/log-event.sh "02" "Command" "Agent完成" "Architecture-Fix修复完成" "" "成功"` |
 | QA 激活 | `bash .claude/hooks/log-event.sh "02" "Command" "Agent激活" "QA开始执行" "" "进行中"` |
 | QA 完成 | `bash .claude/hooks/log-event.sh "02" "Command" "Agent完成" "QA产出完成" "" "成功"` |
+| PM 审核 test-plan 激活 | `bash .claude/hooks/log-event.sh "02" "Command" "Agent激活" "PM开始审核test-plan" "" "进行中"` |
+| PM 审核 test-plan 完成 | `bash .claude/hooks/log-event.sh "02" "Command" "Agent完成" "PM审核test-plan完成" "" "成功"` |
+| QA-Fix-TP 激活 | `bash .claude/hooks/log-event.sh "02" "Command" "Agent激活" "QA-Fix-TP开始修复" "" "进行中"` |
+| QA-Fix-TP 完成 | `bash .claude/hooks/log-event.sh "02" "Command" "Agent完成" "QA-Fix-TP修复完成" "" "成功"` |
 | 阶段退出 | `bash .claude/hooks/log-event.sh "02" "Command" "阶段退出" "阶段2完成" "" "成功"` |
 
 ---

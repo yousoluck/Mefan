@@ -10,7 +10,7 @@
 - **关联 ADR**: `.claude/iterations/sprint-latest/ADR.md`
 - **创建时间**: YYYY-MM-DD
 - **创建人**: QA
-- **状态**: 草稿 / 审核中 / 已审批
+- **状态**: 草稿 / 已生成 / 修复中 / 审核中 / 已审批
 
 ---
 

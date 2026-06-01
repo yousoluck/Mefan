@@ -84,48 +84,154 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "读
 > **目的**：
 > 1. 通过 knowledge.grap 分析所有受影响模块
 > 2. 分析 US 之间的依赖关系，划分 Modular Group
+> 3. 整合 requirements.md 中的"相似功能模块分析"和"复用功能模块"
 
 ```bash
 bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "分析受影响模块+ModularGroup" "" ""
 ```
 
-#### 2.1 已有模块增加对新模块的依赖
+#### 2.0 整合 requirements.md 中的模块分析
+
+**分析来源**：requirements.md 中各 US 的"相似功能模块分析"和"复用功能模块"
+
+**整合规则**：
+1. requirements.md 中已标注的"相似模块" → 自动纳入 6.1 分析范围
+2. requirements.md 中已标注的"复用模块" → 自动纳入 6.3 分析范围
+3. knowledge.grap 发现的额外依赖 → 补充到上述列表
+4. **冲突处理**：如果 knowledge.grap 与 requirements.md 冲突，以 requirements.md 为准（人类已审核）
+
+**直接整合方式**：
+- 在分析 6.1/6.2/6.3 时，直接引用 requirements.md 中对应 US 的"相似功能模块分析"和"复用功能模块"表格
+- 不写入临时文件，直接作为分析输入
+
+
+#### 6.1 已有模块增加对新模块的依赖
+
 > 哪些现有模块需要依赖新增模块
 
-使用 knowledge.grap 识别：
+**分析来源**：
+1. requirements.md 中各 US 的"相似功能模块分析"表格
+2. knowledge.grap 查询结果
+
+**输出格式**（对应 ADR 第 6.1 节）：
+| 现有模块 | 依赖类型 | 调用方式 | 影响范围 | 变更原因 |
+|---------|---------|---------|---------|---------|
+| PostService | 调用新功能 | PostService → CommentService.findByPostId() | 帖子详情页展示评论 | 业务变更 |
+| UserService | 数据提供 | UserService.findById() ← CommentService | 评论显示用户信息 | 数据变更 |
+
+**使用 knowledge.grap 识别**：
 1. 哪些现有功能模块需要调用新功能
 2. 哪些模块需要向新模块提供数据
 
-#### 2.2 现有模块的重构/扩展
+**knowledge.grap 查询策略**：
+```bash
+# 查询调用新模块的现有模块（示例：新模块为 CommentService）
+grep -A 5 "CommentService" .claude/context/knowledge.grap | grep "called_by" || echo "[Info] 未找到直接调用关系"
+# 查询向新模块提供数据的模块
+grep -B 5 "CommentRepository" .claude/context/knowledge.grap | grep "depends_on" || echo "[Info] 未找到数据依赖"
+```
+
+
+#### 6.2 现有模块的重构/扩展
+
 > 为了适配新功能，哪些现有模块需要扩展
 
-使用 knowledge.grap 识别：
+**分析来源**：knowledge.grap 查询结果
+
+**输出格式**（对应 ADR 第 6.2 节）：
+| 现有模块 | 扩展类型 | 扩展内容 | 兼容性影响 | 变更原因 |
+|---------|---------|---------|-----------|---------|
+| Post Entity | 字段扩展 | 增加 commentCount 字段 | 需数据库迁移 | 数据变更 |
+| PostService | 方法扩展 | 增加 getPostWithComments() | 无影响（新增方法） | 业务变更 |
+
+**使用 knowledge.grap 识别**：
 1. 哪些现有模块需要扩展功能
 2. 哪些数据模型需要扩展字段
 
-#### 2.3 新模块复用/依赖现有模块
+**knowledge.grap 查询策略**：
+```bash
+# 查询需要扩展的模块（查找与新实体有关联的现有实体）
+grep -A 10 "@ManyToOne|@OneToMany|@ManyToMany" .claude/context/knowledge.grap | grep "Post|User" || echo "[Info] 未找到关联关系"
+```
+
+
+#### 6.3 新模块复用/依赖现有模块
+
 > 新模块需要复用哪些现有模块
 
-使用 knowledge.grap 识别：
-1. 新功能可以复用哪些现有模块
-2. 新功能需要依赖哪些现有模块的接口
+**优先级顺序**（按 Skill 引用六步优先级）：
+1. 参考 requirements.md 中的"相似功能模块分析"（最高优先级）
+2. 强制复用 requirements.md 中的"复用功能模块"
+3. 从 knowledge.grap 发现可复用的基础模块
 
-#### 2.4 新模块与现有模块集成
+**分析来源**：
+1. requirements.md 中各 US 的"复用功能模块"表格（最高优先级）
+2. knowledge.grap 发现的可复用基础模块
+
+**判定标准**：满足以下任一条件即属于"小改动复用"
+
+| 改动类型 | 示例 | 是否允许 | 处理方式 |
+|---------|------|---------|---------|
+| **参数扩展** | 增加可选参数、默认值参数 | ✅ 允许 | 在伪代码中标注"扩展现有方法签名" |
+| **返回值包装** | 返回类型从 `User` 改为 `Page<User>` | ✅ 允许 | 标注"包装返回值为分页对象" |
+| **异常增强** | 增加新的异常抛出场景 | ✅ 允许 | 标注"补充异常处理逻辑" |
+| **配置注入** | 通过构造函数/注解注入新依赖 | ✅ 允许 | 标注"新增依赖注入" |
+| **逻辑分支** | 增加 if-else 分支处理新场景 | ⚠️ 谨慎 | 需评估是否违反开闭原则 |
+| **方法重载** | 同名方法不同参数签名 | ✅ 允许 | 标注"添加重载方法" |
+| **核心逻辑修改** | 修改算法、业务流程 | ❌ 禁止 | 应创建新方法，保留原方法 |
+| **接口契约变更** | 修改方法名、删除参数 | ❌ 禁止 | 应创建新接口，标记旧接口为 @Deprecated |
+
+**强制约束**：
+- 如果改动涉及"核心逻辑修改"或"接口契约变更"，**禁止复用**，应新建模块
+- 所有"小改动"必须在 ADR 第 6.3 节中明确标注
+
+**输出格式**（对应 ADR 第 6.3 节）：
+| 复用模块 | 复用类型 | 改动类型 | 改动说明 | 兼容性 |
+|---------|---------|---------|---------|--------|
+| BaseEntity | 完全复用 | 无 | 继承即可 | 无影响 |
+| UserService.findById() | 小改动复用 | 参数扩展 | 增加可选参数 includeDeleted | 向后兼容 |
+| PageRequest | 完全复用 | 无 | 直接使用分页工具 | 无影响 |
+
+#### 6.4 新模块与现有模块集成
+
 > 新模块与现有模块的集成方式
 
-使用 knowledge.grap 识别：
-1. 新模块与现有模块的数据交互点
-2. 新模块与现有模块的调用链
+**分析来源**：knowledge.grap 查询结果
 
-#### 2.5 标注变更原因
+**输出格式**（对应 ADR 第 6.4 节）：
+| 集成点 | 集成方式 | 技术实现 | 注意事项 |
+|-------|---------|---------|---------|
+| CommentService ↔ PostService | 同步调用 | Service 层直接注入 | 注意循环依赖 |
+| CommentService ↔ NotificationService | 异步事件 | Spring Event | 失败需重试机制 |
 
-每个受影响的模块需标注变更原因：
-- **业务变更**：由于业务逻辑变化导致的变更
-- **数据变更**：由于数据模型变化导致的变更
+**使用 knowledge.grap 识别**：
+1. 新模块与现有模块的数据交互点（事务、缓存、消息队列）
+2. 新模块与现有模块的调用链（同步调用 vs 异步事件）
 
-#### 2.6 User Story 依赖分析与 Modular Group 划分 [新增]
+#### 6.5 变更影响度评估
 
-> 本节用于阶段 3 迭代计划的 Modular Group 划分
+对每个受影响的模块进行影响度评估。
+
+**输出格式**（对应 ADR 第 6.5 节）：
+| 模块 | 影响类型 | 影响程度 | 风险等级 | 回归测试需求 |
+|------|---------|---------|---------|------------|
+| CommentService | 新增 | 低 | 低 | 单元测试 |
+| PostService | 扩展 | 中 | 中 | 集成测试 |
+| UserService | 无变更 | - | - | 无需测试 |
+
+**影响程度定义**：
+- **低**：新增模块/方法，不影响现有功能
+- **中**：扩展现有模块，需验证兼容性
+- **高**：修改核心逻辑，需全面回归测试
+
+**风险等级定义**：
+- **低**：独立模块，无外部依赖
+- **中**：被 1-3 个模块依赖
+- **高**：被 >3 个模块依赖或是核心基础设施
+
+#### 6.6 User Story 依赖分析与 Modular Group 划分
+
+> 本节内容将写入 ADR 第 2.4 节，不是第 6 节
 
 使用 requirements.md 中的 US 列表，分析 US 之间的依赖关系：
 1. 识别每个 US 依赖哪些其他 US（前置 US）
@@ -141,7 +247,7 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "分
 - 每个 Group 应能在 1-2 天内完成
 
 **输出格式**：
-- 第 2.4 节"User Story 分组与依赖"（见 ADR 模板）
+- 写入 ADR 第 2.4 节"User Story 分组与依赖"
 - 包含 MG 划分表、US 依赖矩阵、开发顺序建议
 
 ```bash
@@ -158,79 +264,78 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "分
 bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "生成ADR文档" "" ""
 ```
 
-#### 3.1 按 ADR 模板生成文档
+#### 3.1 数据模型设计
 
-使用 `.claude/templates/adr-template.md` 作为模板，生成 `.claude/iterations/sprint-latest/ADR.md`
+> **目的**：描述核心数据模型的定义、关系、约束
 
-**必须包含的章节**：
-1. 基本信息
-2. 上下文（背景、需求摘要、决策驱动因素、**User Story 分组与依赖**）
-3. 方案对比（至少两个方案）
-4. **总体设计框架**（重点新增）：
-   - 前端设计
-   - 后端设计
-   - 数据模型设计
-   - 数据库表设计
-   - 功能数据流分析设计
-   - 业务功能模块划分
-   - 业务 Workflow 设计
-   - 性能设计（含缓存）
-   - 状态流转设计
-5. **详细设计**：
-   - 目录结构
-   - 类图设计
-   - 方法签名（标注新增/修改/删除）
-   - API 设计（详细签名、参数、返回值、错误码）
-   - 接口输入输出 Schema
-   - 接口变更标注（新增/修改/删除）
-   - 与现有模块交互
-6. **受影响模块分析**（按4类分类，标注变更原因）
-7. **实现步骤**：
-   - Task 拆分（原子级，关联 US/MG）
-   - **Task 伪代码（独立文件，存放在 pseudocode/ 目录）**
-   - Task 依赖与优先级
-   - Skill 引用
-8. **错误处理与边界设计**
-9. **风险与非功能设计**
-10. **技术栈与命名约定**
-11. **Skill 引用**
-12. **API 变更**
-13. 参考实现位置
-14. 迁移指南
-15. 受影响模块清单
-16. 决策时间
-17. **附录**（自检清单、变更历史）
+**分析方法**：
+1. 从 requirements.md 提取各 US 的数据实体需求
+2. 从 consistency-baseline.md 获取现有实体模式（如 BaseEntity）
+3. 确定新实体与现有实体的关系（@OneToMany, @ManyToOne 等）
+4. 确定实体字段、类型、约束（@NotNull, @Size 等）
 
-#### 3.2 创建伪代码目录与文件
+**输出格式**（对应 ADR 第 4.3 节）：
+```
+## 4.3 数据模型设计
 
-> **目的**：为每个 Task 生成独立的伪代码文件
+### Comment 实体
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | Long | @Id, @GeneratedValue | 主键 |
+| content | String | @NotNull, @Size(max=1000) | 评论内容 |
+| postId | Long | @NotNull | 关联帖子ID |
+| userId | Long | @NotNull | 评论用户ID |
+| createdAt | LocalDateTime | - | 创建时间 |
 
-```bash
-# 创建伪代码目录
-mkdir -p $ROOT/.claude/iterations/sprint-latest/pseudocode
-
-# 统计需要生成的伪代码文件数量
-TASK_COUNT=$(grep -c "^| T-" $ROOT/.claude/iterations/sprint-latest/ADR.md || echo "0")
-echo "[Architect-Stage2] 需要生成 $TASK_COUNT 个伪代码文件"
+**关系映射**：
+- @ManyToOne → Post（一个帖子可有多个评论）
+- @ManyToOne → User（一个用户可发多个评论）
 ```
 
-**伪代码文件命名规范**：
-- 格式：`T-{NNN}-{task-name}.md`
-- 示例：`T-001-comment-entity.md`、`T-002-comment-repository.md`
+#### 3.2 数据库表设计
 
-**生成伪代码文件时**：
-1. 按 3.5.4 节的完整示例格式生成
-2. 包含所有七类注释块（[P1]/[P2]/[P4]/[P6]/[P7]/[P8]/[P9]）
-3. 包含 Dev Agent 实现提示章节
+> **目的**：描述数据库表结构、索引、外键关系
 
-#### 3.2 数据模型设计
-> 描述核心数据模型的定义、关系、约束
+**分析方法**：
+1. 基于数据模型设计，转换为数据库表结构
+2. 确定索引（普通索引、唯一索引）
+3. 确定外键关系（CASCADE, SET_NULL 等）
+4. 确定迁移策略（是否有数据迁移需求）
 
-#### 3.3 数据库表设计
-> 描述数据库表结构、索引、外键关系
+**输出格式**（对应 ADR 第 4.4 节）：
+```
+## 4.4 数据库表设计
 
-#### 3.4 API 详细设计
-> 每个 API 必须包含：
+### comment 表
+| 字段 | 类型 | 约束 | 索引 | 说明 |
+|------|------|------|------|------|
+| id | BIGINT | PK, AUTO_INCREMENT | PRIMARY | 主键 |
+| content | VARCHAR(1000) | NOT NULL | - | 评论内容 |
+| post_id | BIGINT | NOT NULL, FK | idx_post_id | 关联帖子ID |
+| user_id | BIGINT | NOT NULL, FK | idx_user_id | 评论用户ID |
+| created_at | DATETIME | - | - | 创建时间 |
+
+**索引**：
+- idx_post_id: post_id（加速按帖子查询评论）
+- idx_user_id: user_id（加速按用户查询评论）
+
+**外键**：
+- post_id → post(id)：级联删除
+- user_id → user(id)：级联删除
+```
+
+#### 3.3 API 详细设计
+
+> **目的**：描述每个 API 的完整签名、参数、返回值、错误码
+
+**分析方法**：
+1. 从 requirements.md 提取各 US 涉及的业务操作
+2. 确定 API 路径、请求方法
+3. 确定请求参数（含类型、必须/可选、默认值）
+4. 确定响应格式（含 Schema）
+5. 确定错误码（按业务场景）
+
+**每个 API 必须包含**：
 - 请求方法、路径
 - 请求参数（含类型、必须/可选、默认值）
 - 请求头
@@ -239,9 +344,120 @@ echo "[Architect-Stage2] 需要生成 $TASK_COUNT 个伪代码文件"
 - 响应体 Schema
 - 错误码
 
-#### 3.5 Task 拆分原则与伪代码生成规范
+**输出格式**（对应 ADR 第 5.4 节）：
+```
+## 5.4 API 设计
 
-##### 3.5.1 拆分粒度
+### API 1：创建评论
+- **请求方法**：POST
+- **请求路径**：/api/posts/{postId}/comments
+- **请求参数**：
+  - path: postId (Long, 必填)
+  - header: Authorization (String, 必填)
+  - body: CreateCommentRequest
+- **请求体 Schema**：
+  ```json
+  {
+    "content": "string (必填, 最大1000字符)",
+    "userId": "number (必填)"
+  }
+  ```
+- **响应状态码**：201 Created, 400 Bad Request, 403 Forbidden
+- **响应体 Schema**：
+  ```json
+  {
+    "code": "0",
+    "message": "成功",
+    "data": { "id": 1, "content": "...", "createdAt": "..." }
+  }
+  ```
+- **错误码**：
+  | 错误码 | 场景 | 用户提示 |
+  |--------|------|----------|
+  | C001 | 内容为空 | 评论内容不能为空 |
+  | C002 | 内容超长 | 评论内容不能超过1000字符 |
+
+
+#### 3.4 错误处理与边界设计
+
+> **目的**：描述系统的错误处理策略、边界值处理
+
+**分析方法**：
+1. 从 consistency-baseline.md 获取项目的错误处理模式
+2. 从 requirements.md 提取业务边界条件
+3. 确定需要处理的异常场景
+4. 设计错误码体系
+
+**输出格式**（对应 ADR 第 8 节）：
+```
+## 8. 错误处理与边界设计
+
+### 8.1 正常流程设计
+> 描述核心业务的正常执行流程
+
+### 8.2 全局异常处理
+> 描述统一的异常处理机制
+
+### 8.3 错误码设计
+| 错误码 | HTTP状态码 | 错误场景 | 用户提示 | 处理方式 |
+|--------|-----------|---------|---------|---------|
+| C001 | 400 | 评论内容为空 | 内容不能为空 | 提示用户输入 |
+| C002 | 400 | 评论内容超长 | 内容不能超过1000字 | 截断或提示 |
+
+### 8.4 重试与降级策略
+- 重试场景：网络超时、临时故障
+- 重试策略：指数退避，最多3次
+- 降级方案：缓存兜底
+
+### 8.5 幂等性设计
+- 幂等接口：POST /api/comments
+- 幂等键：idempotency-key header
+- 实现方式：Redis 防重
+
+### 8.6 边界值处理
+| 边界条件 | 处理方式 |
+|----------|----------|
+| 空评论 | 提示"评论内容不能为空" |
+| 超长评论 | 提示"评论内容不能超过1000字符" |
+| 并发创建 | 乐观锁（@Version） |
+```
+
+#### 3.5 风险与非功能设计
+
+> **目的**：描述潜在风险、缓解措施、性能和安全设计
+
+**分析方法**：
+1. 从 requirements.md 提取非功能需求（如性能、安全）
+2. 从 consistency-baseline.md 获取项目的风险处理模式
+3. 确定需要关注的性能指标
+4. 确定安全防护措施
+
+**输出格式**（对应 ADR 第 9 节）：
+```
+## 9. 风险与非功能设计
+
+### 9.1 风险分析
+| 风险 | 影响 | 发生概率 | 严重度 | 缓解措施 |
+|------|------|----------|--------|----------|
+| 数据库连接超时 | 服务不可用 | 中 | 高 | 连接池 + 重试 |
+| 并发写入冲突 | 数据不一致 | 低 | 高 | 乐观锁 |
+| 恶意评论 | 业务受损 | 低 | 中 | 内容审核 |
+
+### 9.2 性能设计
+| 指标 | 当前基线 | 目标 | 设计方案 |
+|------|---------|------|---------|
+| API响应时间(P95) | 200ms | <500ms | 分页 + 索引 |
+| QPS | 100 | >500 | 缓存 |
+
+### 9.3 安全设计
+- 用户输入校验（@Valid）
+- SQL 注入防护（参数化查询）
+- XSS 防护（转义）
+```
+
+#### 3.6 Task 拆分原则与伪代码生成规范
+
+##### 3.6.1 拆分粒度
 
 | 维度 | 标准 | 说明 |
 |------|------|------|
@@ -250,7 +466,7 @@ echo "[Architect-Stage2] 需要生成 $TASK_COUNT 个伪代码文件"
 | **优先级排序** | P0 > P1 > P2 | 核心功能优先 |
 | **关联映射** | 每个 Task 必须关联 US/MG | 确保可追溯 |
 
-##### 3.5.2 伪代码生成流程（按此顺序执行）
+##### 3.6.2 伪代码生成流程（按此顺序执行）
 
 > **原则**：伪代码不是"描述做什么"，而是"用项目的命名规范和代码模式，描述具体怎么实现"
 
@@ -284,7 +500,7 @@ echo "[Architect-Stage2] 需要生成 $TASK_COUNT 个伪代码文件"
 | **P8** | ADR.md 第 9 节 "风险与非功能设计" | 在伪代码中标注风险缓解措施 |
 | **P9** | ADR.md 第 9 节 "性能与安全设计" | 在伪代码中标注性能优化和安全防护措施 |
 
-##### 3.5.3 伪代码注释规范
+##### 3.6.3 伪代码注释规范
 
 每个伪代码必须包含以下注释块（按顺序）：
 
@@ -299,17 +515,17 @@ echo "[Architect-Stage2] 需要生成 $TASK_COUNT 个伪代码文件"
 // 必须调用：BaseEntity.getId()、UserService.findById()
 // 禁止重新实现：用户鉴权逻辑
 
-// ========== [P4] 技术栈 Skill ==========
-// Skill：project-tech-lombok.md
-// 体现：@Getter @Setter @Builder 注解使用
+// ========== [P4] 技术栈规范 ==========
+// 来源：project-tech-lombok.md
+// 注解：@Entity, @Table, @Id, @GeneratedValue
 
-// ========== [P6] 中间件 Skill ==========
-// Skill：project-middleware-database.md
-// 体现：Page<?> 分页返回类型、PageRequest 参数模式
+// ========== [P6] 中间件调用 ==========
+// 来源：project-middleware-database.md
+// 分页参数：PageRequest.of(page, size)
 
 // ========== [P7] 错误与异常处理 ==========
 // 来源：ADR.md 第 8 节"错误处理与边界设计"
-// 错误场景 1：Comment 不存在 → 抛出 CommentNotFoundException
+// 错误场景 1：内容为空 → 抛出 ValidationException
 // 错误场景 2：用户无权限 → 抛出 AccessDeniedException
 // 边界处理：空列表返回空 Page 对象（非 null）
 
@@ -324,7 +540,7 @@ echo "[Architect-Stage2] 需要生成 $TASK_COUNT 个伪代码文件"
 // 安全：用户输入校验（@Valid）+ SQL 注入防护
 ```
 
-##### 3.5.4（补充）技术栈判断与伪代码语言选择
+##### 3.6.4 技术栈判断与伪代码语言选择
 
 > **重要**：伪代码示例中的语言必须根据项目的技术栈确定，不得固定使用某一种语言
 
@@ -366,139 +582,90 @@ echo "[Architect] 伪代码语言：$LANG"
 
 **示例中的 Java 仅用于演示**：实际生成时必须替换为对应语言的代码
 
-##### 3.5.4 完整示例：Task T-001 创建 Comment 实体（Java 技术栈）
+##### 3.6.5 完整示例：Task T-001 创建 Comment 实体（Java 技术栈）
 
 > **前提**：假设 tech-stack-profile.md 确定的技术栈为 Java/Spring Boot
-
-**Task 描述**：创建 Comment 实体类，继承 BaseEntity，实现与 Post 的多对一关系
-
-**步骤 1：收集上下文**
-```bash
-# 读取 requirements.md 中 US-001 的相似模块分析
-grep -A 10 "相似功能模块分析" .claude/iterations/sprint-latest/requirements.md
-# 输出：
-# | 功能描述 | 参考文件 | 行号范围 | 业务流程 | 复用的关键方法 |
-# | 评论功能参考帖子功能 | src/entity/Post.java | L20-50 | 发布→查询 | findById(), findAll() |
-
-# 读取 requirements.md 中 US-001 的复用功能模块
-grep -A 10 "复用功能模块" .claude/iterations/sprint-latest/requirements.md
-# 输出：
-# | 模块名称 | 文件名 | 必须复用的接口 |
-# | 用户服务 | src/service/UserService.java | findById(Long id) |
-```
-
-**步骤 2：收集 Skills**
-```bash
-# 从 consistency-baseline.md 第五部分收集
-grep -A 5 "5.2 技术栈 Skills" .claude/context/consistency-baseline.md
-# 输出：project-tech-lombok.md, project-tech-mybatis.md
-
-grep -A 5 "5.4 中间件 Skills" .claude/context/consistency-baseline.md
-# 输出：project-middleware-database.md（分页规范）
-```
-
-**步骤 3：生成伪代码**
 
 ```java
 // ========== [P1] 相似模块参考 ==========
 // 来源：requirements.md US-001 "相似功能模块分析"
-// 模块：Post 实体（src/entity/Post.java L20-50）
-// 复用点：
-//   - id 字段定义方式（private Long id;）
-//   - @ManyToOne 关系映射注解（@JoinColumn）
-//   - 与 BaseEntity 的继承关系
-//   - 字段命名遵循 camelCase
+// 模块：Post 实体（src/entity/Post.java L20-45）
+// 复用点：id 生成模式、@ManyToOne 关系映射
 
 // ========== [P2] 强制复用模块 ==========
 // 来源：requirements.md US-001 "复用功能模块"
-// 必须调用：UserService.findById(Long userId) - 获取评论者信息
-// 禁止重新实现：用户信息查询、用户鉴权
+// 必须调用：BaseEntity.getId()、BaseEntity.getCreatedAt()
+// 禁止重新实现：时间戳自动维护
 
-// ========== [P4] 技术栈 Skill ==========
-// Skill：project-tech-lombok.md
-// 体现：
-//   - @Entity @Table 注解（Spring JPA 规范）
-//   - @Getter @Setter（Lombok 注解，替代 getter/setter 手动编写）
-//   - @Builder 模式（如需要链式构建）
-//   - 构造方法注解使用 @RequiredArgsConstructor
+// ========== [P4] 技术栈规范 ==========
+// 来源：project-tech-lombok.md
+// 注解：@Entity, @Table, @Id, @GeneratedValue, @CreationTimestamp
 
-// ========== [P6] 中间件 Skill ==========
-// Skill：project-middleware-database.md
-// 体现：
-//   - 分页返回类型：Page<Comment>（不是 List<Comment>）
-//   - 分页参数：Pageable（不是 (int page, int size)）
-//   - 遵循 JPA Repository 命名规范（findByPostId）
+// ========== [P6] 中间件调用 ==========
+// 来源：project-middleware-database.md
+// 分页参数：PageRequest.of(page, size)
 
-// ========== 伪代码开始 ==========
+// ========== [P7] 错误与异常处理 ==========
+// 来源：ADR.md 第 8 节"错误处理与边界设计"
+// 错误场景 1：内容为空 → 抛出 ValidationException
+// 错误场景 2：用户无权限 → 抛出 AccessDeniedException
+// 边界处理：空列表返回空 Page 对象（非 null）
+
+// ========== [P8] 风险处理 ==========
+// 来源：ADR.md 第 9 节"风险与非功能设计"
+// 风险 1：数据库连接超时 → 使用连接池 + 重试机制
+// 风险 2：并发写入冲突 → 使用乐观锁（@Version）
+
+// ========== [P9] 非功能性处理 ==========
+// 来源：ADR.md 第 9 节"性能与安全设计"
+// 性能：分页查询（每页 20 条）+ 索引优化
+// 安全：用户输入校验（@Valid）+ SQL 注入防护
+
 package com.example.entity;
 
-import lombok.*;
-import javax.persistence.*;
-import org.springframework.data.domain.*;
+import jakarta.persistence.*;
+import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import java.time.LocalDateTime;
 
+@Data
 @Entity
-@Table(name = "comments")
-@Getter
-@Setter
-@NoArgsConstructor
-@RequiredArgsConstructor
-@Builder
-public class Comment extends BaseEntity {
+@Table(name = "comment", indexes = {
+    @Index(name = "idx_post_id", columnList = "post_id"),
+    @Index(name = "idx_user_id", columnList = "user_id")
+})
+public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;               // 复用：BaseEntity.id 生成模式（参考 Post.java L22）
+    private Long id;
+
+    @Column(nullable = false, length = 1000)
+    private String content;
 
     @Column(name = "post_id", nullable = false)
-    private Long postId;           // 外键字段，命名符合 camelCase
+    private Long postId;
 
     @Column(name = "user_id", nullable = false)
-    private Long userId;           // 复用：UserEntity 用户关联模式
+    private Long userId;
 
-    @Column(name = "content", nullable = false, length = 1000)
-    private String content;       // 字段长度来自业务需求（1000字限制）
-
-    @Column(name = "created_at")
-    private Long createdAt;       // 时间戳使用 Long（毫秒），参考 project-middleware-database.md
-
-    @Column(name = "updated_at")
-    private Long updatedAt;
-
-    // 关系映射：多对一（多个评论属于一个帖子）
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id", insertable = false, updatable = false)
-    private Post post;             // 参考：Post.java L30-35 的 @ManyToOne 实现
-
-    // 关系映射：多对一（多个评论属于一个用户）
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", insertable = false, updatable = false)
-    private User user;            // 复用：UserService.findById() 在 Service 层调用
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 }
-// ========== 伪代码结束 ==========
-
-// ========== Dev Agent 实现提示 ==========
-// 1. 首先阅读参考文件：src/entity/Post.java L20-50（相似模块）
-// 2. 阅读 Skill：.claude/skills/project-tech-lombok.md（Lombok 规范）
-// 3. 阅读 Skill：.claude/skills/project-middleware-database.md（分页规范）
-// 4. 按本伪代码实现，注意：
-//    - 继承 BaseEntity 后无需定义 id 字段（已在父类定义）
-//    - 时间戳字段使用 Long 类型毫秒值
-//    - @ManyToOne 使用 LAZY 加载避免 N+1 问题
 ```
 
-##### 3.5.5 伪代码与 Skill 引用对应表
+##### 3.6.6 伪代码与 Skill 引用对应表
 
-在 ADR.md 表格中，Skill 引用列的填写规范：
+| Task 类型 | 必须引用的 Skill | 说明 |
+|-----------|-----------------|------|
+| 实体创建 | project-tech-lombok.md, project-middleware-database.md | 注解规范、分页模式 |
+| Service 层 | project-service-pattern.md | 事务管理、异常处理 |
+| Controller 层 | project-tech-web.md | 参数校验、响应格式 |
+| Repository 层 | project-mybatis-pattern.md | 查询方法命名 |
+| 业务逻辑复杂 | project-{module}.md | 对应模块的接口约定 |
 
-| Skill 类别 | 填写格式 | 示例 |
-|-----------|---------|------|
-| 开发流程 Skill | `{Skill 文件名}` | `project-tdd-pattern.md` |
-| 技术栈 Skill | `{Skill 文件名}` | `project-tech-lombok.md` |
-| 业务模块 Skill | `{Skill 文件名}` | `project-comment-module.md` |
-| 中间件 Skill | `{Skill 文件名}` | `project-middleware-database.md` |
-| 外部 Skill | `{来源}/{Skill 文件名}` | `@superpowers/ship-discipline` |
-
-##### 3.5.6 常见错误与纠正
+##### 3.6.7 常见错误与纠正
 
 | 错误类型 | 错误示例 | 正确做法 |
 |---------|---------|---------|
@@ -507,11 +674,59 @@ public class Comment extends BaseEntity {
 | Skill 引用不清 | `project-tech-*.md` | `project-tech-lombok.md` |
 | 伪代码过于简略 | `create Comment entity` | 包含完整的类结构、字段类型、注解、关系映射 |
 | 未标注行号 | `// 参考 Post.java` | `// 参考：Post.java L20-50` |
-  
+
 ```bash
 bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "产出物" "生成ADR" ".claude/iterations/sprint-latest/ADR.md" "成功"
 bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "生成ADR文档" "" "成功"
 ```
+
+---
+
+#### 3.7 按 ADR 模板生成文档
+
+> **目的**：将以上分析结果（3.1-3.6）整合到 ADR 文档
+
+使用 `.claude/templates/adr-template.md` 作为模板，将以上分析结果整合到 `.claude/iterations/sprint-latest/ADR.md`
+
+**整合来源**：
+
+| 分析章节 | ADR 对应章节 | 说明 |
+|---------|-------------|------|
+| 3.1 数据模型设计 | 第 4.3 节 | 基于 requirements.md 各 US 的数据实体需求 |
+| 3.2 数据库表设计 | 第 4.4 节 | 基于数据模型设计转换的表结构 |
+| 3.3 API 详细设计 | 第 5.4 节 | 包含签名、参数、返回值、错误码 |
+| 3.4 错误处理与边界设计 | 第 8 节 | 包含正常流程、异常处理、错误码、重试降级、幂等性、边界值 |
+| 3.5 风险与非功能设计 | 第 9 节 | 包含风险分析、性能设计、安全设计 |
+| 3.6 Task 拆分与伪代码 | 第 7 节 | Task 拆分表 + pseudocode/ 目录下独立文件 |
+
+**整合顺序**：
+1. **先完成分析章节**：按顺序完成 3.1 → 3.2 → 3.3 → 3.4 → 3.5 → 3.6
+2. **再执行整合**：使用 ADR 模板，按模板章节顺序填入各分析结果
+3. **最后自检**：检查是否覆盖所有 User Story、是否有关联映射
+
+**必须包含的章节**（共 18 节，来自 adr-template.md）：
+1. 基本信息
+2. 上下文（背景、需求摘要、决策驱动因素、**User Story 分组与依赖**）
+3. 方案对比（至少两个方案）
+4. **总体设计框架**：
+   - 前端设计、后端设计、数据模型设计、数据库表设计、功能数据流分析设计、业务功能模块划分、业务 Workflow 设计、性能设计（含缓存）、状态流转设计
+5. **详细设计**：
+   - 目录结构、类图设计、方法签名、API 设计、接口 Schema、接口变更标注、与现有模块交互
+6. **受影响模块分析**（按4类分类）
+7. **实现步骤**：
+   - Task 拆分（原子级，关联 US/MG）
+   - **Task 伪代码（独立文件，存放在 pseudocode/ 目录）**
+   - Task 依赖与优先级、Skill 引用
+8. **错误处理与边界设计**
+9. **风险与非功能设计**
+10. **技术栈与命名约定**
+11. **Skill 引用**
+12. **API 变更**
+13. 参考实现位置
+14. 迁移指南
+15. 受影响模块清单
+16. 决策时间
+17. **附录**（自检清单、变更历史）
 
 ---
 
@@ -592,7 +807,15 @@ sed -i "s/| 02 | ADR.md | .claude/iterations/sprint-latest/ADR.md | ⏳ 待生�
    "$ROOT/.claude/iterations/session-status.md"
 ```
 
-#### 5.3 记录 Architect 阶段完成报告
+#### 5.3 更新 ADR 自身状态为"已生成"
+
+```bash
+# 将 ADR 内部状态从"草稿"更新为"已生成"，供 PM 审核使用
+sed -i "s/| \*\*状态\*\* | 草稿/| **状态** | 已生成/g" "$ROOT/.claude/iterations/sprint-latest/ADR.md"
+echo "[Architect-Stage2] ADR 状态已更新为：已生成"
+```
+
+#### 5.4 记录 Architect 阶段完成报告
 
 ```markdown
 ### 阶段 2 完成报告：架构设计（Architect-Stage2）

@@ -10,7 +10,16 @@
 
 ## 0. 概述
 
-本阶段由 BA Agent 主导，执行详细需求设计，将 feature.md 转化为完整的 requirements.md 文档。BA 完成产出后，PM Agent 执行需求文档审查，验证文档符合标准后通知 Architect 进入阶段 2。
+本阶段由 BA Agent 主导，执行详细需求设计，将 feature.md 转化为完整的 requirements.md 文档。BA 完成产出后，PM Agent 执行需求文档审查（最多3次循环），验证文档符合标准后通知 Architect 进入阶段 2。
+
+**流程**：
+```
+BA Agent → 生成 requirements.md
+       ↓
+PM Agent 审查（≤3次循环）
+       ↓
+阶段完成 → 通知 Architect 进入阶段 2
+```
 
 ---
 

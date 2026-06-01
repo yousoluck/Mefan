@@ -115,6 +115,7 @@ sed -i "s/| \*\*审核轮次\*\* | .*/| **审核轮次** | 第 $ROUND 次/g" "$R
 # 将 ADR 状态更新为审核中
 sed -i "s/| \*\*状态\*\* | 草稿/| **状态** | 审核中/g" "$ROOT/.claude/iterations/sprint-latest/ADR.md"
 sed -i "s/| \*\*状态\*\* | 已生成/| **状态** | 审核中/g" "$ROOT/.claude/iterations/sprint-latest/ADR.md"
+sed -i "s/| \*\*状态\*\* | 修复中/| **状态** | 审核中/g" "$ROOT/.claude/iterations/sprint-latest/ADR.md"
 echo "[PM-Audit-Stage2] ADR 状态已更新为：审核中"
 ```
 

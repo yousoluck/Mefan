@@ -10,15 +10,31 @@
 
 ## 0. 概述
 
-本阶段由 PM Agent 主导，执行环境确认和上下文建立。只有当 PM Agent 完成所有任务后，Architect Agent 才开始执行技术栈分析和一致性基线提取。Analyst Agent 在 Architect 完成后执行需求澄清对话，产出 feature.md。
+本阶段由 PM Agent 主导，执行环境确认和上下文建立。PM Agent 完成所有任务后，Architect Agent 才开始执行技术栈分析和一致性基线提取。Architect 完成后，PM Agent 执行校验，校验通过后 Analyst Agent 执行需求澄清对话，产出 feature.md。
+
+**流程**：
+```
+PM Agent → Human Gate → Architect Agent → Human Gate → PM 校验 → Human Gate → Analyst Agent → Human Gate
+```
 
 ---
 
 ## 1. 日志声明
 
 执行本 playbook 时，必须使用 `.claude/hooks/log-event.sh` 记录日志：
-- 进入阶段：`bash .claude/hooks/log-event.sh "00" "PM" "阶段进入" "阶段0开始" "" "成功"`
-- 结束阶段：`bash .claude/hooks/log-event.sh "00" "PM" "阶段退出" "阶段0完成" "" "成功"`
+
+| 事件类型 | 日志命令格式 |
+|---------|-------------|
+| 阶段进入 | `bash .claude/hooks/log-event.sh "00" "PM" "阶段进入" "阶段0开始" "" "成功"` |
+| PM 激活 | `bash .claude/hooks/log-event.sh "00" "PM" "Agent激活" "PM开始执行" "" "进行中"` |
+| PM 完成 | `bash .claude/hooks/log-event.sh "00" "PM" "Agent完成" "PM产出完成" "" "成功"` |
+| Architect 激活 | `bash .claude/hooks/log-event.sh "00" "Architect" "Agent激活" "Architect开始执行" "" "进行中"` |
+| Architect 完成 | `bash .claude/hooks/log-event.sh "00" "Architect" "Agent完成" "Architect产出完成" "" "成功"` |
+| PM 校验激活 | `bash .claude/hooks/log-event.sh "00" "PM" "Agent激活" "PM开始校验" "" "进行中"` |
+| PM 校验完成 | `bash .claude/hooks/log-event.sh "00" "PM" "Agent完成" "PM校验完成" "" "成功"` |
+| Analyst 激活 | `bash .claude/hooks/log-event.sh "00" "Analyst" "Agent激活" "Analyst开始执行" "" "进行中"` |
+| Analyst 完成 | `bash .claude/hooks/log-event.sh "00" "Analyst" "Agent完成" "Analyst产出完成" "" "成功"` |
+| 阶段退出 | `bash .claude/hooks/log-event.sh "00" "PM" "阶段退出" "阶段0完成" "" "成功"` |
 
 ---
 

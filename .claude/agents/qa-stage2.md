@@ -399,7 +399,15 @@ sed -i "s/| 02 | test-plan.md | .claude/iterations/sprint-latest/test-plan.md | 
    "$ROOT/.claude/iterations/session-status.md"
 ```
 
-#### 7.2 记录 QA 阶段完成报告
+#### 7.2 更新 test-plan 自身状态为"已生成"
+
+```bash
+# 将 test-plan 内部状态从"草稿"更新为"已生成"，供 PM 审核使用
+sed -i "s/| \*\*状态\*\* | 草稿/| **状态** | 已生成/g" "$ROOT/.claude/iterations/sprint-latest/test-plan.md"
+echo "[QA-Stage2] test-plan 状态已更新为：已生成"
+```
+
+#### 7.3 记录 QA 阶段完成报告
 
 ```markdown
 ### 阶段 2 完成报告：Test-Plan 生成（QA-Stage2）

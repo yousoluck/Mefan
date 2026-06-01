@@ -5,12 +5,39 @@
 
 ---
 
-## 0. 日志声明
+## 0. 概述
+
+本阶段由 QA Agent 主导质量测试，执行完整质量测试工作（自动化测试、探索性测试、缺陷分类与记录、人工测试指南生成、质量报告生成）。PM Agent 审阅缺陷清单并做 P0/P1 缺陷决策。如有 P0/P1 缺陷需修复，Dev Agent 执行缺陷修复。最后由守护者 Agent 执行终审门禁裁定。
+
+**流程**：
+```
+QA Agent → 质量测试 + 缺陷记录
+       ↓
+PM Agent → P0/P1 缺陷决策
+       ↓ (如有缺陷)
+Dev Agent → 缺陷修复
+       ↓
+守护者 Agent → 终审门禁
+```
+
+---
+
+## 1. 日志声明
 
 执行本阶段所有步骤时，必须使用 `.claude/hooks/log-event.sh` 记录日志：
-- 进入阶段：`bash .claude/hooks/log-event.sh "05" "$AGENT_NAME" "阶段进入" "阶段5开始" "" "成功"`
-- 结束阶段：`bash .claude/hooks/log-event.sh "05" "$AGENT_NAME" "阶段退出" "阶段5完成" "" "成功"`
-- 产出文件：`bash .claude/hooks/log-event.sh "05" "$AGENT_NAME" "产出物" "生成 <文件>" "<文件>" "成功"`
+
+| 事件类型 | 日志命令格式 |
+|---------|-------------|
+| 阶段进入 | `bash .claude/hooks/log-event.sh "05" "QA" "阶段进入" "阶段5开始" "" "成功"` |
+| QA 激活 | `bash .claude/hooks/log-event.sh "05" "QA" "Agent激活" "QA开始执行" "" "进行中"` |
+| QA 完成 | `bash .claude/hooks/log-event.sh "05" "QA" "Agent完成" "QA产出完成" "" "成功"` |
+| PM 激活 | `bash .claude/hooks/log-event.sh "05" "PM" "Agent激活" "PM开始决策" "" "进行中"` |
+| PM 完成 | `bash .claude/hooks/log-event.sh "05" "PM" "Agent完成" "PM决策完成" "" "成功"` |
+| Dev 激活 | `bash .claude/hooks/log-event.sh "05" "Dev" "Agent激活" "Dev开始修复" "" "进行中"` |
+| Dev 完成 | `bash .claude/hooks/log-event.sh "05" "Dev" "Agent完成" "Dev修复完成" "" "成功"` |
+| 守护者激活 | `bash .claude/hooks/log-event.sh "05" "Guardian" "Agent激活" "守护者开始门禁" "" "进行中"` |
+| 守护者完成 | `bash .claude/hooks/log-event.sh "05" "Guardian" "Agent完成" "守护者门禁完成" "" "成功"` |
+| 阶段退出 | `bash .claude/hooks/log-event.sh "05" "QA" "阶段退出" "阶段5完成" "" "成功"` |
 
 ---
 
@@ -149,7 +176,24 @@
 
 ---
 
-## 关联文档
+## 6. 状态更新职责
+
+> 阶段 5 需要更新以下文档，详见各 Agent 执行文件
+
+| 文档 | 更新者 | 更新内容 |
+|------|--------|---------|
+| **session-status.md** | QA, PM, Dev, Guardian | 阶段完成记录、产出物追踪表（quality-report.md ✅）、自动推进状态、PM 阶段完成报告 |
+| **project.md** | QA | 迭代历史章节中质量报告文档状态从 ⏳ 更新为 ✅ |
+
+**更新时机**：各 Agent 完成各自任务后，Human Gate 确认前
+
+| QA 完成质量测试 | PM 完成 P0/P1 决策 | Dev 完成缺陷修复 | Guardian 完成门禁 |
+|-----------------|-------------------|------------------|------------------|
+| 更新 quality-report.md ✅ | 更新决策结果 | 更新缺陷状态 | 更新门禁结果 |
+
+---
+
+## 7. 关联文档
 
 | 文档 | 路径 |
 |------|------|

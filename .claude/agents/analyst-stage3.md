@@ -207,6 +207,58 @@ SPRINT_STATUS_PATH="$ROOT/.claude/iterations/sprint-latest/sprint-status.md"
 
 ---
 
+### 操作 6：更新 session-status.md
+
+> 目的：在 session-status.md 中记录 Analyst 阶段完成状态
+
+```bash
+bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤开始" "更新 session-status.md" "" ""
+```
+
+1. 检查 `session-status.md` 是否存在
+2. 在 `## 阶段完成记录` 中添加 Analyst 阶段 3 完成记录：
+   ```bash
+   # 追加到阶段完成记录
+   echo "| 03 | Analyst | $(date +"%Y-%m-%d %H:%M") | sprint-status.md 生成完成 | ✅ |" >> \
+     "$ROOT/.claude/iterations/session-status.md"
+   ```
+
+3. 在 `## 产出物追踪表` 中更新 sprint-status.md 状态：
+   ```bash
+   if [ -f "$ROOT/.claude/iterations/session-status.md" ]; then
+     sed -i 's/| sprint-status.md | ⏳ 待创建 |/| sprint-status.md | ✅ 已创建 |/g' \
+       "$ROOT/.claude/iterations/session-status.md"
+   fi
+   ```
+
+4. 在 `## 阶段完成报告` 中添加 Analyst 阶段完成报告：
+   ```bash
+   # 在 PM 阶段完成报告之前，由 Analyst 记录阶段完成情况
+   cat >> "$ROOT/.claude/iterations/session-status.md" << 'EOF'
+
+   ### Analyst 阶段 3 完成报告
+
+   #### 执行摘要
+   Analyst 从 ADR 提取任务清单并补充 Task 详细信息，生成 sprint-status.md 草案。
+
+   #### 关键产出
+   - Task 清单：共 N 个 Task（T-001 ~ T-NNN）
+   - 关联 US/MG：每个 Task 关联到对应的 US 和 Modular Group
+   - Skill 引用：已从 ADR 提取并关联
+
+   #### 异常记录
+   （无异常）
+   EOF
+   ```
+
+5. 在 `## 自动推进状态` 中更新阶段 3 Analyst 完成状态（如有）
+
+```bash
+bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤完成" "更新 session-status.md" "" "成功"
+```
+
+---
+
 ## 异常处理
 
 > 引用：`.claude/snippets/exception-handling.md`

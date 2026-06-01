@@ -479,7 +479,42 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "产
 
 ---
 
-### 操作 1.5：更新 project.md
+### 操作 1.5：更新 session-status.md
+
+> 目的：在 session-status.md 中记录 BA 阶段完成状态
+
+```bash
+bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "更新 session-status.md" "" ""
+```
+
+1. 检查 `session-status.md` 是否存在
+2. 在 `## 阶段完成记录` 中添加 BA 阶段 1 完成记录：
+   ```bash
+   # 追加到阶段完成记录
+   echo "| 01 | BA | $(date +"%Y-%m-%d %H:%M") | requirements.md 生成完成 | ✅ |" >> \
+     "$ROOT/.claude/iterations/session-status.md"
+   ```
+
+3. 在 `## 产出物追踪表` 中更新 requirements.md 状态：
+   ```bash
+   sed -i 's/| requirements.md | ⏳ 待创建 |/| requirements.md | ✅ 已创建 | '\
+     "$ROOT/.claude/iterations/session-status.md"
+   ```
+
+4. 在 `## 自动推进状态` 中更新阶段 1 BA 完成状态：
+   ```bash
+   # 如果有 BA 完成状态字段，更新为 ✅
+   sed -i 's/| 01.*BA.*🔄/| 01 | BA | ... | ✅ |/g' \
+     "$ROOT/.claude/iterations/session-status.md" 2>/dev/null || true
+   ```
+
+```bash
+bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "更新 session-status.md" "" "成功"
+```
+
+---
+
+### 操作 1.6：更新 project.md
 
 > 目的：在 project.md 的迭代历史中更新需求文档状态
 
@@ -503,7 +538,7 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "更
 
 ---
 
-### 操作 1.6：输出阶段摘要
+### 操作 1.7：更新阶段摘要
 
 > 目的：向用户报告 BA 阶段完成情况
 

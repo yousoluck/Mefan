@@ -163,10 +163,66 @@ BUGS_PATH="$ROOT/.claude/iterations/sprint-latest/bugs.md"
 ### 操作 5：更新 session-status.md 和 project.md
 
 1. `bash $ROOT/.claude/hooks/log-event.sh "04" "$AGENT_NAME" "步骤开始" "更新状态文档" "" ""`
-2. 当阶段 4 完成（所有 MG 进入 Close）时：
-   - 更新 `session-status.md` 中阶段 4 状态为"✅ 完成"
-   - 更新 `project.md` 中的迭代历史（如有必要）
-3. `bash $ROOT/.claude/hooks/log-event.sh "04" "$AGENT_NAME" "状态文档更新完成" "" "" "成功"`
+2. 当阶段 4 完成（所有 MG 进入 Close）时，更新 `session-status.md`：
+
+   ```bash
+   # 更新 session-status.md 中阶段 4 状态为"✅ 完成"
+   sed -i 's/| 04 | 迭代实现 |.*| 🔄 进行中 |/| 04 | 迭代实现 | $(date +"%Y-%m-%d %H:%M") | ✅ 完成 |/g' \
+     "$ROOT/.claude/iterations/session-status.md"
+
+   # 更新 ## 阶段完成记录
+   echo "| 04 | PM | $(date +"%Y-%m-%d %H:%M") | 阶段 4 完成，MG 全部 Close | ✅ |" >> \
+     "$ROOT/.claude/iterations/session-status.md"
+
+   # 更新 ## 产出物追踪表
+   sed -i 's/| 04 实现.*| ⏳ |/| 04 实现 | ✅ 完成 |/g' \
+     "$ROOT/.claude/iterations/session-status.md" 2>/dev/null || true
+
+   # 更新 ## 自动推进状态
+   sed -i 's/| 04.*🔄/| 04 | ✅ |/g' \
+     "$ROOT/.claude/iterations/session-status.md" 2>/dev/null || true
+   ```
+
+3. 更新 `project.md` 中的迭代历史（如有必要）：
+   ```bash
+   if [ -f "$ROOT/.claude/context/project.md" ]; then
+     # 更新迭代历史章节中的文档状态
+     sed -i 's/| 04 实现阶段.*| ⏳ 待开始 |/| 04 实现阶段 | ✅ 已完成 |/g' \
+       "$ROOT/.claude/context/project.md"
+   fi
+   ```
+
+4. 生成 `## PM 阶段完成报告`：
+   ```bash
+   # 追加到 session-status.md
+   cat >> "$ROOT/.claude/iterations/session-status.md" << 'EOF'
+
+   ### PM 阶段 4 完成报告
+
+   #### 执行摘要
+   阶段 4 完成，所有 MG 进入 Close 状态。
+
+   #### 关键产出
+   - 完成 MG 数：X / Y
+   - 完成 US 数：X / Y
+   - 完成 Task 数：X / Y
+
+   #### 测试结果
+   - 自动化测试：X / X 通过
+   - 人工测试：X / X 通过
+
+   #### Bug 统计
+   - 发现 Bug 数：X
+   - 已修复：X
+   - 技术债务：X
+
+   #### 问题追踪
+   - review-log.md 记录数：X
+   - Human Gate 触发次数：X
+   EOF
+   ```
+
+5. `bash $ROOT/.claude/hooks/log-event.sh "04" "$AGENT_NAME" "状态文档更新完成" "" "" "成功"`
 
 ---
 
