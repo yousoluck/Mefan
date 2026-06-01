@@ -68,6 +68,8 @@ REVIEW_LOG_PATH="$ROOT/.claude/iterations/sprint-latest/reviews/review-log.md"
    - 第 5.5 节：接口输入输出 Schema
    - 第 8 节：错误处理与边界设计
    - 第 9 节：风险与非功能设计
+   - **第 12 节：测试策略要点**（了解测试优先级和自动化要求）
+   - **第 13 节：部署与运维**（了解回滚策略和监控指标）
    ```bash
    # 提取当前 MG 关联的 API 设计
    grep -A 20 "### API" "$ROOT/.claude/iterations/sprint-latest/ADR.md" | head -50
