@@ -18,7 +18,18 @@
       "Bash(bash /mnt/d/pycharmprojects/Mefan/.claude/hooks/conversation-log.sh \"assistant\" \"你跟现在的plans文档记录的下一步重构对比，你觉得应该先做重构，再做集成？还是先集成再重构？如果先重构，那我们是否需要 安装预留到时集成的接口？\" \"更新plans.md：1）增加集成决策（方案C：重构时预留集成接口）；2）Agent文件结构预留可扩展技能格式；3）创建skills-external/目录计划；4）增加外部集成任务清单（SuperPowers/GStack）；5）增加附录说明并行策略。\" \"更新plans.md增加集成预留策略\")",
       "Bash(ls:*)",
       "Bash(cd:*)",
-      "mcp__context7__resolve-library-id"
+      "mcp__context7__resolve-library-id",
+      "Bash(grep -rn \"Code-Review\\\\|Test-Code-Review\" /mnt/d/pycharmprojects/Mefan/.claude/ --include=*.md --include=*.sh)",
+      "Bash(grep -rn \"Code-Review\\\\|Test-Code-Review\" /mnt/d/pycharmprojects/Mefan/.claude/agents/ --include=*.md)",
+      "Bash(grep -rn \"review-log\" /mnt/d/pycharmprojects/Mefan/.claude/agents/*.md)",
+      "Bash(grep -n \"REVIEW_LOG_PATH=\" /mnt/d/pycharmprojects/Mefan/.claude/agents/*.md)",
+      "Bash(grep -rn \"Code-Review\\\\|Test-Code-Review\\\\|🏛️\\\\|🔬\" /mnt/d/pycharmprojects/Mefan/.claude/agents/ --include=*.md)",
+      "Bash(grep -rn ArchCheck /mnt/d/pycharmprojects/Mefan/.claude/ --include=*.md --include=*.sh)",
+      "Bash(grep -rn \"ArchCheck\\\\|Test-Code-Review\" /mnt/d/pycharmprojects/Mefan/.claude/ --include=*.md --include=*.sh)",
+      "Bash(grep \"reviews/review-log\" /mnt/d/pycharmprojects/Mefan/.claude/agents/*.md)",
+      "Bash(grep -rn \"Code-Review\\\\|Test-Code-Review\\\\|ArchCheck\\\\|ArchTestCheck\" /mnt/d/pycharmprojects/Mefan/.claude/agents/ --include=*.md)",
+      "Bash(sed -i '361s/^| /   | /' /mnt/d/pycharmprojects/Mefan/.claude/agents/ba-stage1.md)",
+      "Bash(sed -i '362s/^| /   | /' /mnt/d/pycharmprojects/Mefan/.claude/agents/ba-stage1.md)"
     ]
   }
 }

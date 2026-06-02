@@ -30,8 +30,10 @@ PM Agent 审查（≤3次循环）
 | 事件类型 | 日志命令格式 |
 |---------|-------------|
 | 阶段进入 | `bash .claude/hooks/log-event.sh "01" "Command" "阶段进入" "阶段1开始" "" "成功"` |
-| Agent 激活 | `bash .claude/hooks/log-event.sh "01" "Command" "Agent激活" "BA开始执行" "" "进行中"` |
-| Agent 完成 | `bash .claude/hooks/log-event.sh "01" "Command" "Agent完成" "BA产出完成" "" "成功"` |
+| BA Agent 激活 | `bash .claude/hooks/log-event.sh "01" "Command" "Agent激活" "BA开始执行" "" "进行中"` |
+| BA Agent 完成 | `bash .claude/hooks/log-event.sh "01" "Command" "Agent完成" "BA产出完成" "" "成功"` |
+| PM Agent 激活 | `bash .claude/hooks/log-event.sh "01" "Command" "Agent激活" "PM开始审查" "" "进行中"` |
+| PM Agent 完成 | `bash .claude/hooks/log-event.sh "01" "Command" "Agent完成" "PM审查完成" "" "成功"` |
 | 阶段退出 | `bash .claude/hooks/log-event.sh "01" "Command" "阶段退出" "阶段1完成" "" "成功"` |
 
 ---
@@ -68,7 +70,7 @@ echo "[前置检查] 功能要点：P0=$P0_COUNT, P1=$P1_COUNT"
 echo "[前置检查] 加载依赖文档..."
 ls -la $ROOT/.claude/context/tech-stack-profile.md 2>/dev/null || echo "[Warning] tech-stack-profile.md 不存在"
 ls -la $ROOT/.claude/context/consistency-baseline.md 2>/dev/null || echo "[Warning] consistency-baseline.md 不存在"
-ls -la $ROOT/.claude/context/knowledge.grap 2>/dev/null || echo "[Info] knowledge.grap 不存在，将使用手动分析"
+ls -la "$ROOT/graphify-out" 2>/dev/null || echo "[Info] graphify-out 不存在，将使用手动分析"
 ```
 
 ---
@@ -275,7 +277,7 @@ bash .claude/hooks/log-event.sh "01" "Command" "阶段退出" "阶段1完成" ""
 | Sub-feature 拆分技能 | `.claude/skills/sub-feature-splitting.md` | SF 拆分方法论 |
 | tech-stack-profile.md | `.claude/context/tech-stack-profile.md` | 技术栈参考 |
 | consistency-baseline.md | `.claude/context/consistency-baseline.md` | 代码风格参考 |
-| knowledge.grap | `.claude/context/knowledge.grap` | 知识图谱（必须分析） |
+| graphify-out/ | `.claude/context/graphify-out/` | Graphify 图谱（必须分析） |
 | session-status.md | `.claude/iterations/session-status.md` | 阶段状态追踪（需更新） |
 | project.md | `.claude/context/project.md` | 项目上下文（需更新） |
 

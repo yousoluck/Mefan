@@ -53,9 +53,9 @@ SCENARIO="upgrade"
 bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤开始" "检查知识图谱" "" ""
 ```
 
-1. 检查 `.claude/context/knowledge.grap` 是否存在
+1. 检查 `$ROOT/graphify-out/` 是否存在
    - **不存在**：输出警告，继续执行（可能仅有部分数据）
-   - **存在**：记录知识图谱数据范围，继续执行
+   - **存在**：使用 graphify query 验证图谱可用性
 
 ```bash
 bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤完成" "知识图谱检查" "" "成功"

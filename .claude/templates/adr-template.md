@@ -202,7 +202,7 @@ src/
 ```json
 {
   "field": "type",
-  "description"
+  "description": "this is description"
 }
 ```
 

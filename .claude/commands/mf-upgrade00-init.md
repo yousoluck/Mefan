@@ -38,25 +38,45 @@ PM Agent → Human Gate → Architect Agent → Human Gate → PM 校验 → Hum
 
 ---
 
-## 1.1 知识图谱准备
+## 1.1 Graphify 安装与初始化
 
-> **重要**：阶段 0 执行前，必须先确认知识图谱存在
+> **重要**：阶段 0 执行前，必须先安装并初始化 graphify
 
-**知识图谱生成**：
-如果 `.claude/context/knowledge.grap` 不存在，先运行 graphify 生成：
+**Graphify 安装步骤**：
 
 ```bash
-# 检查 knowledge.grap 是否存在
-if [ ! -f "$ROOT/.claude/context/knowledge.grap" ]; then
-  echo "[Warning] knowledge.grap 不存在，建议先运行 graphify scan"
-  echo "如果没有 graphify，阶段 0 Agent 会标注'手动分析'继续执行"
+# 1. 安装 graphify 到本项目（如尚未安装）
+if ! command -v graphify &> /dev/null; then
+    echo "[PM-Stage0] 正在安装 graphify..."
+    pip install graphify 2>/dev/null || echo "[Warning] graphify 安装失败"
+fi
+
+# 2. 在项目根目录初始化 graphify
+cd "$ROOT"
+if [ ! -f "$ROOT/graphify-out/.graphify_initialized" ]; then
+    echo "[PM-Stage0] 正在初始化 graphify 项目..."
+    graphify install --project 2>/dev/null || echo "[Warning] graphify install --project 失败"
 fi
 ```
 
-**如果 knowledge.grap 不存在**：
-- PM Agent 会输出警告但继续执行
-- Architect Agent 会标注"手动分析 [Graphify不可用]"
-- Analyst Agent 会标注"手动分析"
+**Graphify 图谱生成**：
+
+```bash
+# 检查是否已有图谱
+if [ -d "$ROOT/graphify-out" ] && [ -n "$(ls -A "$ROOT/graphify-out" 2>/dev/null)" ]; then
+    echo "[PM-Stage0] graphify 图谱已存在，执行更新..."
+    cd "$ROOT" && graphify --update 2>/dev/null || echo "[Warning] graphify --update 失败"
+else
+    echo "[PM-Stage0] 未检测到 graphify 图谱，执行生成..."
+    cd "$ROOT" && graphify . 2>/dev/null || echo "[Warning] graphify . 失败"
+fi
+```
+
+**注意**：
+- `graphify install --project` 初始化项目级配置
+- `graphify .` 在项目根目录生成图谱，默认输出到 `graphify-out/`
+- `graphify --update` 更新已有图谱
+- 如果 graphify 不可用，Agent 会标注"手动分析 [Graphify不可用]"继续执行
 
 ---
 

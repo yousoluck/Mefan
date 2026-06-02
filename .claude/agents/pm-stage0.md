@@ -21,7 +21,14 @@ run_in_background: false
 ## 变量定义
 ```bash
 AGENT_NAME="PM"
-ROOT="/mnt/d/pycharmprojects/mefan"
+# ROOT 从 project.conf 加载，详见 mf-upgrade:00-init.md 的配置说明
+if [ -n "$ROOT" ]; then
+    :
+elif [ -f "$(dirname "${BASH_SOURCE[0]}")/../project.conf" ]; then
+    source "$(dirname "${BASH_SOURCE[0]}")/../project.conf"
+else
+    export ROOT="/mnt/d/pycharmprojects/Mefan"
+fi
 SCENARIO="upgrade"
 ```
 
@@ -29,28 +36,25 @@ SCENARIO="upgrade"
 
 ## 阶段 0 操作（原子化）
 
-### 操作 0.1：确定知识图谱
-> **目的**：验证知识图谱是否存在，作为项目理解的根基
+### 操作 0.1：检查 Graphify 图谱
+> **目的**：验证 Graphify 图谱是否存在，作为项目理解的根基
 
 ```bash
-bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤开始" "检查知识图谱" "" ""
+bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤开始" "检查 Graphify 图谱" "" ""
 ```
 
-1. 检查 `.claude/context/knowledge.grap` 是否存在
-   - **不存在**：输出错误信息并退出 Sub Agent
-     ```
-     [PM-Stage0] 知识图谱不存在，请先运行 graphify 或相关知识图谱生成命令。
-     当前阶段需要知识图谱才能继续初始化。
-     ```
+1. 检查 `$ROOT/graphify-out/` 是否存在且有内容
+   - **不存在或为空**：输出警告，继续执行（可能仅有部分数据）
    - **存在**：继续执行
 
+2. 使用 graphify query 验证图谱可用性：
 ```bash
-bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤完成" "知识图谱检查" "" "成功"
+cd "$ROOT" && graphify query "Show me project overview" --format markdown 2>/dev/null | head -10 || echo "[Warning] Graphify 查询失败"
 ```
 
-2. 知识图谱更新占位符（TODO）
-   - 调用知识图谱更新接口，传入当前项目状态
-   - 占位符标记：`[TODO: 知识图谱更新]`
+```bash
+bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤完成" "Graphify 图谱检查" "" "成功"
+```
 
 ---
 
@@ -196,38 +200,33 @@ NEXT_SPRINT_NUM=$((SPRINT_COUNT + 1))
 # 新建 ### 迭代 sprint-latest，状态为 🔍 进行中，开始日期为 2026-05-22
 ```
 
-#### 3.2 知识图谱项目信息采集
-> 查阅知识图谱 `.claude/context/knowledge.grap`，完成以下信息采集：
+#### 3.2 Graphify 项目信息采集
+> 使用 graphify query 查询项目信息：
 
-| 信息类别 | 采集字段 | 知识图谱节点路径 | 说明 |
-|---------|---------|----------------|------|
-| **项目总体介绍** | 项目名称 | `metadata.name` 或项目根目录的 `package.json` / `pyproject.toml` | |
-| | 项目类型 | `metadata.type` | 全新/二次开发/重构/hotfix |
-| | 核心功能概述 | `functions.overview` | 一句话描述项目做什么 |
-| | 项目背景 | `metadata.background` | 为什么有这个项目 |
-| **项目功能介绍** | 主要功能清单 | `functions.list` | 列出 3-5 个核心功能 |
-| | 核心业务流程 | `business_flow` | 主要的业务流程描述 |
-| | 用户角色 | `users.roles` | 系统涉及哪些用户角色 |
-| | 关键场景 | `scenarios.key` | 核心使用场景 |
-| **项目性质** | 项目类型 | `metadata.project_type` | 从 SCENARIO 获取 |
-| | 触发原因 | `upgrade.trigger` | 为什么现在要做升级 |
-| **Tech Stack** | 前端语言/版本/框架 | `tech_stack.frontend.*` | |
-| | 后端语言/版本/框架 | `tech_stack.backend.*` | |
-| | 数据库产品/版本 | `tech_stack.database.*` | |
-| **其他关键信息** | 外部服务依赖 | `dependencies.external` | 第三方服务 |
-| | 部署环境 | `deployment.env` | |
-| | 配置管理方式 | `deployment.config` | |
+| 信息类别 | 查询命令 | 输出 |
+|---------|---------|------|
+| **项目总体介绍** | `graphify query "Show me project name and type"` | 项目名称、类型 |
+| | `graphify query "Show me project overview"` | 核心功能概述 |
+| **Tech Stack** | `graphify query "Show me tech stack"` | 技术栈信息 |
+| **前端框架** | `graphify query "Show me frontend frameworks"` | 前端框架信息 |
+| **后端框架** | `graphify query "Show me backend frameworks"` | 后端框架信息 |
+| **数据库** | `graphify query "Show me database configuration"` | 数据库配置 |
 
 #### 3.3 填充 project.md 内容
-> 打开已创建/存在的 project.md，逐字段从知识图谱填充：
+> 打开已创建/存在的 project.md，逐字段从 Graphify 查询结果填充：
 
-1. **逐字段填充**（使用知识图谱查询结果）：
+1. **执行 Graphify 查询**：
+```bash
+cd "$ROOT"
+PROJECT_OVERVIEW=$(graphify query "Show me project overview" --format markdown 2>/dev/null | head -30 || echo "")
+TECH_STACK=$(graphify query "Show me tech stack" --format markdown 2>/dev/null | head -30 || echo "")
+```
+
+2. **逐字段填充**：
    - 打开 `.claude/context/project.md`
-   - 打开 `knowledge.grap` 文件
-   - 读取 3.2 表格中对应节点的内容
-   - 填充到 `project.md` 的对应字段
+   - 将 Graphify 查询结果填充到对应字段
 
-2. **无法从知识图谱获取的字段**：
+3. **无法从 Graphify 获取的字段**：
    - 标记为 `[人工补充]`
    - 在 `待补充项` 表格中记录
 
@@ -254,55 +253,34 @@ bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤开始" "生成/
 3. **如果存在**：
    - 读取现有内容，评估是否需要更新
 
-#### 4.2 知识图谱技术栈详细采集
-> 查阅知识图谱 `.claude/context/knowledge.grap`，完成以下详细技术信息采集：
+#### 4.2 Graphify 技术栈详细采集
+> 使用 graphify query 查询详细技术信息：
 
-| 类别 | 采集项 | 知识图谱节点路径 | 填充位置 |
-|------|--------|-----------------|---------|
-| **前端框架** | 框架名称 | `tech_stack.frontend.framework.name` | tech-stack-profile.md → 核心框架 |
-| | 框架版本 | `tech_stack.frontend.framework.version` | tech-stack-profile.md → 核心框架 |
-| | 配套库（router/state等） | `tech_stack.frontend.libraries` | tech-stack-profile.md → 对应小节 |
-| | UI 组件库 | `tech_stack.frontend.ui_library` | tech-stack-profile.md → UI 组件库 |
-| **前端工具链** | 构建工具 | `tech_stack.frontend.build_tool` | tech-stack-profile.md → 构建与开发工具 |
-| | 包管理器 | `tech_stack.frontend.package_manager` | tech-stack-profile.md → 构建与开发工具 |
-| | TypeScript | `tech_stack.frontend.typescript` | tech-stack-profile.md → 构建与开发工具 |
-| | Lint 工具 | `tech_stack.frontend.lint` | tech-stack-profile.md → 构建与开发工具 |
-| **后端框架** | 框架名称 | `tech_stack.backend.framework.name` | tech-stack-profile.md → 核心框架 |
-| | 框架版本 | `tech_stack.backend.framework.version` | tech-stack-profile.md → 核心框架 |
-| | 配套中间件 | `tech_stack.backend.middleware` | tech-stack-profile.md → 中间件 |
-| **后端运行时** | 语言版本 | `tech_stack.backend.runtime.version` | tech-stack-profile.md → 运行时环境 |
-| | 包管理器 | `tech_stack.backend.package_manager` | tech-stack-profile.md → 运行时环境 |
-| **数据库** | 数据库类型 | `tech_stack.database.type` | tech-stack-profile.md → 主数据库 |
-| | 数据库版本 | `tech_stack.database.version` | tech-stack-profile.md → 主数据库 |
-| | ORM/ODM | `tech_stack.database.orm` | tech-stack-profile.md → 主数据库 |
-| **缓存层** | 缓存产品 | `tech_stack.cache.type` | tech-stack-profile.md → 缓存 |
-| | 缓存版本 | `tech_stack.cache.version` | tech-stack-profile.md → 缓存 |
-| **消息队列** | MQ 产品 | `tech_stack.mq.type` | tech-stack-profile.md → 消息队列 |
-| | MQ 版本 | `tech_stack.mq.version` | tech-stack-profile.md → 消息队列 |
-| **容器化** | 容器技术 | `tech_stack.container.type` | tech-stack-profile.md → 容器化 |
-| | 编排工具 | `tech_stack.container.orchestration` | tech-stack-profile.md → 容器化 |
-| **CI/CD** | CI 工具 | `tech_stack.cicd.tool` | tech-stack-profile.md → CI/CD |
-| | 部署平台 | `tech_stack.cicd.platform` | tech-stack-profile.md → CI/CD |
-| **测试** | 单元测试框架 | `tech_stack.test.unit` | tech-stack-profile.md → 单元测试 |
-| | 集成测试框架 | `tech_stack.test.integration` | tech-stack-profile.md → 集成测试 |
-| | E2E 测试框架 | `tech_stack.test.e2e` | tech-stack-profile.md → E2E 测试 |
-| **监控** | 日志系统 | `tech_stack.monitoring.log` | tech-stack-profile.md → 监控与日志 |
-| | 监控系统 | `tech_stack.monitoring.metrics` | tech-stack-profile.md → 监控与日志 |
-| **版本清单** | 核心依赖版本 | `tech_stack.versions.core` | tech-stack-profile.md → 版本清单汇总 |
-| | 系统依赖版本 | `tech_stack.versions.system` | tech-stack-profile.md → 系统环境版本 |
+| 类别 | 查询命令 | 填充位置 |
+|------|---------|---------|
+| **前端框架** | `graphify query "Show me React components and Redux usage"` | tech-stack-profile.md → 核心框架 |
+| **前端工具链** | `graphify query "Show me build tools and TypeScript usage"` | tech-stack-profile.md → 构建与开发工具 |
+| **后端框架** | `graphify query "Show me backend API patterns"` | tech-stack-profile.md → 核心框架 |
+| **数据库** | `graphify query "Show me database models and ORM usage"` | tech-stack-profile.md → 主数据库 |
+| **中间件** | `graphify query "Show me middleware configuration"` | tech-stack-profile.md → 中间件 |
 
 #### 4.3 更新 tech-stack-profile.md 内容
-> 使用模板生成文件后，逐字段从知识图谱填充：
+> 使用模板生成文件后，逐字段从 Graphify 查询结果填充：
 
 1. **复制模板到目标位置**：
    ```bash
    cp $ROOT/.claude/templates/tech-stack-profile-template.md $ROOT/.claude/context/tech-stack-profile.md
    ```
 
-2. **逐字段填充**（使用知识图谱查询结果）：
-   - 打开 `knowledge.grap` 文件
-   - 读取上述表格中对应节点的内容
-   - 填充到 `tech-stack-profile.md` 的对应表格
+2. **执行 Graphify 查询**：
+```bash
+cd "$ROOT"
+FRONTEND_INFO=$(graphify query "Show me frontend framework and libraries" --format markdown 2>/dev/null | head -40 || echo "")
+BACKEND_INFO=$(graphify query "Show me backend framework and middleware" --format markdown 2>/dev/null | head -40 || echo "")
+DATABASE_INFO=$(graphify query "Show me database configuration" --format markdown 2>/dev/null | head -40 || echo "")
+```
+
+3. **逐字段填充**：将 Graphify 查询结果填充到 tech-stack-profile.md 的对应表格
 
 3. **无法从知识图谱获取的字段**：
    - 标记为 `[人工补充]`
@@ -419,7 +397,7 @@ bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "产出物" "更新 pro
 #### 6.1 输入（Inputs）
 | 输入 | 来源 | 用途 |
 |------|------|------|
-| knowledge.grap | `.claude/context/knowledge.grap` | 提供项目信息和 tech stack 数据 |
+| graphify-out/ | `$ROOT/graphify-out/` | 提供项目信息和技术栈数据 |
 | session-status.md | `.claude/iterations/session-status.md` | 读取已完成状态，汇总产出物 |
 | project.md | `.claude/context/project.md`（如已生成） | 读取项目信息 |
 | tech-stack-profile.md | `.claude/context/tech-stack-profile.md`（如已生成） | 读取技术栈统计 |

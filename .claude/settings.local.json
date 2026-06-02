@@ -6,7 +6,21 @@
       "Bash(do echo:*)",
       "Read(//mnt/d/pycharmprojects/mefan/.claude/skills/$skill/**)",
       "Bash(done)",
-      "Bash(bash /mnt/d/pycharmprojects/mefan/.claude/hooks/conversation-log.sh \"assistant\" \"继续之前的工作：更新 architect-stage0.md 的通用骨架调查部分（新增目录结构、数据库架构、API设计、错误处理、命名规范、模块耦合、代码复用、测试规范、部署环境等调查项），以及更新 frontend-redux Skill 新增组件间状态传递、页面间状态传递、API数据处理流程、数据库模式调查等章节。\" \"完成 architect-stage0.md 操作 2.4 通用骨架调查部分扩展（8个调查分类），完成 frontend-redux Skill v1.1.0 更新（新增4个调查章节）\" \"更新 architect-stage0.md 第2.4节通用骨架调查（8个调查分类），更新 frontend-redux/SKILL.md（版本升至1.1.0，新增组件间/页面间状态传递、API数据处理、数据库模式调查章节）\")"
+      "Bash(bash /mnt/d/pycharmprojects/mefan/.claude/hooks/conversation-log.sh \"assistant\" \"继续之前的工作：更新 architect-stage0.md 的通用骨架调查部分（新增目录结构、数据库架构、API设计、错误处理、命名规范、模块耦合、代码复用、测试规范、部署环境等调查项），以及更新 frontend-redux Skill 新增组件间状态传递、页面间状态传递、API数据处理流程、数据库模式调查等章节。\" \"完成 architect-stage0.md 操作 2.4 通用骨架调查部分扩展（8个调查分类），完成 frontend-redux Skill v1.1.0 更新（新增4个调查章节）\" \"更新 architect-stage0.md 第2.4节通用骨架调查（8个调查分类），更新 frontend-redux/SKILL.md（版本升至1.1.0，新增组件间/页面间状态传递、API数据处理、数据库模式调查章节）\")",
+      "WebSearch",
+      "Bash(xxd)",
+      "Bash(bash /mnt/d/pycharmprojects/Mefan/.claude/hooks/conversation-log.sh \"assistant\" \"检查更新后的 files-create.md 是否有断链\" \"完成断链检测：发现 bug-log-template.md 缺失、iteration-plan-template.md 不存在、testplans 目录未创建、阶段5文件不完整等问题\" \"1. 更新阶段5 QA/PM/Dev-Stage5 文件清单\n2. 更新 bugs-template.md 使用者信息\n3. 在断链报告中添加 bug-log-template.md 缺失说明\n4. 验证 iteration-plan-template.md 实际不存在\n5. 确认 testplans/ 目录在 qa-stage2.md 中有创建逻辑\")",
+      "Bash(curl -s \"https://api.github.com/search/repositories?q=graphify+code+analysis&per_page=5\")",
+      "Bash(curl -s \"https://api.github.com/search/repositories?q=graphify+in:name+code&per_page=10\")",
+      "Bash(curl -s \"https://api.github.com/search/repositories?q=gitnexus+OR+codegrip&per_page=10\")",
+      "Bash(curl -s \"https://api.github.com/search/repositories?q=codegraph+in:name&per_page=10\")",
+      "Bash(curl -s \"https://api.github.com/search/repositories?q=code-review-graph+in:name&per_page=10\")",
+      "Bash(curl -s \"https://api.github.com/repos/abhigyanpatwari/GitNexus\")",
+      "Bash(curl -s \"https://api.github.com/repos/colbymchenry/codegraph\")",
+      "Bash(chmod:*)",
+      "Bash(bash .claude/skills/code-pattern-extractor.sh --help 2>&1)",
+      "Bash(bash .claude/skills/code-pattern-extractor.sh --type tech-frontend 2>&1)",
+      "Bash(bash .claude/skills/code-pattern-extractor.sh --all 2>&1)"
     ]
   },
   "hooks": {

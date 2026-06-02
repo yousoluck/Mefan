@@ -52,7 +52,14 @@ run_in_background: false
 ## 变量定义
 ```bash
 AGENT_NAME="Architect"
-ROOT="/mnt/d/pycharmprojects/mefan"
+# ROOT 从 project.conf 加载
+if [ -n "$ROOT" ]; then
+    :
+elif [ -f "$(dirname "${BASH_SOURCE[0]}")/../project.conf" ]; then
+    source "$(dirname "${BASH_SOURCE[0]}")/../project.conf"
+else
+    export ROOT="/mnt/d/pycharmprojects/Mefan"
+fi
 SCENARIO="upgrade"
 ```
 
@@ -84,19 +91,24 @@ SCENARIO="upgrade"
 
 ## 阶段 0 操作（原子化）
 
-### 操作 0.1：检查知识图谱
-> **目的**：确认知识图谱存在，为后续深度分析提供数据基础
+### 操作 0.1：检查 Graphify 图谱
+> **目的**：确认 Graphify 图谱存在，为后续深度分析提供数据基础
 
 ```bash
-bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤开始" "检查知识图谱" "" ""
+bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤开始" "检查 Graphify 图谱" "" ""
 ```
 
-1. 检查 `.claude/context/knowledge.grap` 是否存在
+1. 检查 `$ROOT/graphify-out/` 是否存在
    - **不存在**：输出警告，继续执行（可能仅有部分数据）
-   - **存在**：记录知识图谱数据范围，继续执行
+   - **存在**：记录 Graphify 图谱数据范围，继续执行
+
+2. 使用 graphify query 查询项目信息验证图谱可用性：
+```bash
+cd $ROOT && graphify query "Show me all exported functions" --format markdown 2>/dev/null | head -20
+```
 
 ```bash
-bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤完成" "知识图谱检查" "" "成功"
+bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤完成" "Graphify 图谱检查" "" "成功"
 ```
 
 ---
@@ -297,6 +309,19 @@ fi
 >
 > **输出位置**：consistency-baseline.md 第五部分"项目 Skills 清单"
 
+##### 2.6.1 调用 code-pattern-extractor.sh 生成 Skills
+> 使用 graphify 分析代码后，生成项目的技术栈 Skills
+
+```bash
+# 生成所有技术栈 Skills
+cd "$ROOT"
+bash "$ROOT/.claude/skills/code-pattern-extractor.sh" --all 2>/dev/null || {
+    echo "[Architect-Stage0] code-pattern-extractor.sh 执行失败，跳过 Skill 生成"
+}
+```
+
+##### 2.6.2 扫描 skills 目录生成清单
+
 ```bash
 # 扫描 skills 目录生成清单
 SKILLS_DIR="$ROOT/.claude/skills"
@@ -386,11 +411,11 @@ fi
 
 #### 3.1 核心模块依赖分析
 1. 识别项目核心模块：
-   - 从 `knowledge.grap` 的 `modules.core` 节点获取
+   - 使用 graphify query 查询 `graphify query "Show me main entry points and core modules"`
    - 或扫描 `src/` 下入口文件（如 `main.ts`、`index.ts`）
 2. 对每个核心模块执行：
    ```bash
-   graphify dependents <核心模块>
+   cd "$ROOT" && graphify query "Show me dependencies of $module" 2>/dev/null
    ```
 3. 记录模块间的依赖关系
 

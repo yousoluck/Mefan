@@ -1,6 +1,7 @@
 # mefan Harness 宪法
 SCENARIO=upgrade
 CURRENT_STAGE=0
+ROOT=/mnt/d/pycharmprojects/Mefan
 知识库路径：.claude/rules/
 Skills 路径：.claude/skills/
 图谱目录：graphify-out/

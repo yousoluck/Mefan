@@ -575,6 +575,23 @@ Knowledge.grap 分析结果：
 bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "BA 产出完成" "" "成功"
 ```
 
+#### Human Gate 确认
+
+> **目的**：向用户报告 BA 阶段完成情况，等待确认
+
+**等待用户确认以下内容**：
+1. requirements.md 是否满足要求
+2. 是否允许进入 PM 审查阶段
+
+**回复选项**：
+- `继续` - 允许进入 PM 审查阶段
+- `补充` - 需要补充信息
+- `暂停` - 暂停阶段 1，等待进一步指示
+
+```bash
+bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "等待" "Human Gate 确认" "" "待回复"
+```
+
 ---
 
 ## 异常处理
