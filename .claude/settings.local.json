@@ -20,7 +20,11 @@
       "Bash(chmod:*)",
       "Bash(bash .claude/skills/code-pattern-extractor.sh --help 2>&1)",
       "Bash(bash .claude/skills/code-pattern-extractor.sh --type tech-frontend 2>&1)",
-      "Bash(bash .claude/skills/code-pattern-extractor.sh --all 2>&1)"
+      "Bash(bash .claude/skills/code-pattern-extractor.sh --all 2>&1)",
+      "Bash(graphify --help)",
+      "Bash(find /mnt/d/pycharmprojects/Mefan -name *consistency* -type f)",
+      "Bash(find /mnt/d/pycharmprojects/Mefan/.claude/skills -type f -name *.md)",
+      "Bash(ls:*)"
     ]
   },
   "hooks": {
