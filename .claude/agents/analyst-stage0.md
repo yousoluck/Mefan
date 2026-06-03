@@ -26,8 +26,15 @@ run_in_background: false
 ## 变量定义
 ```bash
 AGENT_NAME="Analyst"
-ROOT="/mnt/d/pycharmprojects/mefan"
-SCENARIO="upgrade"
+# ROOT 从 project.conf 加载
+if [ -n "$ROOT" ]; then
+    :
+elif [ -f "$(dirname "${BASH_SOURCE[0]}")/../project.conf" ]; then
+    source "$(dirname "${BASH_SOURCE[0]}")/../project.conf"
+else
+    export ROOT="/mnt/d/pycharmprojects/Mefan"
+fi
+# SCENARIO 从 CLaUDE.md 中读取（框架自动加载）
 ```
 
 ---
@@ -157,13 +164,13 @@ bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤开始" "现有�
 ```
 
 #### 4.1 查询知识图谱
-> 查阅 `knowledge.grap` 快速分析
+> 使用 graphify query 查阅 `graphify-out/graph.json`
 
 | 分析项 | 查询方法 | 输出 |
 |--------|---------|------|
 | 是否已实现此需求 | `graphify query "是否已实现 {需求}"` | 是/否/部分实现 |
-| 类似功能 | `graphify similar {需求关键词}` | 相似功能列表 |
 | 影响的模块 | `graphify query "与 {需求} 相关的模块"` | 模块列表 |
+| 类似功能 | `graphify path "现有功能" "需求相关模块"` | 相似功能列表 |
 
 #### 4.2 查询已有需求文档
 > 如果有之前迭代的需求文档，查阅对比
@@ -242,9 +249,8 @@ cp $ROOT/.claude/templates/feature-template.md $ROOT/.claude/iterations/sprint-l
 #### 5.7 知识图谱查询（如有）
 ```bash
 # 查询知识图谱获取现有项目信息
-# TODO: knowledge.grap 路径待确认，可能是 .claude/context/knowledge.grap 或其他位置
-graphify query "项目现有功能模块"
-graphify similar "{功能关键词}"
+graphify query "What modules and components exist in this project"
+graphify path "existing functionality" "new requirement" 2>/dev/null || true
 ```
 
 ```bash
@@ -376,7 +382,7 @@ bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤完成" "session
 | 输入 | 来源 | 用途 |
 |------|------|------|
 | 用户原始需求 | 对话输入 | 澄清的起点 |
-| knowledge.grap | `.claude/context/knowledge.grap` | 现有项目初步分析 |
+| graphify-out/ | `$ROOT/graphify-out/` | 现有项目初步分析 |
 
 #### 8.2 输出（Outputs）
 | 输出 | 目的地 | 说明 |

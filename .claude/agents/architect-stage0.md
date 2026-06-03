@@ -60,7 +60,7 @@ elif [ -f "$(dirname "${BASH_SOURCE[0]}")/../project.conf" ]; then
 else
     export ROOT="/mnt/d/pycharmprojects/Mefan"
 fi
-SCENARIO="upgrade"
+# SCENARIO 从 CLaUDE.md 中读取（框架自动加载）
 ```
 
 ---
@@ -102,9 +102,9 @@ bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤开始" "检查 
    - **不存在**：输出警告，继续执行（可能仅有部分数据）
    - **存在**：记录 Graphify 图谱数据范围，继续执行
 
-2. 使用 graphify query 查询项目信息验证图谱可用性：
+2. 使用 graphify query 验证图谱可用性：
 ```bash
-cd $ROOT && graphify query "Show me all exported functions" --format markdown 2>/dev/null | head -20
+cd $ROOT && graphify query "What are the main modules and components" 2>/dev/null | head -20
 ```
 
 ```bash
@@ -217,91 +217,459 @@ fi
 ```
 
 #### 2.4 通用骨架调查（所有框架通用）
-> 不依赖框架类型的通用调查项，需逐项扫描源码并记录证据
+> **目的**：逐章填充 consistency-baseline.md 的每个章节
+> **方法**：使用 Graphify 查询 + 源码扫描 + 证据记录
+> **原则**：每个调查项必须记录文件路径和行号作为证据
 
-##### 2.4.1 项目元数据调查
-| 调查项 | 采集方法 | 输出 |
-|--------|---------|------|
-| 项目名称 | 读取 `project.md` 或 `package.json` 的 name 字段 | 项目名称 |
-| 项目类型 | 判断前端/后端/fullstack | frontend/backend/fullstack |
-| 前端框架 | 检测 `package.json` 中的框架依赖 | react/vue/angular |
-| 后端框架 | 检测 `requirements.txt` 中的框架依赖 | flask/fastapi/django |
-| 调查时间 | 自动记录 | 时间戳 |
+##### 2.4.1 第一章：项目元数据
 
-##### 2.4.2 目录结构调查
-| 调查项 | 采集方法 | 输出 |
-|--------|---------|------|
-| 源代码目录 | 扫描 `src/`、`app/`、`lib/` | 目录结构及职责 |
-| 配置文件目录 | 扫描 `config/`、`settings/` | 配置位置 |
-| 测试目录 | 扫描 `tests/`、`__tests__/`、`test/` | 测试结构 |
-| 公共代码目录 | 扫描 `components/`、`hooks/`、`utils/` | 复用位置 |
+**Graphify 查询：**
+```bash
+# 查询项目基本信息
+graphify query "What is the project name and description"
+graphify query "What are the main entry points and configuration files"
+graphify query "What is the overall project structure"
+```
 
-##### 2.4.3 数据库架构调查
-| 调查项 | 采集方法 | 输出 |
-|--------|---------|------|
-| ORM/ODM 类型 | 检测 `models/`、`entities/`、`schemas/` 目录 | SQLAlchemy/Prisma/MongoDB |
-| 数据库连接配置 | 搜索 `baseURL`、`DATABASE_URL`、`db.py` | 连接配置文件 |
-| Session/连接管理 | 搜索 `sessionmaker`、`Session`、`connect` | 连接管理方式 |
-| 迁移工具 | 检测 `alembic/`、`migrations/` 目录 | Alembic/Flyway |
-| 模型基类 | 搜索 `Base`、`Model` 继承关系 | 是否有统一基类 |
-| Repository/DAO 模式 | 检测数据访问层封装 | 数据访问封装方式 |
+**源码扫描：**
+```bash
+# 读取 package.json 获取前端信息
+cat package.json | grep -E '"name"|"version"|"dependencies"' | head -20
 
-##### 2.4.4 API 设计通用调查
-| 调查项 | 采集方法 | 输出 |
-|--------|---------|------|
-| API 定义位置 | 扫描 `api/`、`routes/`、`endpoints/` | API 文件位置 |
-| Base URL 配置 | 搜索 `baseURL`、`BASE_URL`、`axios instance` | 配置文件 |
-| 请求/响应格式 | 搜索 `application/json`、`Response` | 格式约定 |
-| 统一响应结构 | 搜索 `{code, message, data}` 或类似 | 响应格式模板 |
-| 错误码定义 | 搜索 `ErrorCode`、`err_code`、`error_code` | 错误码定义位置 |
+# 读取 requirements.txt 或 pyproject.toml 获取后端信息
+cat requirements.txt 2>/dev/null | head -20 || cat pyproject.toml 2>/dev/null | head -20
+```
 
-##### 2.4.5 错误处理通用调查
-| 调查项 | 采集方法 | 输出 |
-|--------|---------|------|
-| 统一响应结构 | 搜索 `{code, message, data}` | 响应格式 |
-| 异常处理模式 | 搜索 `try/catch`、`exception`、`Error` | 错误处理代码 |
-| 自定义异常类 | 搜索 `class.*Error`、`class.*Exception` | 自定义异常 |
-| 日志规范 | 扫描 `logger/`、`log/`、`logging` | 日志配置 |
-| 日志级别 | 搜索 `DEBUG`、`INFO`、`WARN`、`ERROR` | 日志级别定义 |
+**填充内容**：
+- 项目名称、版本、类型（frontend/backend/fullstack）
+- 前端框架及版本
+- 后端框架及版本
+- 调查时间和调查人
 
-##### 2.4.6 命名规范调查
-| 调查项 | 采集方法 | 输出 |
-|--------|---------|------|
-| 文件命名 | 扫描 `src/` 文件命名模式 | camelCase/kebab-case/snake_case |
-| 变量/函数命名 | 分析代码中的命名风格 | 驼峰/下划线 |
-| 组件命名 | 分析 React/Vue 组件命名 | PascalCase/kebab-case |
-| API 命名 | 分析 API endpoint 命名 | RESTful 风格 |
+---
 
-##### 2.4.7 模块耦合规则调查
-| 调查项 | 采集方法 | 输出 |
-|--------|---------|------|
-| 依赖关系 | 分析 `import`/`require` 语句 | 模块依赖图 |
-| 循环依赖检测 | 检测 `circular dependency` | 循环依赖报告 |
-| 分层架构 | 分析代码层次 | Presentation/Business/Data 层 |
+##### 2.4.2 第二/三章：前后端目录结构规范
 
-##### 2.4.8 代码复用约定调查
-| 调查项 | 采集方法 | 输出 |
-|--------|---------|------|
-| 工具函数位置 | 检测 `utils/`、`helpers/` | 公共函数位置 |
-| 公共组件位置 | 检测 `components/`、`shared/` | 组件复用位置 |
-| 类型定义位置 | 检测 `types/`、`interfaces/` | 类型复用位置 |
-| 配置常量位置 | 检测 `config/`、`constants/` | 常量定义位置 |
+**Graphify 查询：**
+```bash
+# 查询目录结构
+graphify query "What is the directory structure of this project and what are the responsibilities of each directory"
+graphify query "What source directories exist (src/, app/, lib/) and what are their purposes"
+```
 
-##### 2.4.9 测试规范调查
-| 调查项 | 采集方法 | 输出 |
-|--------|---------|------|
-| 测试框架 | 检测 `package.json`/`requirements.txt` | jest/vitest/pytest |
-| 测试目录 | 扫描 `tests/`、`__tests__/` | 测试结构 |
-| 测试命名规范 | 扫描测试文件命名 | `*.test.ts`/`test_*.py` |
-| 测试覆盖率要求 | 检测覆盖率配置 | 覆盖率阈值 |
+**源码扫描：**
+```bash
+# 列出所有源代码目录
+find . -maxdepth 3 -type d \( -name "src" -o -name "app" -o -name "lib" -o -name "components" -o -name "services" -o -name "models" -o -name "views" -o -name "controllers" \) 2>/dev/null
 
-##### 2.4.10 部署与环境调查
-| 调查项 | 采集方法 | 输出 |
-|--------|---------|------|
-| 环境管理 | 检测 `.env`、`config.yaml` | 环境配置方式 |
-| 多环境配置 | 检测 `dev/staging/prod` 配置 | 环境列表 |
-| Docker 配置 | 检测 `Dockerfile`、`docker-compose.yml` | 容器化配置 |
-| CI/CD 配置 | 检测 `.github/workflows/`、`Jenkinsfile` | 持续集成配置 |
+# 扫描前端目录
+ls -la src/ 2>/dev/null || ls -la app/ 2>/dev/null
+```
+
+**填充内容**：
+- 各目录的职责说明
+- 证据（文件路径:行号）
+- 层级关系
+
+---
+
+##### 2.4.3 第四章：数据库架构
+
+**Graphify 查询：**
+```bash
+# 查询数据库相关
+graphify query "What database models or entities exist in this project"
+graphify query "What ORM patterns are used (SQLAlchemy, Prisma, Eloquent, MongoDB)"
+graphify query "What is the database connection configuration"
+graphify query "What migration tools are used (Alembic, Flyway, Prisma Migrate)"
+graphify query "Are there any repository or DAO patterns for data access"
+```
+
+**源码扫描：**
+```bash
+# 查找模型文件
+find . -name "*.py" -path "*/models/*" -o -name "*.py" -path "*/entities/*" -o -name "*.ts" -path "*/models/*" 2>/dev/null | head -20
+
+# 查找数据库配置
+grep -r "DATABASE_URL\|baseURL\|mongodb://\|postgresql://" --include="*.py" --include="*.ts" --include="*.js" . 2>/dev/null | head -10
+
+# 查找迁移目录
+ls -la migrations/ 2>/dev/null || ls -la alembic/ 2>/dev/null || ls -la db/migrations/ 2>/dev/null
+```
+
+**填充内容**：
+- ORM/ODM 类型
+- 数据库模型定义位置
+- 模型基类
+- 数据库连接配置
+- 迁移工具
+- Repository/DAO 模式
+
+---
+
+##### 2.4.4 第五章：前台 Redux 架构（如适用）
+
+**Graphify 查询：**
+```bash
+graphify query "What state management patterns are used (Redux, MobX, Vuex, Pinia, Context API)"
+graphify query "What are the main Redux slices or stores"
+graphify query "How are actions and reducers organized"
+graphify query "What async handling patterns are used (thunk, saga, RTK Query)"
+```
+
+**源码扫描：**
+```bash
+# 查找 store 配置
+find . -name "store" -type d 2>/dev/null
+find . -name "*Slice*.ts" -o -name "*Slice*.js" 2>/dev/null | head -10
+
+# 查找 reducer 配置
+grep -r "createSlice\|createStore\|configureStore" --include="*.ts" --include="*.js" . 2>/dev/null | head -10
+```
+
+**填充内容**：
+- Store 配置与创建
+- State 数据组织
+- Action 与 Reducer 开发
+- Action Dispatch 与业务逻辑触发
+- 组件间/页面间状态传递
+
+---
+
+##### 2.4.5 第六章：前台 API 调用层
+
+**Graphify 查询：**
+```bash
+graphify query "How are API calls organized in this project"
+graphify query "What is the API layer structure (services, api, endpoints)"
+graphify query "How are requests authenticated (tokens, headers)"
+graphify query "What is the response format convention"
+```
+
+**源码扫描：**
+```bash
+# 查找 API 定义
+find . -name "*.ts" -path "*/api/*" -o -name "*.ts" -path "*/services/*" -o -name "*.ts" -path "*/endpoints/*" 2>/dev/null | head -20
+
+# 查找 axios 或 fetch 配置
+grep -r "axios\|fetch\|baseURL\|interceptor" --include="*.ts" --include="*.js" . 2>/dev/null | head -10
+```
+
+**填充内容**：
+- API 访问架构
+- Base URL 配置
+- 请求/响应拦截器
+- API 契约定义
+- 数据处理方式
+
+---
+
+##### 2.4.6 第七章：后台业务架构
+
+**Graphify 查询：**
+```bash
+graphify query "What are the main backend routes or endpoints"
+graphify query "How is business logic organized (services, controllers)"
+graphify query "What middleware patterns are used"
+graphify query "How are URL routes defined"
+```
+
+**源码扫描：**
+```bash
+# 查找路由定义
+find . -name "*.py" -path "*/routes/*" -o -name "*.py" -path "*/urls.py" -o -name "*.py" -path "*/views/*" 2>/dev/null | head -20
+
+# 查找服务层
+find . -name "*.py" -path "*/services/*" -o -name "*.py" -path "*/business/*" 2>/dev/null | head -20
+
+# 查找中间件
+grep -r "middleware\|@app.middleware\|def middleware" --include="*.py" . 2>/dev/null | head -10
+```
+
+**填充内容**：
+- URL 接口定义
+- 业务逻辑组织
+- 中间件与拦截器
+- 事务管理
+
+---
+
+##### 2.4.7 第八章：前后台 API 交互契约
+
+**Graphify 查询：**
+```bash
+graphify query "What authentication methods are used (JWT, Session, OAuth)"
+graphify query "What is the error handling and response format convention"
+graphify query "How are errors represented in API responses"
+```
+
+**源码扫描：**
+```bash
+# 查找认证配置
+grep -r "JWT\|token\|auth\|Authorization" --include="*.py" --include="*.ts" --include="*.js" . 2>/dev/null | grep -v node_modules | head -20
+
+# 查找响应格式
+grep -r "{code\|message\|data}\|error\|Error" --include="*.py" --include="*.ts" . 2>/dev/null | grep -v node_modules | head -10
+```
+
+**填充内容**：
+- 认证与鉴权方式
+- Token 存储和传递
+- 统一响应格式
+- 异常处理统一规范
+
+---
+
+##### 2.4.8 第九章：命名与组织规范
+
+**Graphify 查询：**
+```bash
+graphify query "What naming conventions are used in this project for files, variables, and functions"
+graphify query "What is the file naming pattern (camelCase, snake_case, kebab-case)"
+graphify query "Are there any naming rules for API endpoints"
+```
+
+**源码扫描：**
+```bash
+# 分析文件命名模式
+ls src/ 2>/dev/null | head -30
+
+# 查找组件命名模式
+grep -r "class \|function \|const \|let " --include="*.ts" --include="*.py" . 2>/dev/null | grep -v node_modules | head -30
+```
+
+**填充内容**：
+- 文件命名规范
+- 变量/函数命名规范
+- 模块命名规范
+- 证据（文件路径）
+
+---
+
+##### 2.4.9 第十章：模块耦合规则
+
+**Graphify 查询：**
+```bash
+graphify query "What are the main module dependencies in this project"
+graphify query "Are there any circular dependencies"
+graphify query "What is the layer structure (presentation, business, data)"
+```
+
+**源码扫描：**
+```bash
+# 分析 import 依赖
+grep -r "^import \|^from \|require(" --include="*.ts" --include="*.py" . 2>/dev/null | grep -v node_modules | head -50
+
+# 查找循环依赖
+graphify query "Are there any circular dependencies in the codebase"
+```
+
+**填充内容**：
+- 模块间依赖关系
+- 允许的依赖
+- 禁止的依赖
+- 循环依赖检测结果
+
+---
+
+##### 2.4.10 第十一章：代码复用约定
+
+**Graphify 查询：**
+```bash
+graphify query "Where are common utilities, helpers, or shared code located"
+graphify query "What shared components exist"
+graphify query "How is code reused across features"
+```
+
+**源码扫描：**
+```bash
+# 查找公共目录
+ls -la src/utils/ 2>/dev/null || ls -la app/utils/ 2>/dev/null
+ls -la src/helpers/ 2>/dev/null || ls -la app/helpers/ 2>/dev/null
+ls -la src/components/ 2>/dev/null || ls -la app/components/ 2>/dev/null
+ls -la src/shared/ 2>/dev/null || ls -la app/shared/ 2>/dev/null
+```
+
+**填充内容**：
+- 工具函数位置
+- 公共组件位置
+- 类型定义位置
+- 配置常量位置
+- 复用证据
+
+---
+
+##### 2.4.11 第十二章：反模式（禁止做法）
+
+**Graphify 查询：**
+```bash
+graphify query "What are the common pitfalls or anti-patterns in this codebase"
+graphify query "What coding practices should be avoided"
+graphify query "Are there any comments marking technical debt or FIXME"
+```
+
+**源码扫描：**
+```bash
+# 查找 FIXME、TODO、HACK 注释
+grep -r "TODO\|FIXME\|HACK\|XXX\|BUG\|NOLOG" --include="*.py" --include="*.ts" --include="*.js" . 2>/dev/null | grep -v node_modules | head -20
+
+# 查找已知的反模式
+grep -r "any\|as any\|// @ts-ignore" --include="*.ts" --include="*.py" . 2>/dev/null | grep -v node_modules | head -10
+```
+
+**填充内容**：
+- 禁止做法列表
+- 原因说明
+- 正确做法示例
+
+---
+
+##### 2.4.12 第十三章：测试规范
+
+**Graphify 查询：**
+```bash
+graphify query "What testing framework is used (jest, vitest, pytest, unittest)"
+graphify query "What is the test file organization and naming convention"
+```
+
+**源码扫描：**
+```bash
+# 查找测试框架配置
+cat package.json 2>/dev/null | grep -E "jest|vitest|testing" | head -10
+cat requirements.txt 2>/dev/null | grep -E "pytest|unittest|nose" | head -10
+
+# 查找测试目录
+ls -la tests/ 2>/dev/null || ls -la test/ 2>/dev/null || ls -la __tests__/ 2>/dev/null
+```
+
+**填充内容**：
+- 测试框架
+- 测试目录结构
+- 测试命名规范
+- 覆盖率要求
+
+---
+
+##### 2.4.13 第十四章：部署与环境
+
+**Graphify 查询：**
+```bash
+graphify query "What deployment methods are used (Docker, Kubernetes, Serverless)"
+graphify query "What environment configurations exist"
+```
+
+**源码扫描：**
+```bash
+# 查找 Docker 配置
+ls -la Dockerfile 2>/dev/null || ls -la docker-compose.yml 2>/dev/null
+
+# 查找 CI/CD 配置
+ls -la .github/workflows/ 2>/dev/null || ls -la .gitlab-ci.yml 2>/dev/null || ls -la Jenkinsfile 2>/dev/null
+
+# 查找环境配置
+ls -la .env* 2>/dev/null || ls -la config/ 2>/dev/null
+```
+
+**填充内容**：
+- 环境管理方式
+- 多环境配置
+- Docker 配置
+- CI/CD 配置
+
+---
+
+##### 2.4.14 第十五章：类型定义规范
+
+**Graphify 查询：**
+```bash
+graphify query "How are types defined in this project (TypeScript, Python type hints)"
+graphify query "Where are shared types or interfaces defined"
+graphify query "What is the typing convention"
+```
+
+**源码扫描：**
+```bash
+# 查找类型定义
+find . -name "*.d.ts" 2>/dev/null | head -10
+find . -name "types.ts" -o -name "interfaces.ts" -o -name "typings.ts" 2>/dev/null | head -10
+
+# 查找 type 或 interface 定义
+grep -r "^type \|^interface \|class.*:" --include="*.ts" . 2>/dev/null | grep -v node_modules | head -20
+```
+
+**填充内容**：
+- 类型定义文件位置
+- 全局类型定义
+- API 类型定义
+- 组件 Props 类型定义
+
+---
+
+##### 2.4.15 第十六章：日志与监控
+
+**Graphify 查询：**
+```bash
+graphify query "What logging framework is used and how are logs configured"
+graphify query "What log levels are used (DEBUG, INFO, WARN, ERROR)"
+graphify query "Are there any error tracking tools (Sentry, Bugsnag)"
+```
+
+**源码扫描：**
+```bash
+# 查找日志配置
+grep -r "logging\|logger\|log\." --include="*.py" --include="*.ts" --include="*.js" . 2>/dev/null | grep -v node_modules | head -20
+
+# 查找监控工具配置
+grep -r "sentry\|bugsnag\|monitoring\|apm" --include="*.py" --include="*.ts" --include="*.js" --include="*.json" . 2>/dev/null | grep -v node_modules | head -10
+```
+
+**填充内容**：
+- 日志级别
+- 日志格式
+- 日志输出位置
+- 错误追踪工具
+
+---
+
+##### 2.4.16 第十七章：缓存策略
+
+**Graphify 查询：**
+```bash
+graphify query "What caching strategies are used in this project"
+graphify query "Is there frontend caching (React Query, SWR, Redux Persist)"
+graphify query "Is there backend caching (Redis, Memcached)"
+```
+
+**源码扫描：**
+```bash
+# 查找缓存配置
+grep -r "cache\|redis\|memcached\|CACHE" --include="*.py" --include="*.ts" --include="*.js" --include="*.json" . 2>/dev/null | grep -v node_modules | head -20
+```
+
+**填充内容**：
+- 前端缓存策略
+- 后端缓存策略
+- 缓存失效机制
+
+---
+
+##### 2.4.17 证据记录与填充
+
+**重要**：每个调查项必须记录证据，格式为 `文件路径:行号`
+
+```bash
+# 示例：记录发现的证据
+echo "发现：统一响应格式 {code, message, data}"
+echo "证据：src/api/base.ts:15"
+echo "发现：Redux Store 配置"
+echo "证据：src/store/index.ts:8"
+```
+
+**填充步骤**：
+1. 将 Graphify 查询结果整理成文字描述
+2. 将源码扫描结果标注文件路径和行号
+3. 逐章填充到 consistency-baseline.md 的对应章节
+4. 每项内容必须包含证据引用
 
 #### 2.6 生成 Skills 清单（第五部分）
 
@@ -386,6 +754,83 @@ bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "产出物" "生成 con
 bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤完成" "一致性基线提取" "" "跳过/成功"
 ```
 
+#### 2.8 生成 Skills（三类完整生成）
+> **目的**：生成三类完整的 Skills：
+> 1. **第一类**：Naming Convention / 项目目录组织架构类（通过 graphify 动态生成）
+> 2. **第二类**：开发工作流类（扫描现有 Skills 进行分类）
+> 3. **第三类**：功能元素类（从 feature-elements.md 用 graphify 生成）
+>
+> **依赖脚本**：
+> - `scripts/generate-naming-skill.sh`（生成第一类）
+> - `scripts/generate-workflow-skills.sh`（生成第二类）
+> - `scripts/generate-feature-skills.sh`（生成第三类）
+>
+> **依赖文档**：
+> - `feature-elements.md`（Feature 清单）
+> - `graphify-out/graph.json`（知识图谱）
+
+```bash
+bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤开始" "生成 Skills" "" ""
+SKILLS_DIR="$ROOT/.claude/skills"
+mkdir -p "$SKILLS_DIR" 2>/dev/null
+```
+
+##### 2.8.1 第一类：Naming Convention / 项目目录组织架构类
+> **生成方式**：通过 Graphify 查询项目实际代码，动态生成
+
+```bash
+echo "[Architect-Stage0] 生成第一类 Skills：Naming Convention / 目录组织架构"
+bash "$ROOT/.claude/skills/project-create-skill/scripts/generate-naming-skill.sh" "$SKILLS_DIR" "$ROOT"
+```
+
+##### 2.8.2 第二类：开发工作流类
+> **生成方式**：扫描 `.claude/skills` 目录中的非 project-* Skills 进行分类
+
+```bash
+echo "[Architect-Stage0] 生成第二类 Skills：开发工作流 + 部署工作流"
+bash "$ROOT/.claude/skills/project-create-skill/scripts/generate-workflow-skills.sh" "$SKILLS_DIR" "$ROOT"
+```
+
+##### 2.8.3 第三类：功能元素类
+> **生成方式**：从 `feature-elements.md` 读取 L5 业务场景，用 Graphify 查询生成
+
+```bash
+echo "[Architect-Stage0] 生成第三类 Skills：功能元素类"
+bash "$ROOT/.claude/skills/project-create-skill/scripts/generate-feature-skills.sh" "$SKILLS_DIR" "$ROOT"
+```
+
+##### 2.8.4 更新 consistency-baseline.md Skills 索引
+
+```bash
+echo "[Architect-Stage0] 更新 consistency-baseline.md Skills 索引..."
+
+CB_FILE="$ROOT/.claude/context/consistency-baseline.md"
+if [ -f "$CB_FILE" ]; then
+    # 统计各类 Skill 数量
+    NAMING_COUNT=$(ls $SKILLS_DIR/project-naming*.md $SKILLS_DIR/project-directory*.md $SKILLS_DIR/project-module*.md 2>/dev/null | wc -l)
+    WORKFLOW_DEV_COUNT=$(ls $SKILLS_DIR/project-workflow-*.md 2>/dev/null | wc -l)
+    WORKFLOW_DEPLOY_COUNT=$(ls $SKILLS_DIR/project-deploy-*.md 2>/dev/null | wc -l)
+    FEATURE_COUNT=$(ls $SKILLS_DIR/project-feature-*.md 2>/dev/null | wc -l)
+
+    echo "[Architect-Stage0] Skills 统计："
+    echo "  - Naming Convention 类: $NAMING_COUNT"
+    echo "  - 开发工作流类: $WORKFLOW_DEV_COUNT"
+    echo "  - 部署工作流类: $WORKFLOW_DEPLOY_COUNT"
+    echo "  - 功能元素类: $FEATURE_COUNT"
+    echo "[Architect-Stage0] Skills 索引更新完成"
+else
+    echo "[Architect-Stage0] consistency-baseline.md 不存在，跳过更新"
+fi
+```
+
+```bash
+bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "产出物" "生成 Naming Convention Skills" ".claude/skills/project-naming*.md" "成功"
+bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "产出物" "生成 Workflow Skills" ".claude/skills/project-workflow*.md" "成功"
+bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "产出物" "生成 Deploy Skills" ".claude/skills/project-deploy*.md" "成功"
+bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "产出物" "生成 Feature Skills" ".claude/skills/project-feature*.md" "成功"
+bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤完成" "生成 Skills" "" "成功"
+```
+
 ---
 
 ### 操作 0.3：依赖全景图生成（仅在新生成时执行）
@@ -411,11 +856,11 @@ fi
 
 #### 3.1 核心模块依赖分析
 1. 识别项目核心模块：
-   - 使用 graphify query 查询 `graphify query "Show me main entry points and core modules"`
+   - 使用 graphify query 查询 `graphify query "What are the main entry points and core modules"`
    - 或扫描 `src/` 下入口文件（如 `main.ts`、`index.ts`）
 2. 对每个核心模块执行：
    ```bash
-   cd "$ROOT" && graphify query "Show me dependencies of $module" 2>/dev/null
+   cd "$ROOT" && graphify path "$module" "Database" 2>/dev/null
    ```
 3. 记录模块间的依赖关系
 
@@ -583,7 +1028,7 @@ bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "产出物" "更新 pro
 #### 6.1 输入（Inputs）
 | 输入 | 来源 | 用途 |
 |------|------|------|
-| knowledge.grap | `.claude/context/knowledge.grap` | 提供代码模式和技术架构数据 |
+| graphify-out/ | `$ROOT/graphify-out/` | 提供代码模式和技术架构数据 |
 | consistency-baseline-template.md | `.claude/templates/consistency-baseline-template.md` | 模板引用 |
 | dependencies-overview-template.md | `.claude/templates/dependencies-overview-template.md` | 模板引用 |
 

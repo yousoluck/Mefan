@@ -423,81 +423,107 @@
 
 > **用途**：供 Arch-Stage2 生成 Task 伪代码时引用，为 Dev Agent 提供完整的 Skill 索引
 >
-> **来源**：
-> 1. **Superpowers 官方 Skills**：`@superpowers/*`（从 GitHub/npm 集成）
-> 2. **Mefan 自定义 Skills**：`.claude/skills/project-*.md`
-> 3. **动态生成的 Skills**：由 arch-stage0 扫描项目后生成
+> **Skill 分类体系**：
+> 1. **Naming Convention / 项目目录组织架构类** - 命名规范、目录结构
+> 2. **开发工作流类** - Git 操作、Build、部署
+> 3. **功能元素类** - 项目功能开发，来源于 feature-elements.md
 >
 > **更新时机**：阶段 0 初始化时生成，Skill 目录变化时更新
 
-### 5.1 Superpowers 官方 Skills（集成）
+### 5.1 Naming Convention / 项目目录组织架构类
 
-> **说明**：Superpowers 是标准化开发规范框架，提供跨语言的通用技能。集成方式：直接引用 `@superpowers/{skill-name}`
+> **说明**：项目的命名规范和目录结构约定，供 Dev Agent 遵守
 
-| Skill 名称 | 来源 | 描述 | 官方文档 |
-|-----------|------|------|---------|
-| @superpowers/tdd-mastery | superpowers | TDD 开发流程：测试先行、RED-GREEN、重构 | https://superpowers.github.io |
-| @superpowers/ship-discipline | superpowers | 防御性编程：异常处理、空指针防护、边界检查 | https://superpowers.github.io |
-| @superpowers/api-design | superpowers | API 设计规范：RESTful 风格、版本控制、错误码规范 | https://superpowers.github.io |
-| @superpowers/code-review | superpowers | Code Review 标准：命名、复杂度、安全检查清单 | https://superpowers.github.io |
-| @superpowers/git-conventions | superpowers | Git 提交规范：conventional commits、分支命名 | https://superpowers.github.io |
+| Skill 文件 | 描述 | 适用范围 | 关键要点 |
+|-----------|------|---------|---------|
+| project-naming-convention.md | 命名规范 | 所有代码文件 | 文件命名、变量命名、函数命名 |
+| project-directory-structure.md | 目录结构 | 项目目录 | 各目录职责、层级关系 |
+| project-module-organization.md | 模块组织 | 模块划分 | 模块边界、依赖关系 |
 
-**集成优先级**：
-- Superpowers Skills 作为**强制基础**，所有项目都必须引用
-- Mefan 自定义 Skills 作为**补充扩展**，针对特定框架或业务场景
+### 5.2 开发工作流类
 
-### 5.2 开发流程 Skills（强制）
+> **说明**：开发过程中的工作流程规范
 
-| Skill 文件 | 描述 | 适用的业务场景 | 关键要点 |
-|-----------|------|--------------|---------|
-| project-tdd-pattern.md | TDD 开发流程 | 所有后端服务开发 | 测试先行、RED-GREEN、重构 |
-| project-code-review-checklist.md | Code Review 标准 | 所有代码提交 | 命名、复杂度、安全检查 |
+#### 5.2.1 开发工作流
+
+| Skill 文件 | 描述 | 适用范围 | 关键要点 |
+|-----------|------|---------|---------|
+| project-git-workflow.md | Git 工作流 | 版本控制 | 分支策略、提交规范 |
+| project-tdd-pattern.md | TDD 开发流程 | 测试驱动 | RED-GREEN-REFACTOR |
+| project-code-review-checklist.md | Code Review 标准 | 代码审查 | 命名、复杂度、安全检查 |
 | project-commit-convention.md | 提交规范 | Git 提交 | conventional commit 格式 |
 
-### 5.3 技术栈 Skills（按框架）
+#### 5.2.2 部署工作流
 
-| Skill 文件 | 框架 | 描述 | 关键模式 |
-|-----------|------|------|---------|
-| project-tech-springboot.md | Spring Boot | Spring Boot 开发规范 | 注解使用、配置加载、自动装配 |
-| project-tech-mybatis.md | MyBatis | MyBatis 开发规范 | 映射文件、动态 SQL、分页 |
-| project-tech-lombok.md | Lombok | Lombok 使用规范 | @Getter/@Setter/@Builder 使用场景 |
-| project-tech-redis.md | Redis | Redis 使用规范 | key 命名、过期策略、序列化 |
-| project-tech-springcloud.md | Spring Cloud | 微服务规范 | 服务注册、负载均衡、熔断 |
+| Skill 文件 | 描述 | 适用范围 | 关键要点 |
+|-----------|------|---------|---------|
+| project-build.md | 构建规范 | 项目构建 | 构建命令、产物管理 |
+| project-deploy.md | 部署规范 | 部署流程 | 环境配置、部署步骤 |
+| project-docker.md | Docker 规范 | 容器化 | Dockerfile、docker-compose |
 
-### 5.4 业务模块 Skills（按模块）
+### 5.3 功能元素类
 
-| Skill 文件 | 业务模块 | 描述 | 核心接口 |
+> **说明**：来源于 PM-Stage0 生成的 feature-elements.md，由 Architect-Agent 扫描项目代码后生成
+>
+> **分类**：
+> - **底层基础类**：L1 基础设施（数据库、缓存、文件系统、网络通信等）
+> - **框架/中间件类**：L2-L3 领域/应用层（ORM、框架封装、中间件）
+> - **工具类**：工具函数、配置管理、日志等
+> - **业务应用层类**：L5 业务场景（从 l5-scenes清单.md 获取）
+
+#### 5.3.1 底层基础类（FE-I-*）
+
+| Skill 文件 | 对应 FE | 描述 | 关键模式 |
 |-----------|---------|------|---------|
-| project-user-module.md | 用户模块 | 用户注册/登录/鉴权 | login(), logout(), getCurrentUser() |
-| project-order-module.md | 订单模块 | 订单创建/查询/取消 | create(), findById(), cancel() |
-| project-payment-module.md | 支付模块 | 支付流程 | pay(), refund(), callback() |
-| project-notification-module.md | 通知模块 | 消息通知 | send(), broadcast() |
+| project-infra-database.md | FE-I-001 | 数据库基础设施 | 连接管理、事务、ORM |
+| project-infra-cache.md | FE-I-002 | 缓存基础设施 | Redis/Memcached 使用 |
+| project-infra-filesystem.md | FE-I-003 | 文件系统 | 文件读写、存储抽象 |
+| project-infra-network.md | FE-I-004 | 网络通信 | HTTP 客户端、API 调用 |
+| project-infra-mq.md | FE-I-005 | 消息队列 | RabbitMQ/Kafka 使用 |
+| project-infra-security.md | FE-I-006 | 安全认证 | JWT、OAuth、加密 |
+| project-infra-logging.md | FE-I-007 | 日志 | 日志配置、格式规范 |
+| project-infra-config.md | FE-I-008 | 配置管理 | 环境配置、参数管理 |
 
-**说明**：如果某业务模块尚无对应的 Skill 文件，Arch-Stage2 在 Task 伪代码中标注"无对应业务 Skill"，由 Dev Agent 自行参考 consistency-baseline 的通用规范。
+#### 5.3.2 框架/中间件类
 
-### 5.5 中间件 Skills（按类型）
+| Skill 文件 | 描述 | 关键模式 |
+|-----------|------|---------|
+| project-framework-*.md | 按检测到的框架生成 | 框架特定开发规范 |
+| project-middleware-*.md | 按检测到的中间件生成 | 中间件使用规范 |
 
-| Skill 文件 | 中间件 | 描述 | 关键规范 |
-|-----------|------|------|---------|
-| project-middleware-database.md | 数据库 | SQL/ORM 规范 | 分页、索引、事务处理 |
-| project-middleware-cache.md | 缓存 | Redis 缓存规范 | key 命名、过期策略、穿透/击穿 |
-| project-middleware-mq.md | 消息队列 | MQ 规范 | 消息格式、消费确认、幂等性 |
-| project-middleware-http.md | HTTP | 外部 API 调用 | 超时、重试、熔断 |
+#### 5.3.3 工具类
 
-### 5.6 外部 Skills（按需）
+| Skill 文件 | 描述 | 关键模式 |
+|-----------|------|---------|
+| project-utils.md | 工具函数规范 | 公共函数组织 |
+| project-types.md | 类型定义规范 | TypeScript/Java 类型 |
 
-| Skill 文件 | 来源 | 描述 | 使用场景 |
-|-----------|------|------|---------|
-| @superpowers/ship-discipline | superpowers | 通用开发规范 | 防御性编程、异常处理 |
-| @superpowers/api-design | superpowers | API 设计规范 | RESTful 风格、版本控制 |
+#### 5.3.4 业务应用层类（从 L5 场景生成）
 
-### 5.7 Skills 索引表
+| Skill 文件 | 对应场景 | 描述 | 核心元素 |
+|-----------|---------|------|---------|
+| project-feature-*.md | BS-001, BS-002... | 业务功能开发规范 | 实体、服务、接口 |
 
-| Skill 文件 | 描述 | 适用的业务场景 | 关键要点 |
-|-----------|------|--------------|---------|
-| project-tdd-pattern.md | TDD 开发流程 | 所有后端服务开发 | 测试先行、RED-GREEN、重构 |
-| project-code-review-checklist.md | Code Review 标准 | 所有代码提交 | 命名、复杂度、安全检查 |
-| project-commit-convention.md | 提交规范 | Git 提交 | conventional commit 格式 |
+**说明**：如果某功能元素尚无对应的 Skill 文件，Arch-Stage2 在 Task 伪代码中标注"无对应 Skill"，由 Dev Agent 自行参考 consistency-baseline 的通用规范。
+
+---
+
+### 5.4 Skills 索引表（汇总）
+
+| Skill 文件 | 类别 | 描述 | 优先级 |
+|-----------|------|------|--------|
+| project-naming-convention.md | 命名规范 | 命名规范 | P0 |
+| project-directory-structure.md | 目录结构 | 目录规范 | P0 |
+| project-git-workflow.md | 开发工作流 | Git 工作流 | P0 |
+| project-tdd-pattern.md | 开发工作流 | TDD 开发 | P1 |
+| project-code-review-checklist.md | 开发工作流 | Code Review | P1 |
+| project-commit-convention.md | 开发工作流 | 提交规范 | P1 |
+| project-build.md | 部署工作流 | 构建规范 | P2 |
+| project-deploy.md | 部署工作流 | 部署规范 | P2 |
+| project-docker.md | 部署工作流 | Docker 规范 | P2 |
+| project-infra-*.md | 底层基础 | 基础设施 | P3 |
+| project-framework-*.md | 框架中间件 | 框架规范 | P4 |
+| project-feature-*.md | 业务应用 | 业务功能 | P5 |
 
 ---
 

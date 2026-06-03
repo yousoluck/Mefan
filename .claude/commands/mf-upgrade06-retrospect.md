@@ -39,7 +39,7 @@ PM Agent → 项目进度报告 + 版本更新
 
 ---
 
-## 1. 规则加载（按需引用）
+## 2. 规则加载（按需引用）
 
 | 规则/技能 | 用途 | 引用时机 |
 |-----------|------|---------|
@@ -50,9 +50,27 @@ PM Agent → 项目进度报告 + 版本更新
 
 ---
 
-## 2. 前置检查
+## 3. 前置检查
 
 **执行者**：框架自动检查
+
+### 2.0 Sprint 归档检查
+
+> 在阶段 6 开始前，需要确认是否需要执行 Sprint 归档
+> **判断条件**：如果 `sprint-latest/` 目录存在且有内容，则在步骤 1 开始前先执行归档
+
+```bash
+# 检查是否需要归档
+if [ -d "$ROOT/.claude/iterations/sprint-latest" ] && [ -n "$(ls -A "$ROOT/.claude/iterations/sprint-latest" 2>/dev/null)" ]; then
+    echo "[mf-upgrade:06-retrospect] 检测到 sprint-latest/ 目录存在，将在步骤 1 前执行归档"
+    NEED_ARCHIVE=true
+else
+    echo "[mf-upgrade:06-retrospect] sprint-latest/ 目录为空或不存在，跳过归档"
+    NEED_ARCHIVE=false
+fi
+```
+
+---
 
 ### 2.1 检查阶段 5 产出物
 
@@ -103,12 +121,30 @@ PM Agent → 项目进度报告 + 版本更新
 
 ---
 
-## 3. 工作流编排
+## 4. 工作流编排
+
+### 步骤 0：Sprint 归档（条件执行）
+
+> **触发条件**：`NEED_ARCHIVE=true` 时执行（即 sprint-latest/ 目录存在且有内容）
+
+- **前置检查**：检查 sprint-latest/ 是否存在且有内容
+- **激活 Agent**：`agents/pm-stage6.md`（执行操作 0：Sprint 归档）
+- **职责**：
+  1. 将 `sprint-latest/` 重命名为 `sprint-N`
+  2. 更新 session-status.md 中的历史 Sprint 索引
+  3. 更新 project.md 中的迭代历史章节
+  4. 创建新的 `sprint-latest/` 目录
+- **产出物**：
+  - `sprint-N/` 目录（归档的迭代）
+  - `sprint-latest/` 目录（新迭代目录）
+- **完成后**：继续执行步骤 1
+
+---
 
 ### 步骤 1：PM 主导迭代总结
 
 - **前置检查**：自动检查阶段 5 产出物
-- **激活 Agent**：`agents/pm-stage6.md`
+- **激活 Agent**：`agents/pm-stage6.md`（执行操作 1-7）
 - **职责**：PM 执行完整的迭代总结工作（迭代数据汇总、迭代总结撰写、进化提案审批、版本与知识库更新、异常处理）
 - **引用规则**：`.claude/rules/global/harness-version-control.md`、`.claude/rules/global/tech-debt-management.md`、`.claude/rules/global/evolution-process.md`
 - **产出物**：
@@ -145,14 +181,14 @@ PM Agent → 项目进度报告 + 版本更新
 
 ---
 
-## 4. Human Gate
+## 5. Human Gate
 
 **审查内容**：迭代总结摘要、进化提案数量、技术债务趋势、守护者验证报告
 **通过条件**：人类审批通过 + 守护者验证通过
 
 ---
 
-## 5. 产出物
+## 6. 产出物
 
 | 产出物 | 路径 |
 |--------|------|
@@ -165,7 +201,7 @@ PM Agent → 项目进度报告 + 版本更新
 
 ---
 
-## 6. 异常处理
+## 7. 异常处理
 
 | 异常场景 | 处理方式 |
 |---------|---------|
@@ -179,7 +215,7 @@ PM Agent → 项目进度报告 + 版本更新
 
 ---
 
-## 7. 状态更新职责
+## 8. 状态更新职责
 
 > 阶段 6 需要更新以下文档，详见各 Agent 执行文件
 

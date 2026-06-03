@@ -38,49 +38,79 @@ PM Agent → Human Gate → Architect Agent → Human Gate → PM 校验 → Hum
 
 ---
 
-## 1.1 Graphify 安装与初始化
+## 2. 变量定义
 
-> **重要**：阶段 0 执行前，必须先安装并初始化 graphify
+```bash
+# 从 project.conf 加载 ROOT 和 SCENARIO
+if [ -f "$(dirname "${BASH_SOURCE[0]}")/../project.conf" ]; then
+    source "$(dirname "${BASH_SOURCE[0]}")/../project.conf"
+else
+    export ROOT="/mnt/d/pycharmprojects/Mefan"
+fi
+SCENARIO="upgrade"
+```
+
+---
+
+## 3. Graphify 安装与初始化
+
+> **重要**：阶段 0 执行前，必须完成 graphify 安装和项目扫描
 
 **Graphify 安装步骤**：
 
 ```bash
-# 1. 安装 graphify 到本项目（如尚未安装）
+# 1. 检查 graphify 是否已安装（系统级）
 if ! command -v graphify &> /dev/null; then
-    echo "[PM-Stage0] 正在安装 graphify..."
-    pip install graphify 2>/dev/null || echo "[Warning] graphify 安装失败"
+    echo "[mf-upgrade:00-init] 正在安装 graphify..."
+    pip install graphifyy 2>/dev/null || echo "[Warning] graphify 安装失败"
 fi
 
-# 2. 在项目根目录初始化 graphify
-cd "$ROOT"
-if [ ! -f "$ROOT/graphify-out/.graphify_initialized" ]; then
-    echo "[PM-Stage0] 正在初始化 graphify 项目..."
-    graphify install --project 2>/dev/null || echo "[Warning] graphify install --project 失败"
+# 2. 检查 graphify 是否可用
+if command -v graphify &> /dev/null; then
+    echo "[mf-upgrade:00-init] graphify 已安装: $(which graphify)"
+else
+    echo "[Warning] graphify 不可用，跳过图谱生成"
 fi
 ```
 
-**Graphify 图谱生成**：
+**Graphify 项目初始化**：
 
 ```bash
-# 检查是否已有图谱
-if [ -d "$ROOT/graphify-out" ] && [ -n "$(ls -A "$ROOT/graphify-out" 2>/dev/null)" ]; then
-    echo "[PM-Stage0] graphify 图谱已存在，执行更新..."
-    cd "$ROOT" && graphify --update 2>/dev/null || echo "[Warning] graphify --update 失败"
+# 3. 在项目根目录初始化 graphify（项目级配置）
+cd "$ROOT"
+if [ -f "$ROOT/graphify-out/.graphify_initialized" ]; then
+    echo "[mf-upgrade:00-init] graphify 项目已初始化"
 else
-    echo "[PM-Stage0] 未检测到 graphify 图谱，执行生成..."
-    cd "$ROOT" && graphify . 2>/dev/null || echo "[Warning] graphify . 失败"
+    echo "[mf-upgrade:00-init] 正在初始化 graphify 项目..."
+    if command -v graphify &> /dev/null; then
+        graphify install --project 2>/dev/null || echo "[Warning] graphify install --project 失败"
+    fi
 fi
+```
+
+**Graphify 图谱生成/更新**：
+
+> 以下操作需要在 Claude Code 中执行（slash command 形式）
+
+**首次扫描（之前未扫描过项目）**：
+```
+/graphify .
+```
+
+**增量更新（之前已扫描过项目）**：
+```
+/graphify . --update
 ```
 
 **注意**：
-- `graphify install --project` 初始化项目级配置
-- `graphify .` 在项目根目录生成图谱，默认输出到 `graphify-out/`
-- `graphify --update` 更新已有图谱
+- `graphify install --project`：初始化项目级配置
+- `/graphify .`：在 Claude Code 中执行全量扫描，生成图谱到 `graphify-out/`
+- `/graphify . --update`：在 Claude Code 中执行增量更新
 - 如果 graphify 不可用，Agent 会标注"手动分析 [Graphify不可用]"继续执行
 
 ---
 
-## 2. 规则加载
+## 3. 规则加载
 
 按需引用（不在阶段开头集中声明）：
 
@@ -93,15 +123,15 @@ fi
 
 ---
 
-## 3. 执行流程
+## 4. 执行流程
 
-### 3.1 阶段进入日志
+### 4.1 阶段进入日志
 
 ```bash
 bash .claude/hooks/log-event.sh "00 Init" "PM" "PM Agent开始执行" "PM 初始化项目开始" "" "进行中"
 ```
 
-### 3.2 PM Agent 执行（阶段 0 业务逻辑）
+### 4.2 PM Agent 执行（阶段 0 业务逻辑）
 
 **前置条件**：无
 **执行文件**：`.claude/agents/pm-stage0.md`
@@ -160,7 +190,18 @@ bash .claude/hooks/log-event.sh "00" "PM" "步骤完成" "PM环境确认完成" 
 | 后端框架信息 | 已填写 | 核心框架章节 |
 | 数据库信息 | 已填写 | 主数据库章节 |
 
-**五、确认选项**
+**五、feature-elements.md 文档检查**
+
+| 检查项 | 期望状态 | 路径 |
+|--------|---------|------|
+| feature-elements.md 是否生成 | ✅ | `.claude/context/feature-elements.md` |
+| L1 基础层 | 已填写 | 基础层章节 |
+| L2 框架层 | 已填写 | 框架层章节 |
+| L3 工具层 | 已填写或待补充 | 工具层章节 |
+| L4 业务层 | 已填写或待用户确认 | 业务层章节 |
+| 架构图 | Mermaid 格式 | 架构图章节 |
+
+**六、确认选项**
 
 **快速验证命令**：
 ```bash
@@ -173,6 +214,9 @@ grep "### 迭代 sprint-latest" .claude/context/project.md
 # 检查 tech-stack-profile.md 是否存在
 ls -la .claude/context/tech-stack-profile.md
 
+# 检查 feature-elements.md 是否存在
+ls -la .claude/context/feature-elements.md
+
 # 检查迭代目录
 ls -la .claude/iterations/sprint-latest/
 ```
@@ -184,7 +228,7 @@ ls -la .claude/iterations/sprint-latest/
 
 ---
 
-### 3.3 Architect Agent 执行（阶段 0 技术分析）
+### 4.3 Architect Agent 执行（阶段 0 技术分析）
 
 **前置条件**：PM Agent 全部完成
 **执行文件**：`.claude/agents/architect-stage0.md`
@@ -270,7 +314,7 @@ grep -A1 "dependencies-overview.md" .claude/context/project.md
 
 ---
 
-### 3.4 PM 校验
+### 4.4 PM 校验
 
 **执行者**：PM Agent（回跳执行校验）
 
@@ -307,6 +351,7 @@ PM Agent 在 Architect 完成产出后，执行以下校验：
 | session-status.md | `.claude/iterations/` | ✅ | 阶段完成记录、产出物追踪表已更新 |
 | project.md | `.claude/context/` | ✅ | 迭代历史、详细文档表格已更新 |
 | tech-stack-profile.md | `.claude/context/` | ✅ | 前端/后端框架、数据库信息已填写 |
+| feature-elements.md | `.claude/context/` | ✅ | L1-L4 层次已填写，架构图已生成 |
 | consistency-baseline.md | `.claude/context/` | ✅/⏳ | 至少 5 条规则，有代码示例证据 |
 | dependencies-overview.md | `.claude/context/` | ✅/⏳ | 至少 3 个核心模块，有依赖图 |
 | feature.md | `.claude/iterations/sprint-latest/` | ⏳ 待生成 | Analyst-Stage0 尚未执行 |
@@ -332,7 +377,7 @@ grep -A5 "PM校验" .claude/iterations/session-status.md
 
 ---
 
-### 3.5 Analyst Agent 执行（阶段 0 需求澄清）
+### 4.5 Analyst Agent 执行（阶段 0 需求澄清）
 
 **前置条件**：PM 校验完成且用户确认
 **执行文件**：`.claude/agents/analyst-stage0.md`
@@ -389,6 +434,7 @@ bash .claude/hooks/log-event.sh "00" "Analyst" "步骤完成" "Analyst需求澄�
 | session-status.md | `.claude/iterations/` | ✅ | 阶段 00 (PM、Architect、Analyst) 完成记录 |
 | project.md | `.claude/context/` | ✅ | 迭代历史、详细文档表格、迭代概述 |
 | tech-stack-profile.md | `.claude/context/` | ✅ | 完整技术栈信息 |
+| feature-elements.md | `.claude/context/` | ✅ | L1-L4 层次已填写，架构图已生成 |
 | consistency-baseline.md | `.claude/context/` | ✅/⏳ | 规则≥5条，有证据 |
 | dependencies-overview.md | `.claude/context/` | ✅/⏳ | 核心模块≥3个 |
 | feature.md | `.claude/iterations/sprint-latest/` | ✅ | 功能要点≥1，验收标准已定义 |
@@ -418,7 +464,7 @@ grep -c "验收标准" .claude/iterations/sprint-latest/feature.md
 
 ---
 
-### 3.6 阶段退出
+### 4.6 阶段退出
 
 ```bash
 bash .claude/hooks/log-event.sh "00" "PM" "阶段退出" "阶段0完成" "" "成功"
@@ -426,20 +472,21 @@ bash .claude/hooks/log-event.sh "00" "PM" "阶段退出" "阶段0完成" "" "成
 
 ---
 
-## 4. 产出物清单
+## 5. 产出物清单
 
 | 产出物 | 路径 | 状态 | 产出者 |
 |--------|------|------|--------|
 | session-status.md | `.claude/iterations/` | ⏳→✅ | PM |
 | project.md | `.claude/context/` | ⏳→✅ | PM |
 | tech-stack-profile.md | `.claude/context/` | ⏳→✅ | PM |
+| feature-elements.md | `.claude/context/` | ⏳→✅ | PM |
 | consistency-baseline.md | `.claude/context/` | ⏳→✅（可能跳过） | Architect |
 | dependencies-overview.md | `.claude/context/` | ⏳→✅（可能跳过） | Architect |
 | feature.md | `.claude/iterations/sprint-latest/` | ⏳→✅ | Analyst |
 
 ---
 
-## 5. 异常处理
+## 6. 异常处理
 
 | 异常场景 | 处理方式 |
 |---------|---------|
@@ -454,7 +501,7 @@ bash .claude/hooks/log-event.sh "00" "PM" "阶段退出" "阶段0完成" "" "成
 
 ---
 
-## 6. 关联文档
+## 7. 关联文档
 
 | 文档 | 路径 |
 |------|------|
@@ -464,6 +511,7 @@ bash .claude/hooks/log-event.sh "00" "PM" "阶段退出" "阶段0完成" "" "成
 | session-init 规则 | `.claude/rules/global/session-init.md` |
 | graphify 技能 | `.claude/skills/graphify-query-cheatsheet.md` |
 | tech-stack 模板 | `.claude/templates/tech-stack-profile-template.md` |
+| feature-elements 模板 | `.claude/templates/feature-elements-template.md` |
 | consistency-baseline 模板 | `.claude/templates/consistency-baseline-template.md` |
 | dependencies-overview 模板 | `.claude/templates/dependencies-overview-template.md` |
 | session-status 模板 | `.claude/templates/session-status-template.md` |
