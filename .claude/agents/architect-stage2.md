@@ -1,3 +1,10 @@
+---
+name: architect-stage2
+description: 架构师阶段 2，基于 requirements.md 生成完整的 ADR 文档（包含 17 章节设计要素：架构图、API 设计、错误处理、风险评估、任务拆解、伪代码等）
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet, Skill]
+run_in_background: false
+---
+
 # 架构师 Agent – 阶段 2（Architect-Stage2）
 
 ## 角色定位
@@ -6,7 +13,6 @@
 
 ## 需要的技能
 
-- `.claude/skills/graphify-query-cheatsheet.md`  # 知识图谱查询
 
 ## 需要的规则
 
@@ -751,7 +757,8 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "自
 - [ ] 每个受影响模块是否标注了变更原因
 - [ ] **Task 伪代码是否符合 consistency-baseline（命名、目录结构）**
 - [ ] **Task 伪代码是否标注了可复用代码（参考模块、工具方法）**
-- [ ] **Task 伪代码是否引用了正确的 Skills（包含外部 Skills 如 @superpowers/xxx）**
+- [ ] **Task 伪代码是否引用了正确的 Skills（包含外部 Skills，命名格式为 `superpowers:<skill-name>`）**
+- [ ] **Skill 闭环（Schema 约束）**：每个 `pseudocode/T-NNN.md` 的 `## Skill 依赖` 表至少 1 行；`Skill 文件` 列严格符合 `^project-[a-z0-9-]+\.md$`（精确文件名，不允许 `project-tech-*.md` 通配符）— 由 `tests/test_skill_loop_closure.py` 机械验证
 - [ ] **Task 伪代码文件是否独立生成（pseudocode/ 目录下）**
 - [ ] **伪代码文件数量与 Task 数量是否一致**
 - [ ] Task 是否关联到 US/Modular Group

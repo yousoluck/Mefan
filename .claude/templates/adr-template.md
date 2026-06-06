@@ -361,7 +361,9 @@ src/
 
 ### 7.3 伪代码文件内容模板
 
-> 每个伪代码文件必须包含以下章节
+> 每个伪代码文件**必须**包含以下章节。`## Skill 依赖` 表**至少 1 行**；空表 = 违规。
+> `Skill 文件` 列必须严格使用 `xxx.md` 文件名格式（如 `project-tech-lombok.md`），
+> **不得**使用 `project-tech-*.md` 通配符。约束由 `tests/test_skill_loop_closure.py` 机械验证。
 
 ```markdown
 # T-{NNN}：{Task 描述}
@@ -717,6 +719,7 @@ DROP TABLE IF EXISTS {table};
 - [ ] **设计完整**：是否包含数据模型、API 设计、受影响模块分析？
 - [ ] **一致性**：是否符合 consistency-baseline 和 tech-stack-profile？
 - [ ] **Skill 引用**：Task 伪代码是否按 P1-P6 优先级正确引用 Skills？
+- [ ] **Skill 闭环**：每个 `pseudocode/T-NNN.md` 都包含 `## Skill 依赖` 表格，且每行 `Skill 文件` 列符合 `^project-[a-z0-9-]+\.md$` 精确文件名格式（无通配符）
 - [ ] **可实施性**：Task 拆分是否合理（2-4 小时粒度）？
 - [ ] **风险评估**：是否识别了主要风险并有缓解措施？
 - [ ] **审核通过**：PM-Audit 是否已通过（adr-review.md 结论为"通过"）？
