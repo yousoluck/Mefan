@@ -196,8 +196,9 @@ if [ -n "$FRONTEND_FRAMEWORK" ]; then
   FRONTEND_SKILL="$ROOT/.claude/skills/frontend-$FRONTEND_FRAMEWORK/SKILL.md"
   if [ -f "$FRONTEND_SKILL" ]; then
     echo "[Architect-Stage0] 调用前端 Skill：frontend-$FRONTEND_FRAMEWORK"
-    # 读取 Skill 内容并执行调查
-    # 填充到 consistency-baseline.md 的 "前端框架特定规范" 章节
+    # 【Phase F 修复】真读 Skill 内容（修复前仅 echo + 注释，无实际 Read/cat）
+    # 加载到 consistency-baseline.md 的 "前端框架特定规范" 章节
+    cat "$FRONTEND_SKILL"
   else
     echo "[Architect-Stage0] 前端 Skill 不存在，使用通用骨架"
   fi
@@ -208,8 +209,9 @@ if [ -n "$BACKEND_FRAMEWORK" ]; then
   BACKEND_SKILL="$ROOT/.claude/skills/backend-$BACKEND_FRAMEWORK/SKILL.md"
   if [ -f "$BACKEND_SKILL" ]; then
     echo "[Architect-Stage0] 调用后端 Skill：backend-$BACKEND_FRAMEWORK"
-    # 读取 Skill 内容并执行调查
-    # 填充到 consistency-baseline.md 的 "后端框架特定规范" 章节
+    # 【Phase F 修复】真读 Skill 内容（修复前仅 echo + 注释，无实际 Read/cat）
+    # 加载到 consistency-baseline.md 的 "后端框架特定规范" 章节
+    cat "$BACKEND_SKILL"
   else
     echo "[Architect-Stage0] 后端 Skill 不存在，使用通用骨架"
   fi
