@@ -9,8 +9,10 @@ set -e
 ROOT="/mnt/d/pycharmprojects/Mefan"
 MG_ID="${1:-MG-001}"
 THRESHOLD="${2:-80}"
-TESTS_DIR="$ROOT/../tests"
-SRC_DIR="$ROOT/../src"
+# Fixed: 原先路径使用了"向上跳一层"的形式（注释掉向下走一层的旧写法，避免目录永远不存在），
+# 导致 hook 静默 no-op。改为相对项目根的写法。
+TESTS_DIR="$ROOT/tests"
+SRC_DIR="$ROOT/src"
 LOG_FILE="iterations/mefan-log.md"
 TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
 

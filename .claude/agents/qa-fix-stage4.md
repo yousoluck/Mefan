@@ -1,7 +1,7 @@
 ---
 name: qa-fix-stage4
 description: QA Fix Agent，阶段 4 负责修复测试代码检查中发现的问题
-tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet, Skill]
 run_in_background: false
 ---
 
@@ -49,6 +49,8 @@ SPRINT_STATUS_PATH="$ROOT/.claude/iterations/sprint-latest/sprint-status.md"
 ### 操作 1：检查问题汇总
 
 > **目的**：验证是否存在需要修复的测试代码问题
+
+**【步骤开始前必做】** Read 工具读取 `.claude/skills/code-review-checklist.md`，加载 5 维度审查清单（语义正确性 / 安全性 / 性能 / 一致性 / 可维护性）；review-log.md 中 Open 的 ATC-* 问题按本清单分类归档（特别是"测试代码质量 = 一致性"维度）
 
 ```bash
 bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "检查问题汇总" "" ""
@@ -108,6 +110,8 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "检
 
 > **目的**：加载所有参考文档用于问题分析和修复
 
+**【读取参考前必做】** Read 工具读取 `.claude/skills/write-unit-test.md`，加载单元测试编写方法论（命名规范、断言写法、目录结构、覆盖率要求）；后续修复 ATC-* 时按本规范补写
+
 ```bash
 bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "读取参考文档" "" ""
 ```
@@ -130,6 +134,8 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "读
 ### 操作 3：逐个分析并修复测试代码问题
 
 > **目的**：对每个测试代码问题进行分析和修复（测试代码审查问题 + Bug）
+
+**【修复前必做】** Read 工具读取 `.claude/skills/write-manual-test-guide.md`，加载人工测试指南方法论；当 ATC-* 问题涉及人工测试模板（`tests/{US-ID}/manual-test/TC-M{NNN}.md`）的补全/修正时，按本方法论修复
 
 ```bash
 bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "修复问题" "" ""

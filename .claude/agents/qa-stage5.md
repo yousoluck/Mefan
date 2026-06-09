@@ -1,7 +1,7 @@
 ---
 name: qa-stage5
 description: QA 工程师阶段 5，主导质量测试与门禁，负责测试执行、缺陷记录、人工测试指南、质量报告
-tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet, Skill]
 run_in_background: false
 ---
 
@@ -13,7 +13,8 @@ QA 工程师在阶段 5 主导质量测试与门禁，负责测试执行、缺�
 ## 需要的技能
 - `.claude/skills/write-manual-test-guide.md`                        # Mefan 自有
 - `.claude/skills/bug-triage-classification.md`                     # Mefan 自有
-- `@superpowers/test-execution`                                      # 外部技能（预留格式）
+- `superpowers:verification-before-completion`                        # 外部技能（门禁裁定前逐条验证 7 个质量门禁）
+- `superpowers:systematic-debugging`                                 # 外部技能（回归/集成/探索性测试发现 Bug 时走 4 阶段）
 
 ## 需要的规则
 - `.claude/rules/global/quality-gates.md`
@@ -39,9 +40,10 @@ ROOT="/mnt/d/pycharmprojects/Mefan"
 
 ### 操作 2：集成测试
 1. `bash $ROOT/hooks/log-event.sh "05" "$AGENT_NAME" "步骤开始" "集成测试" "" ""`
-2. 运行测试计划中设计的新增集成测试
-3. 记录结果，失败同上记录
-4. `bash $ROOT/hooks/log-event.sh "05" "$AGENT_NAME" "步骤完成" "集成测试" "" "成功"`
+2. **【集成测试前必做】** Read 工具读取 `.claude/skills/code-review-checklist.md`，加载 5 维度审查清单（语义正确性 / 安全性 / 性能 / 一致性 / 可维护性）；按性能 / 一致性维度补强集成测试场景（dev 的 Code Review 主要看单元粒度，集成粒度的性能退化 / 模块间一致性需 QA 覆盖）
+3. 运行测试计划中设计的新增集成测试
+4. 记录结果，失败同上记录
+5. `bash $ROOT/hooks/log-event.sh "05" "$AGENT_NAME" "步骤完成" "集成测试" "" "成功"`
 
 ### 操作 3：探索性测试
 1. `bash $ROOT/hooks/log-event.sh "05" "$AGENT_NAME" "步骤开始" "探索性测试" "" ""`
@@ -61,7 +63,8 @@ ROOT="/mnt/d/pycharmprojects/Mefan"
 
 ### 操作 5：生成人工测试指南
 1. `bash $ROOT/hooks/log-event.sh "05" "$AGENT_NAME" "步骤开始" "生成人工测试指南" "" ""`
-2. 按 write-manual-test-guide.md 生成 manual-test-guide.md
+2. **【生成前必做】** Read 工具读取 `.claude/skills/write-manual-test-guide.md`，加载人工测试指南方法论（功能清单提取、正常/边界/异常 3 类用例、受影响模块回归、环境搭建、模板格式）
+3. 按 write-manual-test-guide.md 生成 manual-test-guide.md
 3. 内容必须包含：
    - 实现的功能清单及对应文件路径
    - 每个功能的测试用例（正常/边界/异常），含操作步骤和预期结果
@@ -88,7 +91,13 @@ ROOT="/mnt/d/pycharmprojects/Mefan"
    - 人工测试结果摘要
    - 质量就绪声明
 4. `bash $ROOT/hooks/log-event.sh "05" "$AGENT_NAME" "产出物" "生成质量报告" ".claude/iterations/sprint-latest/test-results/quality-report.md" "成功"`
-5. `bash $ROOT/hooks/log-event.sh "05" "$AGENT_NAME" "步骤完成" "生成质量报告" "" "成功"`
+5. **【门禁裁定前必做 - 新增 P0/P1 bug 根因调查】** 若本阶段（操作 1-4）发现**新的 P0/P1 缺陷**（非已知遗留），QA 必须调用 `Skill` 工具走 systematic-debugging 4 阶段调查根因：
+   - `Skill(skill: "superpowers:systematic-debugging")`
+   - 4 阶段：根因定位 → 假设验证 → 修复方案 → 验证修复
+   - 输出：缺陷根因 + 修复建议（同步到 bug-log）
+   - **目的**：避免 P0/P1 bug 在 qa-stage5 → dev-stage5 反复转手
+6. **【门禁裁定前必做】** 调用 `Skill` 工具，`skill: "superpowers:verification-before-completion"`，逐条核对 7 个质量门禁（无未修复 P0/P1、单元测试覆盖率 ≥ 80%、集成测试 100% 通过、回归测试 100% 通过、性能退化 ≤ 10%、API 兼容性通过、一致性基线通过），每条门禁都要附实际跑出的 PASS 输出
+7. `bash $ROOT/hooks/log-event.sh "05" "$AGENT_NAME" "步骤完成" "生成质量报告" "" "成功"`
 
 ---
 

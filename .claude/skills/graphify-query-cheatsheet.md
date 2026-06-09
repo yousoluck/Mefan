@@ -2,6 +2,12 @@
 - 触发条件：阶段 0、2、4 需要分析代码结构或依赖关系时
 - 适用 Agent：架构师、开发者、PM
 
+> **重要**（2026-06-08）：
+> 1. **真实命令**：`query` / `path` / `explain` / `extract` / `cluster-only` / `update` / `clone` / `add`
+> 2. **不存在的命令**（已废弃）：`similar` / `dependents` / `scan` / `update`（作为子命令）
+> 3. **真实文件位置**：`graphify-out/graph.json`（已重构，原 `.claude/context/knowledge.grap` 废弃）
+> 4. **典型错误**：用 grep 搜 `knowledge.grap` 中的 `called_by` / `depends_on` 模式 → **JSON 文件无此文本模式**，必须用 `graphify query` / `graphify path`
+
 ## 输入
 - 查询类型（query/path/explain）
 - 目标模块名或问题描述

@@ -21,6 +21,7 @@ tools:
     - TaskUpdate
     - TaskList
     - TaskGet
+    - Skill
 ---
 
 # 项目经理 Agent – 阶段 1（PM-Stage1）
@@ -31,7 +32,6 @@ tools:
 
 ## 需要的技能
 
-- `.claude/skills/graphify-query-cheatsheet.md`  # 知识图谱查询
 
 ## 需要的规则
 
@@ -47,8 +47,8 @@ tools:
 
 ```bash
 AGENT_NAME="PM"
-ROOT="/mnt/d/pycharmprojects/mefan"
-SCENARIO="upgrade"
+ROOT="/mnt/d/pycharmprojects/Mefan"
+# SCENARIO 从 CLAUDE.md 的 SCENARIO 变量读取（框架自动加载）
 STAGE="01"
 ```
 
@@ -59,7 +59,7 @@ STAGE="01"
 | 对比维度 | PM-Stage1 | BA-Stage1 |
 |---------|-----------|-----------|
 | **目的** | 需求文档审查，校验产出 | 详细需求设计，拆分 User Story |
-| **输入** | BA 的 requirements.md, feature.md | feature.md, knowledge.grap |
+| **输入** | BA 的 requirements.md, feature.md | feature.md, `graphify-out/graph.json` |
 | **输出** | 审查结果（通过/打回） | requirements.md |
 | **受众** | 用户/BA | PM |
 | **核心问题** | "需求文档是否符合标准？" | "需求怎么拆？有多少 User Story？" |
@@ -343,7 +343,7 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "ses
 |------|------|------|
 | requirements 主文档 | `.claude/iterations/sprint-latest/requirements.md` | 审查对象 |
 | feature.md | `.claude/iterations/sprint-latest/feature.md` | 需求一致性对照 |
-| knowledge.grap | `.claude/context/knowledge.grap` | 验证受影响范围 |
+| 知识图谱 | `graphify-out/graph.json` | 验证受影响范围 |
 
 #### 6.2 输出（Outputs）
 
@@ -413,6 +413,6 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "等待" "Human Gat
 | 文档 | 路径 | 说明 |
 |------|------|------|
 | requirements 主文档 | `.claude/iterations/sprint-latest/requirements.md` | 审查对象 |
-| knowledge.grap | `.claude/context/knowledge.grap` | 验证受影响范围 |
+| 知识图谱 | `graphify-out/graph.json` | 验证受影响范围 |
 | ba-stage1.md | `.claude/agents/ba-stage1.md` | BA 阶段 1 操作 |
 | mf-upgrade:01-requirements.md | `.claude/commands/mf-upgrade:01-requirements.md` | 阶段 1 完整 playbook |

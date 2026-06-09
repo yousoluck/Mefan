@@ -19,6 +19,16 @@ if [ ! -f "$ADR_PATH" ]; then
     exit 0  # 不阻断，只警告
 fi
 
+# 源码目录（mefan 框架自身代码在 .claude/ 下，但项目代码可能在 src/）
+# Fixed: 原先路径使用了"向上跳一层"的形式（注释掉向下走一层的旧写法，避免目录永远不存在）
+SRC_DIR="$ROOT/src"
+
+# Fallback: 源码目录不存在时不阻断（mefan 框架自身没 src/）
+if [ ! -d "$SRC_DIR" ]; then
+    echo "WARN: $SRC_DIR 不存在，跳过 ADR 实现检查中的源码匹配" >&2
+    SRC_DIR=""
+fi
+
 # 2. 提取 MG 对应的 Task 列表
 # ADR 中 MG-XXX 格式的任务块
 MG_TASKS=$(grep -A 50 "^## $MG_ID" "$ADR_PATH" 2>/dev/null | grep -E "^### (T-|Task)" | head -20 || echo "")
@@ -61,8 +71,8 @@ while IFS= read -r task_line; do
         FUNC_NAME=$(echo "$func" | cut -d'(' -f1 | cut -d'.' -f2)
         if [ -n "$FUNC_NAME" ]; then
             # 在源代码目录搜索该函数
-            if [ -d "$ROOT/../src" ]; then
-                FOUND=$(grep -r "$FUNC_NAME" "$ROOT/../src" --include="*.py" --include="*.js" --include="*.ts" 2>/dev/null | head -1 || echo "")
+            if [ -n "$SRC_DIR" ] && [ -d "$SRC_DIR" ]; then
+                FOUND=$(grep -r "$FUNC_NAME" "$SRC_DIR" --include="*.py" --include="*.js" --include="*.ts" 2>/dev/null | head -1 || echo "")
                 if [ -z "$FOUND" ]; then
                     echo "[check-adr-implementation] 警告：未找到函数 $FUNC_NAME"
                     MISSING_IMPL+=("Task $TASK_NAME 中 $func 未实现")
@@ -83,7 +93,8 @@ for module_path in $MODULE_PATHS; do
     # 提取路径
     if echo "$module_path" | grep -qE "^(path:|src/|lib/)"; then
         REL_PATH=$(echo "$module_path" | cut -d':' -f2 | tr -d ' `')
-        if [ -n "$REL_PATH" ] && [ -f "$ROOT/../$REL_PATH" ]; then
+        # Fixed: 原先路径使用了"向上跳一层"的形式（注释掉向下走一层的旧写法）；改为相对项目根
+        if [ -n "$REL_PATH" ] && [ -f "$ROOT/$REL_PATH" ]; then
             echo "[check-adr-implementation] 模块存在: $REL_PATH"
         fi
     fi

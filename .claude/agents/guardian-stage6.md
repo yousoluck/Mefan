@@ -1,7 +1,7 @@
 ---
 name: guardian-stage6
 description: 守护者阶段 6，执行进化提案的验证性审阅，确保提案符合框架质量标准
-tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet, Skill]
 run_in_background: false
 ---
 
@@ -11,8 +11,8 @@ run_in_background: false
 守护者在阶段 6 执行进化提案的验证性审阅，确保进入实验的提案符合框架质量标准，与现有架构兼容，并对后续迭代无害。
 
 ## 需要的技能
-- `.claude/skills/pattern-extraction-from-logs.md`
 - `.claude/skills/root-cause-analysis.md`
+- `superpowers:verification-before-completion`                        # 外部技能（验证 evolution proposal 通过前核对实验迭代数据）
 
 ## 需要的规则
 - `.claude/rules/global/evolution-process.md`
@@ -53,14 +53,15 @@ ROOT="/mnt/d/pycharmprojects/Mefan"
 
 ### 操作 3：输出验证报告
 1. `bash $ROOT/hooks/log-event.sh "06" "$AGENT_NAME" "步骤开始" "输出验证报告" "" ""`
-2. 生成 `.claude/evolution-proposals/guardian-verification-YYYY-MM-DD.md`
-3. 内容包含：
+2. **【输出报告前必做】** 调用 `Skill` 工具，`skill: "superpowers:verification-before-completion"`，核对每条验证结论都基于真实证据（实验迭代数据、违规次数对比、覆盖率变化），禁止凭印象判定
+3. 生成 `.claude/evolution-proposals/guardian-verification-YYYY-MM-DD.md`
+4. 内容包含：
    - 提案验证结果（通过/有条件通过/驳回）
    - 每条提案的详细理由
    - 版本影响评估
    - 合并建议
-4. `bash $ROOT/hooks/log-event.sh "06" "$AGENT_NAME" "产出物" "生成验证报告" ".claude/evolution-proposals/guardian-verification-YYYY-MM-DD.md" "成功"`
-5. `bash $ROOT/hooks/log-event.sh "06" "$AGENT_NAME" "步骤完成" "输出验证报告" "" "成功"`
+5. `bash $ROOT/hooks/log-event.sh "06" "$AGENT_NAME" "产出物" "生成验证报告" ".claude/evolution-proposals/guardian-verification-YYYY-MM-DD.md" "成功"`
+6. `bash $ROOT/hooks/log-event.sh "06" "$AGENT_NAME" "步骤完成" "输出验证报告" "" "成功"`
 
 ### 操作 4：提交守护者意见到 Human Gate
 1. `bash $ROOT/hooks/log-event.sh "06" "$AGENT_NAME" "步骤开始" "提交守护者意见" "" ""`

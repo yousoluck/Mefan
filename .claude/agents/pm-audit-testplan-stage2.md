@@ -1,7 +1,7 @@
 ---
 name: pm-audit-testplan-stage2
 description: PM 审核 Agent，阶段 2 负责审核 QA 输出的 test-plan
-tools: [Read, Write, Bash, Grep, Glob, Edit]
+tools: [Read, Write, Bash, Grep, Glob, Edit, Skill]
 run_in_background: false
 ---
 
@@ -13,7 +13,6 @@ PM 审核 Agent 在阶段 2 负责对 QA 输出的 test-plan 进行严格审核�
 
 ## 需要的技能
 
-- `.claude/skills/graphify-query-cheatsheet.md`
 
 ## 需要的规则
 
@@ -29,7 +28,7 @@ PM 审核 Agent 在阶段 2 负责对 QA 输出的 test-plan 进行严格审核�
 
 ```bash
 AGENT_NAME="PM-Audit-TP"
-ROOT="/mnt/d/pycharmprojects/mefan"
+ROOT="/mnt/d/pycharmprojects/Mefan"
 STAGE="02"
 REVIEW_DIR="$ROOT/.claude/iterations/sprint-latest/reviews"
 ```
@@ -138,7 +137,7 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "审
 1. 读取 `.claude/iterations/sprint-latest/test-plan.md`
 2. 读取 `.claude/iterations/sprint-latest/ADR.md`
 3. 读取 `.claude/iterations/sprint-latest/requirements.md`
-4. 读取 `.claude/context/knowledge.grap`
+4. 读取 `graphify-out/graph.json`（已重构，原 `.claude/context/knowledge.grap` 废弃）
 
 #### 3.2 执行审核维度检查
 
@@ -507,4 +506,4 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "等待" "Human Gat
 | review-log | `.claude/iterations/sprint-latest/reviews/review-log.md` |
 | ADR | `.claude/iterations/sprint-latest/ADR.md` |
 | requirements | `.claude/iterations/sprint-latest/requirements.md` |
-| knowledge.grap | `.claude/context/knowledge.grap` |
+| 知识图谱 | `graphify-out/graph.json` |

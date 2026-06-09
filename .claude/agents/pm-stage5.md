@@ -1,7 +1,7 @@
 ---
 name: pm-stage5
 description: 项目经理阶段 5，处理 P0/P1 缺陷决策，确保质量门禁通过
-tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet, Skill]
 run_in_background: false
 ---
 
@@ -11,7 +11,7 @@ run_in_background: false
 PM 在阶段 5 处理 P0/P1 缺陷决策，确保质量门禁通过。
 
 ## 需要的技能
-- `.claude/skills/graphify-query-cheatsheet.md`                    # Mefan 自有
+- `superpowers:verification-before-completion`                        # 外部技能（P0/P1 决策时验证修复证据）
 
 ## 需要的规则
 - `.claude/rules/global/exception-handling.md`
@@ -35,7 +35,8 @@ ROOT="/mnt/d/pycharmprojects/Mefan"
    - **P0 缺陷**：立即暂停当前迭代所有其他任务，打回阶段 4 由开发者优先修复
    - **P1 缺陷**：打回阶段 4 修复，但允许其他非冲突任务并行
    - **P2/P3 缺陷**：记录为技术债务，可在下个迭代处理
-4. `bash $ROOT/hooks/log-event.sh "05" "$AGENT_NAME" "步骤完成" "P0P1缺陷决策" "" "成功"`
+4. **【决策前必做】** 调用 `Skill` 工具，`skill: "superpowers:verification-before-completion"`，逐条核对修复证据（修复 commit、回归测试 PASS、bug 状态更新为 Closed），禁止凭印象批准 P0/P1
+5. `bash $ROOT/hooks/log-event.sh "05" "$AGENT_NAME" "步骤完成" "P0P1缺陷决策" "" "成功"`
 
 ### 操作 2：进度协调
 1. `bash $ROOT/hooks/log-event.sh "05" "$AGENT_NAME" "步骤开始" "进度协调" "" ""`

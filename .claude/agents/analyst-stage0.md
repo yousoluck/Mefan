@@ -1,7 +1,7 @@
 ---
 name: analyst-stage0
 description: 需求分析师阶段 0，负责与用户进行需求澄清对话，初步厘清功能需求
-tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet, Skill]
 run_in_background: false
 ---
 
@@ -26,7 +26,8 @@ run_in_background: false
 ## 变量定义
 ```bash
 AGENT_NAME="Analyst"
-# ROOT 从 project.conf 加载
+STAGE="00"
+# ROOT 从 project.conf 加载（与 pm-stage0 保持一致的模式）
 if [ -n "$ROOT" ]; then
     :
 elif [ -f "$(dirname "${BASH_SOURCE[0]}")/../project.conf" ]; then
@@ -34,7 +35,8 @@ elif [ -f "$(dirname "${BASH_SOURCE[0]}")/../project.conf" ]; then
 else
     export ROOT="/mnt/d/pycharmprojects/Mefan"
 fi
-# SCENARIO 从 CLaUDE.md 中读取（框架自动加载）
+# SCENARIO 从 CLAUDE.md 中读取（框架自动加载）
+# 本文件不重复定义 SCENARIO，由调用环境提供
 ```
 
 ---
@@ -44,7 +46,7 @@ fi
 | 对比维度 | Analyst-Stage0 | PM-Stage0 | Architect-Stage0 |
 |---------|-----------------|-----------|------------------|
 | **目的** | 需求澄清，产出初步功能要点 | 初始化环境，上下文建立 | 技术调研，产出一致性基线 |
-| **输入** | 用户原始需求描述 | SCENARIO 配置 | knowledge.grap |
+| **输入** | 用户原始需求描述 | SCENARIO 配置 | `graphify-out/graph.json` |
 | **输出** | 功能要点列表（feature-outline） | tech-stack-profile.md, project.md | consistency-baseline.md |
 | **受众** | 用户/PM | 框架内部使用 | Dev Agent |
 | **核心问题** | "用户想要什么功能？" | "项目用什么技术？" | "代码怎么写才一致？" |
@@ -98,22 +100,70 @@ bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤开始" "需求�
 ```
 
 #### 3.1 澄清检查清单
-在对话过程中，逐项检查并向用户确认：
+> **设计原则**（参考 `superpowers` 插件的 brainstorming 技能 + `openspec-propose` skill + ba-stage1 §3.1-3.3）：
+> - **一项一问**（One question at a time）：用 AskUserQuestion 单选/多选，避免一次性甩 12 个问题
+> - **先发散后收敛**：先用 1-2 个开放问题探明意图，再用清单逐项验证
+> - **类比参考**：参考 ba-stage1 阶段 1 的"相似 / 复用 / 受影响"三大类问题
 
-| 澄清项 | 问题示例 | 目的 |
-|--------|---------|------|
-| **1. 新需求是什么** | "您描述的 XXX 功能，具体是指什么？" | 明确功能定义 |
-| **2. 现有项目是否已实现** | "现有系统是否有类似的功能？" | 避免重复开发 |
-| **3. 是否有类似功能** | "您是否参考过现有的 YYY 功能？" | 复用或差异化 |
-| **4. 是否基于现有功能的扩展** | "这个新功能是在现有 ZZZ 基础上扩展吗？" | 确定模块归属 |
-| **5. 与现有功能的关系** | "新功能会影响现有的哪些功能？" | 评估影响范围 |
-| **6. 是否需要与其他功能交互** | "新功能需要和哪些已有功能配合？" | 定义接口关系 |
-| **7. 非功能性需求** | "对性能、安全、可用性有什么要求？" | 明确非功能约束 |
-| **8. 大文件处理** | "是否涉及图片/视频等大文件？文件大小上限？" | 性能评估 |
-| **9. 断点上传** | "上传文件是否需要支持断点续传？" | 明确技术要求 |
-| **10. 用户友好度** | "对交互体验、错误提示有什么期望？" | 非功能需求 |
-| **11. 部署兼容性** | "新功能对部署环境有什么特殊要求？" | 兼容性分析 |
-| **12. 设计复杂度** | "您期望的实现方式是否有难度？" | 替代方案评估 |
+在对话过程中，**按以下顺序**逐项检查并向用户确认：
+
+##### A. 意图探索（开放问题，1-2 轮，必问）
+
+| 序号 | 澄清项 | 问题示例 | 目的 |
+|------|--------|---------|------|
+| **A1** | **业务目标** | "您想通过这个功能**达成什么**？描述一个具体的使用场景" | 明确"为什么做"，避免实现错方向 |
+| **A2** | **成功标准** | "怎样算这个功能**做完了**？如何衡量成功？" | 验收标准前置 |
+| **A3** | **不做什么** | "这个功能**不包含**什么？有什么明确排除的场景？" | 明确边界 |
+
+##### B. 现有项目分析（参考 ba-stage1 §3.1-3.3，必问）
+
+| 序号 | 澄清项 | 问题示例 | 目的 |
+|------|--------|---------|------|
+| **B1** | **类似功能** | "现有项目里有没有**做类似事情**的功能？哪怕只做了一半也行" | 复用/参考（对应 ba-stage1 §3.2 相似功能模块分析） |
+| **B2** | **可复用模块** | "您觉得**哪些已有模块**可以被这次新功能直接复用？（不重新造轮子）" | 复用优先（对应 ba-stage1 §3.3 复用功能模块分析） |
+| **B3** | **受影响模块** | "新功能上线后，会**改变或破坏**哪些现有功能的行为？" | 影响范围（对应 ba-stage1 §3.1 涉及哪些现有模块） |
+| **B4** | **基于现有扩展** | "这是**在现有 X 模块上扩展**，还是**从零开始做新模块**？" | 模块归属 |
+
+##### C. 详细需求（清单式，可并行确认）
+
+| 序号 | 澄清项 | 问题示例 | 目的 |
+|------|--------|---------|------|
+| **C1** | **核心流程** | "请用 3-5 步描述：用户从进入到完成的最短路径" | 主流程 |
+| **C2** | **异常流程** | "如果中途失败（断网/输入错误/超时），用户应该看到什么？" | 错误处理 |
+| **C3** | **数据规模** | "涉及多少条数据？单条多大？峰值 QPS 多少？" | 性能评估 |
+| **C4** | **大文件处理** | "是否涉及图片/视频/大文件？文件大小上限？需要断点续传吗？" | 性能/存储 |
+| **C5** | **非功能性需求** | "性能/安全/可用性/可观测性/兼容性，**必须满足**的指标有哪些？" | 非功能约束 |
+| **C6** | **用户角色与权限** | "谁可以用？需要区分 Admin / 普通用户 / 游客吗？" | 权限 |
+| **C7** | **多端/多平台** | "需要支持哪些端？（Web / iOS / Android / 小程序 / 桌面）" | 端到端 |
+| **C8** | **国际化/无障碍** | "需要多语言吗？需要无障碍（a11y）支持吗？" | 兼容性 |
+| **C9** | **部署兼容性** | "对部署环境有特殊要求吗？需要灰度/分批发布吗？" | 部署 |
+| **C10** | **设计复杂度** | "这个功能您觉得**实现上有没有什么难点**？担心哪些风险？" | 替代方案 |
+| **C11** | **数据迁移** | "是否需要从老系统迁移数据？数据格式如何？" | 迁移（可选） |
+| **C12** | **时间/优先级** | "希望的交付时间？P0/P1/P2/P3 优先级怎么排？" | 排期 |
+
+##### D. 扩展探测（AI 主动追问，**不要拘泥于清单**）
+
+> **重要**：清单只是兜底，**当 AI 发现可疑问题时必须主动追问**，例如：
+> - "您提到要支持 XX，但没提到 YY，是因为不需要，还是没想到？"
+> - "如果 Z 发生，会怎样？"
+> - "和您已经做过的 WW 相比，这次有什么不同？"
+> - "有没有**参考产品**？您最喜欢 / 最不喜欢它的哪一点？"
+> - "如果只能保留 1 个功能，您选哪个？为什么？"
+
+#### 3.2 功能要点拆解
+> 将复杂需求拆分成松耦合、高内聚的功能要点
+
+**拆解原则**：
+- 每个功能要点独立可运行
+- 功能要点之间无循环依赖
+- 功能要点有明确的输入输出
+
+**拆解检查**：
+| 检查项 | 说明 |
+|--------|------|
+| 松耦合 | 功能要点之间的依赖关系是否清晰、最小化 |
+| 高内聚 | 每个功能要点是否只负责一个明确的业务目标 |
+| 可独立测试 | 每个功能要点是否可以独立验证 |
 
 #### 3.2 功能要点拆解
 > 将复杂需求拆分成松耦合、高内聚的功能要点
@@ -164,21 +214,24 @@ bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤开始" "现有�
 ```
 
 #### 4.1 查询知识图谱
-> 使用 graphify query 查阅 `graphify-out/graph.json`
+> 使用 graphify query 查阅 `graphify-out/graph.json`（不要用 `knowledge.grap`，已重构为 graph.json）
 
 | 分析项 | 查询方法 | 输出 |
 |--------|---------|------|
 | 是否已实现此需求 | `graphify query "是否已实现 {需求}"` | 是/否/部分实现 |
 | 影响的模块 | `graphify query "与 {需求} 相关的模块"` | 模块列表 |
 | 类似功能 | `graphify path "现有功能" "需求相关模块"` | 相似功能列表 |
+| 复用模块 | `graphify query "可复用的 {类型} 组件"` | 组件列表 |
+
+> **注意**：`graphify similar` / `graphify dependents` / `graphify scan` **不是真实命令**。请使用 `graphify query` / `graphify path` 替代（详见 `graphify-query-cheatsheet.md`）。
 
 #### 4.2 查询已有需求文档
-> 如果有之前迭代的需求文档，查阅对比
+> 阶段 1（BA）产出的需求文档是 `requirements.md`（文件，不是目录）
 
 | 检查项 | 路径 | 说明 |
 |--------|------|------|
-| 上一轮需求 | `.claude/iterations/sprint-*/requirements/` | 避免重复 |
-| 相似需求 | `.claude/iterations/sprint-*/requirements/` | 复用分析 |
+| 上一轮需求 | `.claude/iterations/sprint-*/requirements.md` | 避免重复 |
+| 相似需求 | `.claude/iterations/sprint-*/requirements.md` | 复用分析 |
 
 #### 4.3 初步分析结论
 输出初步分析结论：
@@ -216,41 +269,46 @@ if [ ! -d "$ROOT/.claude/iterations/sprint-latest" ]; then
 fi
 ```
 
-#### 5.2 从模板复制 feature.md
+#### 5.2 生成 feature.md（动态从模板生成）
+> **方法**：从 `.claude/templates/feature-template.md` 复制模板，然后**只替换占位符**，不硬编码内容
+> **好处**：模板更新后，feature.md 自动继承新结构
+
 ```bash
-cp $ROOT/.claude/templates/feature-template.md $ROOT/.claude/iterations/sprint-latest/feature.md
+echo "[Analyst-Stage0] 从模板动态生成 feature.md..."
+TODAY=$(date +%Y-%m-%d)
+TEMPLATE_FILE="$ROOT/.claude/templates/feature-template.md"
+FEATURE_FILE="$ROOT/.claude/iterations/sprint-latest/feature.md"
+
+# 1. 检查模板是否存在
+if [ ! -f "$TEMPLATE_FILE" ]; then
+    echo "[Error] 模板文件不存在: $TEMPLATE_FILE"
+    exit 1
+fi
+
+# 2. 确保目录存在
+mkdir -p "$ROOT/.claude/iterations/sprint-latest"
+
+# 3. 复制模板到目标位置
+cp "$TEMPLATE_FILE" "$FEATURE_FILE"
+
+# 4. 替换占位符（动态，不硬编码）
+sed -i "s/{creation_date}/$TODAY/g" "$FEATURE_FILE"
+sed -i "s/{clarification_date}/$TODAY/g" "$FEATURE_FILE"
+sed -i "s/{iteration_name}/sprint-latest/g" "$FEATURE_FILE"
+
+echo "[Analyst-Stage0] feature.md 已生成（动态从模板）: $FEATURE_FILE"
 ```
 
-#### 5.3 填充基本信息
-1. 填写创建时间
-2. 填写 Analyst 名称
-3. 填写迭代名称
+#### 5.3 用 graphify query 获取现有项目信息（辅助填写）
+> 真实存在的 graphify 命令：`query` / `path` / `explain`
+> 不存在的命令：`similar` / `dependents` / `scan`（已弃用）
 
-#### 5.4 填充功能要点列表
-根据澄清对话结果，填写顶部的功能要点列表表格（序号、功能ID、功能名称、优先级等）
-
-#### 5.5 填充每个功能的详细分析
-对于每个功能要点，按照模板结构填写：
-- 用户描述（原始需求）
-- 澄清后需求
-- 功能边界
-- 现有项目分析（知识图谱查询）
-- 功能交互分析
-- 非功能性需求
-- 部署与兼容性
-- 替代方案
-- 业务规则
-- 待确认事项
-- 验收标准
-
-#### 5.6 填充澄清对话记录
-记录与用户的每一轮澄清对话
-
-#### 5.7 知识图谱查询（如有）
 ```bash
-# 查询知识图谱获取现有项目信息
-graphify query "What modules and components exist in this project"
-graphify path "existing functionality" "new requirement" 2>/dev/null || true
+# 查询项目模块
+cd "$ROOT" && graphify query "What modules and components exist in this project" 2>/dev/null | head -30 || echo "[Warning] graphify query 失败"
+
+# 查询类似功能
+cd "$ROOT" && graphify path "existing functionality" "new requirement" 2>/dev/null | head -20 || true
 ```
 
 ```bash
@@ -382,7 +440,7 @@ bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤完成" "session
 | 输入 | 来源 | 用途 |
 |------|------|------|
 | 用户原始需求 | 对话输入 | 澄清的起点 |
-| graphify-out/ | `$ROOT/graphify-out/` | 现有项目初步分析 |
+| `graphify-out/graph.json` | `$ROOT/graphify-out/graph.json` | 现有项目初步分析 |
 
 #### 8.2 输出（Outputs）
 | 输出 | 目的地 | 说明 |
@@ -447,7 +505,7 @@ bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "等待" "Human Gate �
 | 文档                      | 路径                                        | 说明                |
 |-------------------------|-------------------------------------------|-------------------|
 | feature-template.md     | `.claude/templates/feature-template.md`   | 阶段 0 功能文档模板       |
-| knowledge.grap          | `.claude/context/knowledge.grap`          | 现有项目知识图谱          |
+| 知识图谱 | `graphify-out/graph.json`          | 现有项目知识图谱（已重构，不再用 `knowledge.grap`）          |
 | consistency-baseline.md | `.claude/context/consistency-baseline.md` | 代码风格参考            |
 | tech-stack-profile.md   | `.claude/context/tech-stack-profile.md`   | 技术栈参考             |
 | pm-stage0.md            | `.claude/agents/pm-stage0.md`             | PM 阶段 0 操作        |

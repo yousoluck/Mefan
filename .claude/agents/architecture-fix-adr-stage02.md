@@ -1,7 +1,7 @@
 ---
 name: architecture-fix-adr-stage02
 description: Architecture Fix Agent，阶段 2 负责修复 ADR 审核中发现的问题
-tools: [Read, Write, Bash, Grep, Glob, Edit]
+tools: [Read, Write, Bash, Grep, Glob, Edit, Skill]
 run_in_background: false
 ---
 
@@ -19,7 +19,6 @@ Architecture Fix Agent 在阶段 2 负责根据 adr-review.md 中记录的问题
 
 ## 需要的技能
 
-- `.claude/skills/graphify-query-cheatsheet.md`
 
 ## 需要的规则
 
@@ -38,7 +37,7 @@ Architecture Fix Agent 在阶段 2 负责根据 adr-review.md 中记录的问题
 
 ```bash
 AGENT_NAME="Architecture-Fix"
-ROOT="/mnt/d/pycharmprojects/mefan"
+ROOT="/mnt/d/pycharmprojects/Mefan"
 STAGE="02"
 REVIEW_DIR="$ROOT/.claude/iterations/sprint-latest/reviews"
 ADR_FILE="$ROOT/.claude/iterations/sprint-latest/ADR.md"
@@ -124,12 +123,12 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "读
 2. `.claude/iterations/sprint-latest/requirements.md` — 功能需求参考
 3. `.claude/context/consistency-baseline.md` — 一致性基线
 4. `.claude/context/tech-stack-profile.md` — 技术栈配置
-5. `.claude/context/knowledge.grap` — 知识图谱（受影响模块分析）
+5. `graphify-out/graph.json` — 知识图谱（受影响模块分析，已重构，原 `.claude/context/knowledge.grap` 废弃）
 6. `.claude/iterations/sprint-latest/reviews/adr-review.md` — 问题汇总
 
 **修复约束**：
 - ✅ 允许修改：ADR.md、adr-review.md
-- ❌ 禁止修改：requirements.md、consistency-baseline.md、tech-stack-profile.md、knowledge.grap
+- ❌ 禁止修改：requirements.md、consistency-baseline.md、tech-stack-profile.md、`graphify-out/graph.json`（原 `knowledge.grap` 已重构）
 - ⚠️ 如需修改其他文件，必须在 Human Gate 中申请并获批准
 
 ```bash
@@ -188,7 +187,7 @@ echo "[Architecture-Fix-Stage2] ADR 状态已更新为：修复中"
 **问题分析方法**：
 1. 理解问题本质（从"问题描述"和"审核维度"）
 2. 参考 requirements.md 确认原始需求
-3. 参考 knowledge.grap 分析受影响模块
+3. 参考 `graphify-out/graph.json`（用 `graphify query` / `graphify path`）分析受影响模块
 4. 参考 consistency-baseline.md 确保一致性
 5. 参考 tech-stack-profile.md 确认技术选型
 
@@ -405,4 +404,4 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "等待" "Human Gat
 | requirements | `.claude/iterations/sprint-latest/requirements.md` |
 | consistency-baseline | `.claude/context/consistency-baseline.md` |
 | tech-stack-profile | `.claude/context/tech-stack-profile.md` |
-| knowledge.grap | `.claude/context/knowledge.grap` |
+| 知识图谱 | `graphify-out/graph.json`（已重构，原 `.claude/context/knowledge.grap` 废弃） |

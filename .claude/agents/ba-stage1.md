@@ -9,6 +9,11 @@ tools:
     - Grep
     - Glob
     - Edit
+    - TaskCreate
+    - TaskUpdate
+    - TaskList
+    - TaskGet
+    - Skill
 ---
 
 # BA Agent – 阶段 1（需求详细设计）
@@ -21,7 +26,7 @@ tools:
 - **一个迭代 = 一个 requirements.md**（不拆分多个文件）
 - 基于每个 Feature 拆分为 User Story 和 Sub-feature
 - **不参考 tech-stack-profile.md 或 consistency-baseline.md**（这些是实现阶段的技术约束）
-- **必须参考 knowledge.grap**（分析受影响范围）
+- **必须参考 `graphify-out/graph.json`**（分析受影响范围，原 `knowledge.grap` 已重构废弃）
 - 验收标准使用 **Gherkin 格式**（Given/When/Then）
 
 ---
@@ -44,7 +49,14 @@ tools:
 
 ```bash
 AGENT_NAME="BA"
-ROOT="/mnt/d/pycharmprojects/mefan"
+# ROOT 从 project.conf 加载（与 pm-stage0 / analyst-stage0 保持一致的模式）
+if [ -n "$ROOT" ]; then
+    :
+elif [ -f "$(dirname "${BASH_SOURCE[0]}")/../project.conf" ]; then
+    source "$(dirname "${BASH_SOURCE[0]}")/../project.conf"
+else
+    export ROOT="/mnt/d/pycharmprojects/Mefan"
+fi
 STAGE="01"
 ```
 
@@ -67,7 +79,7 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "检
    - **未完成**：警告并要求确认是否继续
 
 2. 加载依赖文档：
-   - `knowledge.grap` - **必须**，用于分析受影响范围
+   - `graphify-out/graph.json` - **必须**，用于分析受影响范围（原 `.claude/context/knowledge.grap` 已废弃）
    - `project.md` - 参考，了解项目背景
 
 3. 读取 `requirements-template.md` - 了解输出格式要求
@@ -108,22 +120,26 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "加
 
 > 目的：对每个 Feature 进行详细需求拆分
 
+**【拆分前必做】** Read 工具读取 `.claude/skills/user-story-splitting.md` + `.claude/skills/sub-feature-splitting.md`，加载 US 拆分方法论（INVEST + 高内聚低耦合）与 SF 拆分方法论（最小化粒度 + 4 维度），后续 3.4 / 3.5 步严格按方法论执行
+
 ```bash
 bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "Feature 拆分" "" ""
 ```
 
 对每个 P0/P1 优先级的 Feature，执行以下步骤：
 
-#### 3.1 查询 knowledge.grap（必须）
+#### 3.1 查询 `graphify-out/graph.json`（必须；原 `knowledge.grap` 已重构）
 
 **必须分析的内容**：
 
+> **命令名修正**（2026-06-08）：`graphify similar` / `graphify dependents` / `graphify scan` **不是真实命令**。使用下表的替代命令。
+
 | 分析维度 | 查询方法 | 输出 |
 |---------|---------|------|
-| 是否已实现类似功能 | `graphify similar {功能关键词}` | 相似功能列表 |
+| 是否已实现类似功能 | `graphify query "similar to {功能关键词}"` | 相似功能列表 |
 | 涉及哪些现有模块 | `graphify query "与 {功能} 相关的模块"` | 模块列表 |
 | 是否有可复用组件 | `graphify query "可复用的 {类型} 组件"` | 组件列表 |
-| 模块依赖关系 | `graphify dependents {模块}` | 依赖图 |
+| 模块依赖关系 | `graphify path {模块A} {模块B}` 或 `graphify query "what depends on {模块}"` | 依赖图 |
 
 **需要明确的变更类型**：
 
@@ -159,7 +175,7 @@ echo "[BA] 功能关键词：$FEATURE_KEYWORDS"
 
 # 2. 使用 graphify 查找相似模块
 echo "[BA] 执行自动化相似模块搜索..."
-graphify scan --similar-to "$FEATURE_KEYWORDS" 2>/dev/null || echo "[BA] graphify scan 不可用，尝试 knowledge.grap"
+graphify query "similar to $FEATURE_KEYWORDS" 2>/dev/null || echo "[BA] graphify query 不可用，尝试手动 grep"
 
 # 3. 搜索现有代码中的相似实现
 echo "[BA] 搜索相似代码..."
@@ -246,9 +262,9 @@ echo "[BA] 自动化分析报告已生成：similarity-analysis-temp.md"
 FEATURE_KEYWORDS=$(grep -E "^##\s+" "$ROOT/.claude/iterations/sprint-latest/feature.md" | sed 's/## //g' | tr '\n' ' ')
 echo "[BA] 功能关键词：$FEATURE_KEYWORDS"
 
-# 2. 使用 knowledge.grap 查找已实现的模块
+# 2. 使用 graphify-out/graph.json 查找已实现的模块
 echo "[BA] 执行自动化可复用模块搜索..."
-graphify query --modules "认证|用户|权限|支付|订单" 2>/dev/null || echo "[BA] graphify query 不可用"
+graphify query "认证|用户|权限|支付|订单" 2>/dev/null || echo "[BA] graphify query 不可用"
 
 # 3. 搜索现有 Service 层
 echo "[BA] 搜索可复用服务..."
@@ -459,7 +475,7 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "产
    | 所有 US 都已拆分 Sub-feature | ✅/❌ |
    | 所有 US 的 Gherkin 验收标准已填写 | ✅/❌ |
    | 所有 US 的错误/边界/异常场景已填写 | ✅/❌ |
-   | 所有 US 的受影响范围已通过 knowledge.grap 分析 | ✅/❌ |
+   | 所有 US 的受影响范围已通过 `graphify-out/graph.json` 分析 | ✅/❌ |
    | 所有 US 的"相似功能模块分析"已填写（含分析来源：自动/人类补充/混合） | ✅/❌ |
    | 所有 US 的"复用功能模块"已填写（含分析来源：自动/人类补充/混合） | ✅/❌ |
    | 所有 US 的风险评估已填写 | ✅/❌ |
@@ -467,6 +483,7 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "产
    | Sub-feature 之间依赖关系已标注 | ✅/❌ |
    | US 之间依赖关系已标注 | ✅/❌ |
    | 优先级已标注（P0/P1/P2） | ✅/❌ |
+   | 所有 US 的受影响范围已通过 `graphify-out/graph.json` 分析 | ✅/❌ |
 
 4. **记录产出物**
    ```bash
@@ -600,7 +617,7 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "等待" "Human Gat
 |---------|---------|
 | feature.md 不存在 | 报错退出 |
 | feature.md 未完成 | 警告并要求确认 |
-| knowledge.grap 不存在 | BA 标注"手动分析"，继续执行 |
+| `graphify-out/graph.json` 不存在 | BA 标注"手动分析"，继续执行 |
 | US 无法满足 INVEST | 调整拆分粒度，重新拆分 |
 | 发现核心冲突 | 记录冲突位置，提交 Human Gate |
 | 拆分后存在循环依赖 | 记录并提交 Human Gate |
@@ -613,6 +630,6 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "等待" "Human Gat
 |------|------|
 | requirements 模板 | `.claude/templates/requirements-template.md` |
 | feature.md | `.claude/iterations/sprint-latest/feature.md` |
-| knowledge.grap | `.claude/context/knowledge.grap` |
+| 知识图谱 | `graphify-out/graph.json`（**原 `knowledge.grap` 已重构**） |
 | project.md | `.claude/context/project.md` |
 | pm-stage1.md | `.claude/agents/pm-stage1.md` |

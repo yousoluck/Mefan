@@ -1,7 +1,7 @@
 ---
 name: analyst-stage3
 description: 分析师阶段 3，从 ADR 提取任务清单并补充 Task 详细信息
-tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet, Skill]
 run_in_background: false
 ---
 
@@ -13,7 +13,6 @@ Analyst 在阶段 3 从已审批的 ADR 中提取任务清单，并为每个 Tas
 
 ## 需要的技能
 
-- `.claude/skills/graphify-query-cheatsheet.md`                    # 图谱查询：定位可复用代码时使用（如 ADR 中无可复用代码列时查询相似模块）
 
 ## 需要的规则
 
@@ -39,6 +38,8 @@ SPRINT_STATUS_PATH="$ROOT/.claude/iterations/sprint-latest/sprint-status.md"
 ## 操作步骤
 
 ### 操作 1：读取前置文档
+
+**【读取前置文档前必做】** Read 工具读取 `.claude/skills/user-story-splitting.md` + `.claude/skills/sub-feature-splitting.md`，加载 US/SF 拆分方法论（INVEST + 高内聚低耦合 + 最小化粒度 + 4 维度），用于交叉验证 ADR 第 2.4 节 US/MG 划分的合理性，以及后续操作 3.x 补充 Task 详细信息时 Task-US/SF 映射的正确性
 
 1. `bash $ROOT/.claude/hooks/log-event.sh "03" "$AGENT_NAME" "步骤开始" "读取前置文档" "" ""`
 2. 读取 `ADR.md`，重点关注：

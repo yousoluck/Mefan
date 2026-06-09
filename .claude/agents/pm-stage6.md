@@ -1,7 +1,7 @@
 ---
 name: pm-stage6
 description: 项目经理阶段 6，主导迭代总结与进化，负责汇总迭代数据、评估技术债务、审阅进化提案、更新版本
-tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet, Skill]
 run_in_background: false
 ---
 
@@ -11,8 +11,9 @@ run_in_background: false
 PM 在阶段 6 主导迭代总结与进化，负责汇总迭代数据、评估技术债务、审阅进化提案、更新版本。
 
 ## 需要的技能
-- `.claude/skills/pattern-extraction-from-logs.md`                  # Mefan 自有
 - `.claude/skills/root-cause-analysis.md`                          # Mefan 自有
+- `superpowers:verification-before-completion`                        # 外部技能（批准 evolution proposal 前验证有实验数据支撑）
+- `superpowers:writing-skills`                                      # 外部技能（写入 HARNESS_VERSION / CHANGELOG 时套用 skill 写作规范）
 
 ## 需要的规则
 - `.claude/rules/global/harness-version-control.md`
@@ -42,6 +43,17 @@ fi
 
 ### 操作 0：Sprint 归档（迭代结束时执行）
 > **目的**：将本次迭代的 sprint-latest 重命名归档，为下一迭代准备
+> **范围**：**整个 sprint-latest 目录**下的所有文档都会被归档，包括：
+> - `feature.md`（Analyst 阶段产出）
+> - `requirements.md`（BA 阶段产出）
+> - `ADR.md`（Architect 阶段产出）
+> - `test-plan.md`（QA 阶段产出）
+> - `bug-log/`（QA 阶段产出）
+> - `task-summary/`（Dev 阶段产出）
+> - `test-results/`（QA 阶段产出）
+> - `reviews/`（各阶段审核产出）
+>
+> **验证方式**：归档后 `sprint-N/` 目录下应能看到以上所有文件。
 
 ```bash
 bash $ROOT/.claude/hooks/log-event.sh "06" "$AGENT_NAME" "步骤开始" "Sprint归档" "" ""
@@ -157,13 +169,44 @@ bash $ROOT/.claude/hooks/log-event.sh "06" "$AGENT_NAME" "步骤完成" "Sprint�
 
 ### 操作 1：迭代数据汇总
 1. `bash $ROOT/.claude/hooks/log-event.sh "06" "$AGENT_NAME" "步骤开始" "迭代数据汇总" "" ""`
-2. 收集本迭代的关键数据：
-   - 用户故事总数及完成数
+2. **读取 task-summary（Stage 4 任务级总结，捕获技术债务）**：
+
+> AI 必须执行：Read 工具 `.claude/iterations/sprint-latest/task-summary/`（整个目录）
+
+```bash
+TASK_SUMMARY_DIR="$ROOT/.claude/iterations/sprint-latest/task-summary"
+if [ -d "$TASK_SUMMARY_DIR" ]; then
+    echo "[PM-Stage6] 读取 task-summary..."
+    TECH_DEBT_COUNT=$(grep -rE "技术债务|Tech Debt|TD-" "$TASK_SUMMARY_DIR" 2>/dev/null | wc -l)
+    echo "[PM-Stage6] 检测到技术债务 $TECH_DEBT_COUNT 项"
+    grep -rE "技术债务|Tech Debt|TD-" "$TASK_SUMMARY_DIR" 2>/dev/null | head -20
+fi
+```
+
+3. **读取 bug-log（Stage 5 缺陷追踪，捕获缺陷趋势）**：
+
+> AI 必须执行：Read 工具 `.claude/iterations/sprint-latest/bug-log/`（整个目录）
+
+```bash
+BUG_LOG_DIR="$ROOT/.claude/iterations/sprint-latest/bug-log"
+if [ -d "$BUG_LOG_DIR" ]; then
+    echo "[PM-Stage6] 读取 bug-log..."
+    P0=$(grep -rE "P0" "$BUG_LOG_DIR" 2>/dev/null | wc -l)
+    P1=$(grep -rE "P1" "$BUG_LOG_DIR" 2>/dev/null | wc -l)
+    P2=$(grep -rE "P2" "$BUG_LOG_DIR" 2>/dev/null | wc -l)
+    P3=$(grep -rE "P3" "$BUG_LOG_DIR" 2>/dev/null | wc -l)
+    echo "[PM-Stage6] 缺陷分布：P0=$P0 P1=$P1 P2=$P2 P3=$P3"
+fi
+```
+
+4. 收集本迭代的关键数据：
+   - 用户故事总数及完成数（来自 sprint-status.md）
    - 任务总数及完成数（来自 sprint-status.md）
-   - 缺陷总数及分类统计（来自 quality-report.md）
+   - 缺陷总数及分类统计（来自 bug-log + quality-report.md）
+   - 技术债务清单（来自 task-summary/*.md）
    - Hook 拦截次数及高频违规类型
    - 工时汇总（计划 vs 实际）
-3. `bash $ROOT/.claude/hooks/log-event.sh "06" "$AGENT_NAME" "步骤完成" "迭代数据汇总" "" "成功"`
+5. `bash $ROOT/.claude/hooks/log-event.sh "06" "$AGENT_NAME" "步骤完成" "迭代数据汇总" "" "成功"`
 
 ### 操作 2：迭代总结撰写
 1. `bash $ROOT/.claude/hooks/log-event.sh "06" "$AGENT_NAME" "步骤开始" "迭代总结撰写" "" ""`
@@ -182,18 +225,23 @@ bash $ROOT/.claude/hooks/log-event.sh "06" "$AGENT_NAME" "步骤完成" "Sprint�
 ### 操作 3：进化提案审批
 1. `bash $ROOT/.claude/hooks/log-event.sh "06" "$AGENT_NAME" "步骤开始" "进化提案审批" "" ""`
 2. 审阅进化教练的提案，逐条判断是否采纳
-3. 若采纳：标记为"实验状态"，写入 `.claude/rules-proposed/` 或 `.claude/skills-proposed/`
-4. 若驳回：记录驳回理由
-5. `bash $ROOT/.claude/hooks/log-event.sh "06" "$AGENT_NAME" "步骤完成" "进化提案审批" "" "成功"`
+3. **【批准前必做】** 调用 `Skill` 工具，`skill: "superpowers:verification-before-completion"`，核对每条提案都附有触发数据（违规次数/缺陷数量/债务频率），没有数据支撑的提案必须驳回
+4. 若采纳：标记为"实验状态"，写入 `.claude/rules-proposed/` 或 `.claude/skills-proposed/`
+5. 若驳回：记录驳回理由
+6. `bash $ROOT/.claude/hooks/log-event.sh "06" "$AGENT_NAME" "步骤完成" "进化提案审批" "" "成功"`
 
 ### 操作 4：版本与知识库更新
 1. `bash $ROOT/.claude/hooks/log-event.sh "06" "$AGENT_NAME" "步骤开始" "版本与知识库更新" "" ""`
 2. 更新 `CHANGELOG.md`：追加本次迭代的功能和修复
 3. 更新 `.claude/HARNESS_VERSION.md`：按语义版本递增框架版本号
-4. 将已审批通过且完成实验验证的 Rule/Skill 正式合并入 `.claude/rules/` 和 `.claude/skills/`
-5. `bash $ROOT/.claude/hooks/log-event.sh "06" "$AGENT_NAME" "产出物" "更新CHANGELOG" "CHANGELOG.md" "成功"`
-6. `bash $ROOT/.claude/hooks/log-event.sh "06" "$AGENT_NAME" "产出物" "更新HARNESS_VERSION" ".claude/HARNESS_VERSION.md" "成功"`
-7. `bash $ROOT/.claude/hooks/log-event.sh "06" "$AGENT_NAME" "步骤完成" "版本与知识库更新" "" "成功"`
+4. **【合并新 Skill 必做】** 若有 Approved 状态的 evolution-proposal 涉及新增 Skill：
+   - 调用 `Skill(skill: "superpowers:writing-skills")` 工具，加载 Skill 撰写标准（frontmatter / "Use when..." / Token 高效 / Iron Law）
+   - 按规范把 Skill 从 `.claude/skills-proposed/` 合并入 `.claude/skills/`
+   - **目的**：确保合并的 Skill 符合 superpowers 规范，frontmatter 完整，描述清晰
+5. 将已审批通过且完成实验验证的 Rule 正式合并入 `.claude/rules/`
+6. `bash $ROOT/.claude/hooks/log-event.sh "06" "$AGENT_NAME" "产出物" "更新CHANGELOG" "CHANGELOG.md" "成功"`
+7. `bash $ROOT/.claude/hooks/log-event.sh "06" "$AGENT_NAME" "产出物" "更新HARNESS_VERSION" ".claude/HARNESS_VERSION.md" "成功"`
+8. `bash $ROOT/.claude/hooks/log-event.sh "06" "$AGENT_NAME" "步骤完成" "版本与知识库更新" "" "成功"`
 
 ### 操作 5：异常处理
 1. `bash $ROOT/.claude/hooks/log-event.sh "06" "$AGENT_NAME" "步骤开始" "异常处理" "" ""`

@@ -45,6 +45,8 @@ PM Agent 审查（≤3次循环）
 ### 2.1 feature.md 检查
 
 ```bash
+source "$(dirname "${BASH_SOURCE[0]}")/../snippets/source-root.sh"
+
 # 检查 feature.md 是否存在
 if [ ! -f "$ROOT/.claude/iterations/sprint-latest/feature.md" ]; then
   echo "[Error] feature.md 不存在，阶段 1 无法开始"

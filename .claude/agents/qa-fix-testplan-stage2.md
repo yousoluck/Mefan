@@ -1,7 +1,7 @@
 ---
 name: qa-fix-testplan-stage2
 description: QA Fix Agent，阶段 2 负责修复 test-plan 审核中发现的问题
-tools: [Read, Write, Bash, Grep, Glob, Edit]
+tools: [Read, Write, Bash, Grep, Glob, Edit, Skill]
 run_in_background: false
 ---
 
@@ -13,7 +13,6 @@ QA Fix Agent 在阶段 2 负责根据 testplan-review.md 中记录的问题，�
 
 ## 需要的技能
 
-- `.claude/skills/graphify-query-cheatsheet.md`
 
 ## 需要的规则
 
@@ -29,7 +28,7 @@ QA Fix Agent 在阶段 2 负责根据 testplan-review.md 中记录的问题，�
 
 ```bash
 AGENT_NAME="QA-Fix"
-ROOT="/mnt/d/pycharmprojects/mefan"
+ROOT="/mnt/d/pycharmprojects/Mefan"
 STAGE="02"
 REVIEW_DIR="$ROOT/.claude/iterations/sprint-latest/reviews"
 ```
@@ -95,7 +94,7 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "读
 1. `.claude/iterations/sprint-latest/test-plan.md` — 待修复的 test-plan
 2. `.claude/iterations/sprint-latest/ADR.md` — API 设计参考
 3. `.claude/iterations/sprint-latest/requirements.md` — 功能需求参考
-4. `.claude/context/knowledge.grap` — 知识图谱（受影响模块分析）
+4. `graphify-out/graph.json` — 知识图谱（受影响模块分析，已重构）
 5. `.claude/rules/global/quality-gates.md` — 质量门槛标准
 6. `.claude/iterations/sprint-latest/reviews/testplan-review.md` — 问题汇总
 
@@ -138,7 +137,7 @@ echo "[QA-Fix-Stage2] test-plan 状态已更新为：修复中"
 1. 理解问题本质
 2. 参考 ADR.md 确认 API 设计要求
 3. 参考 requirements.md 确认功能需求
-4. 参考 knowledge.grap 分析受影响模块的测试覆盖
+4. 参考 graph.json 分析受影响模块的测试覆盖
 5. 参考 quality-gates.md 确认质量门槛要求
 
 **修复流程**：
@@ -282,5 +281,5 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "等待" "Human Gat
 | testplan-review | `.claude/iterations/sprint-latest/reviews/testplan-review.md` |
 | ADR | `.claude/iterations/sprint-latest/ADR.md` |
 | requirements | `.claude/iterations/sprint-latest/requirements.md` |
-| knowledge.grap | `.claude/context/knowledge.grap` |
+| 知识图谱 | `graphify-out/graph.json` |
 | quality-gates | `.claude/rules/global/quality-gates.md` |

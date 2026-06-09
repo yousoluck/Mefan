@@ -60,6 +60,8 @@ PM Agent → 项目进度报告 + 版本更新
 > **判断条件**：如果 `sprint-latest/` 目录存在且有内容，则在步骤 1 开始前先执行归档
 
 ```bash
+source "$(dirname "${BASH_SOURCE[0]}")/../snippets/source-root.sh"
+
 # 检查是否需要归档
 if [ -d "$ROOT/.claude/iterations/sprint-latest" ] && [ -n "$(ls -A "$ROOT/.claude/iterations/sprint-latest" 2>/dev/null)" ]; then
     echo "[mf-upgrade:06-retrospect] 检测到 sprint-latest/ 目录存在，将在步骤 1 前执行归档"

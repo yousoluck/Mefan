@@ -1,7 +1,7 @@
 ---
 name: qa-stage4
 description: QA 阶段 4，执行测试代码编写（QA-Test-Coding）和人工测试（Testing），每个检查循环最多 3 次
-tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet, Skill]
 run_in_background: false
 ---
 
@@ -20,7 +20,9 @@ QA 在阶段 4 执行两种操作：
 - `.claude/skills/test-plan-reading.md`                              # Mefan 自有
 - `.claude/skills/write-unit-test.md`                               # Mefan 自有
 - `.claude/skills/write-manual-test-guide.md`                        # Mefan 自有
-- `@superpowers/test-automation`                                    # 外部技能（预留格式）
+- `superpowers:test-driven-development`                              # 外部技能（测试代码也是 production code，TDD 同理）
+- `superpowers:verification-before-completion`                        # 外部技能（声明测试通过前必须实际跑看到输出）
+- `superpowers:systematic-debugging`                                 # 外部技能（修测试中发现 Bug 时走 4 阶段）
 
 ## 需要的规则
 
@@ -48,6 +50,8 @@ BUGS_PATH="$ROOT/.claude/iterations/sprint-latest/bugs.md"
 
 ### 操作 1：接收测试任务
 
+**【接收测试任务前必做】** Read 工具读取 `.claude/skills/code-review-checklist.md`，加载 5 维度审查清单（语义正确性 / 安全性 / 性能 / 一致性 / 可维护性）；QA 在编写测试前了解 dev 已通过的 Code Review 维度，针对该维度设计对应测试用例
+
 1. `bash $ROOT/.claude/hooks/log-event.sh "04" "$AGENT_NAME" "步骤开始" "接收测试任务" "$MG_ID" ""`
 2. 确认 Code Review 已通过
 3. 读取相关文档：
@@ -63,7 +67,9 @@ BUGS_PATH="$ROOT/.claude/iterations/sprint-latest/bugs.md"
 
 1. `bash $ROOT/.claude/hooks/log-event.sh "04" "$AGENT_NAME" "步骤开始" "QA-Test-Coding" "$MG_ID" ""`
 2. 更新 sprint-status.md 中 US 的生命周期状态为"🧪 QA-Test-Coding"
-3. **核心原则**：一个 US/Sub-feature 对应多个测试用例
+3. **【写第一行测试代码前必做】** Read 工具读取 `.claude/skills/write-unit-test.md`，加载单元测试编写方法论（测试目录结构、命名规范、断言写法、Mock 范式）
+4. **【写第一行测试代码前必做】** 调用 `Skill` 工具，`skill: "superpowers:test-driven-development"`，加载红→绿→重构铁律；测试代码也是 production code，必须遵守 TDD 流程（NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST）
+4. **核心原则**：一个 US/Sub-feature 对应多个测试用例
 
 #### 2.1 自动化测试代码编写
 
@@ -96,7 +102,7 @@ US-101: 用户注册
     └── TC-008: 注册后自动登录
 ```
 
-4. **完成检查清单**：
+5. **完成检查清单**：
    - [ ] 所有 Test Plan 中的测试用例都有对应测试代码
    - [ ] 一个 US/Sub-feature 对应多个测试用例
    - [ ] 测试代码逻辑与 Test Plan 预期结果一致
@@ -129,6 +135,7 @@ US-101: 用户注册
 
 1. `bash $ROOT/.claude/hooks/log-event.sh "04" "$AGENT_NAME" "步骤开始" "Testing" "$MG_ID" ""`
 2. 更新 sprint-status.md 中 US 的生命周期状态为"✅ Testing"
+3. **【声明"测试通过"前必做】** 调用 `Skill` 工具，`skill: "superpowers:verification-before-completion"`，实际跑 `npm run test` / `npm run test:coverage`，看到 PASS 输出和真实覆盖率数字，禁止凭印象声明通过
 
 #### 4.1 执行自动化测试
 
@@ -163,7 +170,8 @@ npm run test:coverage
 ### 操作 5：Bug 处理（Testing 循环）
 
 1. `bash $ROOT/.claude/hooks/log-event.sh "04" "$AGENT_NAME" "发现Bug" "$MG_ID:发现$N个Bug" "" "待修复"`
-2. 记录 Bug 到 bugs.md：
+2. **【复现 Bug 前必做】** 调用 `Skill` 工具，`skill: "superpowers:systematic-debugging"`，按 4 阶段（reproduce → hypothesize → isolate → fix）调查根因；提单前先确认能稳定复现
+3. 记录 Bug 到 bugs.md：
    ```markdown
    ## Bug Report - Testing
 

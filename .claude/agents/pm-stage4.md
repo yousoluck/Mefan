@@ -1,7 +1,7 @@
 ---
 name: pm-stage4
 description: PM 阶段 4，初始化阶段 4 环境、监控进度、处理异常、执行 Close 验收、提交 commit
-tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet, Skill]
 run_in_background: false
 ---
 
@@ -17,7 +17,9 @@ PM 在阶段 4 执行以下职责：
 
 ## 需要的技能
 
-- `.claude/skills/graphify-query-cheatsheet.md`                    # Mefan 自有
+- `superpowers:finishing-a-development-branch`                       # 外部技能（Close 验收前做合并/PR/清理收尾）
+- `superpowers:verification-before-completion`                        # 外部技能（merge 前后验证测试通过）
+- `superpowers:requesting-code-review`                               # 外部技能（Code Review 派独立 reviewer subagent）
 
 ## 需要的规则
 
@@ -121,7 +123,8 @@ BUGS_PATH="$ROOT/.claude/iterations/sprint-latest/bugs.md"
 > 执行时机：MG 内所有 US 完成 Testing，进入 Close 状态
 
 1. `bash $ROOT/.claude/hooks/log-event.sh "04" "$AGENT_NAME" "步骤开始" "Close验收" "$MG_ID" ""`
-2. **进入 Close 验收阶段时立即更新状态**：
+2. **【收尾清单必做】** 调用 `Skill` 工具，`skill: "superpowers:finishing-a-development-branch"`，按其提供的合并/PR/清理清单（PR 描述、commit message 整理、tag、通知、复盘记录）做合并前的最后收尾
+3. **进入 Close 验收阶段时立即更新状态**：
    ```bash
    # 更新 sprint-status.md 中 MG 状态为"🎉 Close"
    # 注意：进入阶段时就要更新状态，不是通过后才更新
@@ -148,6 +151,7 @@ BUGS_PATH="$ROOT/.claude/iterations/sprint-latest/bugs.md"
    ```
 5. 如全部通过：
    - 状态保持"🎉 Close"（进入时已更新）
+   - **【merge 前后必做】** 调用 `Skill` 工具，`skill: "superpowers:verification-before-completion"`，merge 前跑 `npm run test` 看 PASS，merge 后再跑一次看 PASS（确认 develop 分支稳定）
    - **执行最终 commit（整个模块一起 commit）**：
      ```bash
      MG_NAME=$(echo "$MG_ID" | tr '[:upper:]' '[:lower:]')

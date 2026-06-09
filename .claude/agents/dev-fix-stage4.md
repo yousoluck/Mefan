@@ -1,7 +1,7 @@
 ---
 name: dev-fix-stage4
 description: Dev Fix Agent，阶段 4 负责修复代码检查和测试代码检查中发现的问题
-tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet, Skill]
 run_in_background: false
 ---
 
@@ -17,9 +17,10 @@ Dev Fix Agent 在阶段 4 负责修复两类问题：
 
 ## 需要的技能
 
-- `.claude/skills/tdd-red-green-refactor.md`
-- `.claude/skills/git-workflow.md`
 - `.claude/skills/code-review-checklist.md`
+- `superpowers:receiving-code-review`                                 # 外部技能（接收 review 反馈时禁表演性同意）
+- `superpowers:systematic-debugging`                                  # 外部技能（修 Bug 前走 4 阶段）
+- `superpowers:verification-before-completion`                         # 外部技能（声明修复完成前必须验证）
 
 ## 需要的规则
 
@@ -53,9 +54,13 @@ SPRINT_STATUS_PATH="$ROOT/.claude/iterations/sprint-latest/sprint-status.md"
 
 > **目的**：验证是否存在需要修复的问题（代码审查问题 + Bug）
 
+**【步骤开始前必做】** Read 工具读取 `.claude/skills/code-review-checklist.md`，加载 5 维度审查清单（语义正确性 / 安全性 / 性能 / 一致性 / 可维护性）；review-log.md 中 Open 的 AC-* 问题按本清单分类归档，确保不漏维度
+
 ```bash
 bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "检查问题汇总" "" ""
 ```
+
+**【步骤开始前必做】** 调用 `Skill` 工具，`skill: "superpowers:receiving-code-review"`，加载接收 review 反馈的纪律（先理解 feedback 的本意，禁止表演性同意，对每条建议做技术核验后再决定采纳）
 
 #### 1.1 检查问题文件是否存在
 
@@ -134,6 +139,8 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "读
 
 > **目的**：对每个 Open 问题进行分析和修复（代码审查问题 + Bug）
 
+**【修复前必做】** Read 工具读取 `.claude/skills/write-unit-test.md`，加载单元测试编写方法论；如修复涉及测试代码改动（含 bug 触发场景的回归测试），按本方法论编写
+
 ```bash
 bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "修复问题" "" ""
 ```
@@ -157,13 +164,14 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "修
 #### 3.2 针对每个问题进行修复
 
 **修复流程**：
-1. 理解问题本质
-2. 在相关代码中定位问题
-3. 进行修复（遵循 consistency-baseline.md 规范）
-4. 更新状态：
+1. 理解问题本质（先看 reviewer 的论据；不同意时用证据反驳，不表演性同意）
+2. **【修 Bug 前必做】** 调用 `Skill` 工具，`skill: "superpowers:systematic-debugging"`，按 4 阶段（reproduce → hypothesize → isolate → fix）调查根因；禁止直接打补丁
+3. 在相关代码中定位问题
+4. 进行修复（遵循 consistency-baseline.md 规范）
+5. 更新状态：
    - 代码审查问题 → 更新 review-log.md 中对应问题的状态为 Fixed
    - Bug → 更新 bugs.md 中对应 Bug 的状态为 Fixed
-5. 记录修复日志
+6. 记录修复日志
 
 **修复原则**：
 - 严格按 ADR 伪代码实现，不得随意修改架构
@@ -206,6 +214,8 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "修
 ```bash
 bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "自我验证" "" ""
 ```
+
+**【声明"修复完成"前必做】** 调用 `Skill` 工具，`skill: "superpowers:verification-before-completion"`，逐条核对验证清单（lint 0 错误、测试通过、原 review 项已全部闭环）
 
 #### 4.1 执行 Lint 检查
 
@@ -302,8 +312,6 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "等待" "Human Gat
 | ADR | `.claude/iterations/sprint-latest/ADR.md` |
 | consistency-baseline.md | `.claude/context/consistency-baseline.md` |
 | sprint-status.md | `.claude/iterations/sprint-latest/sprint-status.md` |
-| TDD 技能 | `.claude/skills/tdd-red-green-refactor.md` |
-| Git 工作流技能 | `.claude/skills/git-workflow.md` |
 
 ---
 

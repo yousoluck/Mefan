@@ -96,16 +96,6 @@ To Do → In Progress → In Review → Done
 | Done | 任务完成 | Review通过后进入 |
 | Rejected | 需要返工 | Review失败时进入 |
 
-## 迭代计划文档要求
-
-在 `.claude/iterations/sprint-latest/iteration-plan.md` 中必须包含：
-
-1. **User Story清单**：所有计划的US
-2. **任务拆解表**：所有US对应的任务
-3. **WIP限制**：本次迭代的WIP设置
-4. **里程碑**：关键时间节点
-5. **警戒线**：每个任务的警戒线设置
-
 ## 适用阶段
 
 - 阶段3（迭代计划与任务排期）：PM拆解任务、设置WIP和警戒线

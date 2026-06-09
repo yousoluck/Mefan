@@ -1,7 +1,7 @@
 ---
 name: pm-stage3
 description: 项目经理阶段 3，主导迭代计划与任务排期，创建迭代计划、初始化看板、执行冲突裁决
-tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet, Skill]
 run_in_background: false
 ---
 
@@ -17,7 +17,6 @@ PM 在阶段 3 主导迭代计划与任务排期，负责：
 
 ## 需要的技能
 
-- `.claude/skills/graphify-query-cheatsheet.md`                    # Mefan 自有
 
 ## 需要的规则
 

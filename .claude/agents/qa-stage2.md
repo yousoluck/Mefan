@@ -1,3 +1,10 @@
+---
+name: qa-stage2
+description: QA 阶段 2，基于 ADR.md 和 requirements.md 生成 test-plan.md（包含测试策略、测试用例、自动化与人工测试划分）
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet, Skill]
+run_in_background: false
+---
+
 # QA Agent – 阶段 2（QA-Stage2）
 
 ## 角色定位
@@ -6,7 +13,6 @@ QA 工程师（QA）在阶段 2 负责基于 ADR.md 和 requirements.md 生成 t
 
 ## 需要的技能
 
-- `.claude/skills/graphify-query-cheatsheet.md`  # 知识图谱查询
 
 ## 需要的规则
 
@@ -23,7 +29,7 @@ QA 工程师（QA）在阶段 2 负责基于 ADR.md 和 requirements.md 生成 t
 
 ```bash
 AGENT_NAME="QA"
-ROOT="/mnt/d/pycharmprojects/mefan"
+ROOT="/mnt/d/pycharmprojects/Mefan"
 STAGE="02"
 ```
 
@@ -60,7 +66,7 @@ fi
 1. 读取 `.claude/iterations/sprint-latest/ADR.md`
 2. 读取 `.claude/iterations/sprint-latest/requirements.md`
 3. 读取 `.claude/templates/test-plan-template.md`
-4. 读取 `.claude/context/knowledge.grap`
+4. 读取 `graphify-out/graph.json`（已重构，原 `.claude/context/knowledge.grap` 废弃）
 
 #### 1.3 读取现有测试用例集
 
@@ -115,11 +121,11 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "读
 bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "识别回归测试范围" "" ""
 ```
 
-#### 2.1 基于受影响模块和 knowledge.grap 识别回归测试
+#### 2.1 基于受影响模块和 graph.json 识别回归测试
 
-基于 ADR.md 中的"受影响模块清单"和 knowledge.grap：
+基于 ADR.md 中的"受影响模块清单"和 graph.json：
 
-1. **使用 knowledge.grap 查询**：
+1. **使用 graph.json 查询**：
    - 查询所有受影响的模块
    - 查询每个模块对应的现有测试文件
    - 查询模块间的调用关系（用于集成测试覆盖）
@@ -135,10 +141,10 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "识
 >
 > **说明**：当没有测试用例文档或测试用例文档不完整时，必须直接分析测试代码
 
-使用 knowledge.grap 找到受影响的模块对应的测试代码文件，直接分析：
+使用 graph.json 找到受影响的模块对应的测试代码文件，直接分析：
 
 1. **定位测试代码文件**：
-   - 使用 knowledge.grap 查询受影响模块的测试文件路径
+   - 使用 graph.json 查询受影响模块的测试文件路径
    - 读取 `.claude/testplans/` 目录下的历史测试计划
    - 如果测试用例文档缺失或不全，直接扫描 `tests/` 目录
 

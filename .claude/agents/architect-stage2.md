@@ -32,7 +32,7 @@ run_in_background: false
 
 ```bash
 AGENT_NAME="Architect"
-ROOT="/mnt/d/pycharmprojects/mefan"
+ROOT="/mnt/d/pycharmprojects/Mefan"
 STAGE="02"
 ```
 
@@ -60,7 +60,7 @@ fi
 # 检查依赖文档
 ls -la $ROOT/.claude/context/tech-stack-profile.md 2>/dev/null || echo "[Warning] tech-stack-profile.md 不存在"
 ls -la $ROOT/.claude/context/consistency-baseline.md 2>/dev/null || echo "[Warning] consistency-baseline.md 不存在"
-ls -la $ROOT/.claude/context/knowledge.grap 2>/dev/null || echo "[Info] knowledge.grap 不存在，将使用手动分析"
+ls -la $ROOT/graphify-out/graph.json 2>/dev/null || echo "[Info] graph.json 不存在，将使用手动分析"
 ```
 
 #### 1.2 读取前置文档
@@ -68,7 +68,7 @@ ls -la $ROOT/.claude/context/knowledge.grap 2>/dev/null || echo "[Info] knowledg
 1. 读取 `.claude/iterations/sprint-latest/requirements.md`
 2. 读取 `.claude/context/tech-stack-profile.md`
 3. 读取 `.claude/context/consistency-baseline.md`
-4. 读取 `.claude/context/knowledge.grap`（如存在）
+4. 读取 `graphify-out/graph.json`（如存在）
 
 #### 1.3 提取需求信息
 
@@ -85,10 +85,10 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "读
 
 ---
 
-### 操作 2.2：分析受影响模块 + US Modular Group（基于 knowledge.grap）
+### 操作 2.2：分析受影响模块 + US Modular Group（基于 graph.json）
 
 > **目的**：
-> 1. 通过 knowledge.grap 分析所有受影响模块
+> 1. 通过 graph.json 分析所有受影响模块
 > 2. 分析 US 之间的依赖关系，划分 Modular Group
 > 3. 整合 requirements.md 中的"相似功能模块分析"和"复用功能模块"
 
@@ -103,8 +103,8 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "分
 **整合规则**：
 1. requirements.md 中已标注的"相似模块" → 自动纳入 6.1 分析范围
 2. requirements.md 中已标注的"复用模块" → 自动纳入 6.3 分析范围
-3. knowledge.grap 发现的额外依赖 → 补充到上述列表
-4. **冲突处理**：如果 knowledge.grap 与 requirements.md 冲突，以 requirements.md 为准（人类已审核）
+3. graph.json 发现的额外依赖 → 补充到上述列表
+4. **冲突处理**：如果 graph.json 与 requirements.md 冲突，以 requirements.md 为准（人类已审核）
 
 **直接整合方式**：
 - 在分析 6.1/6.2/6.3 时，直接引用 requirements.md 中对应 US 的"相似功能模块分析"和"复用功能模块"表格
@@ -117,7 +117,7 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "分
 
 **分析来源**：
 1. requirements.md 中各 US 的"相似功能模块分析"表格
-2. knowledge.grap 查询结果
+2. graph.json 查询结果
 
 **输出格式**（对应 ADR 第 6.1 节）：
 | 现有模块 | 依赖类型 | 调用方式 | 影响范围 | 变更原因 |
@@ -125,16 +125,16 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "分
 | PostService | 调用新功能 | PostService → CommentService.findByPostId() | 帖子详情页展示评论 | 业务变更 |
 | UserService | 数据提供 | UserService.findById() ← CommentService | 评论显示用户信息 | 数据变更 |
 
-**使用 knowledge.grap 识别**：
+**使用 graph.json 识别**：
 1. 哪些现有功能模块需要调用新功能
 2. 哪些模块需要向新模块提供数据
 
-**knowledge.grap 查询策略**：
+**graph.json 查询策略**（用 graphify CLI，不用 grep graph.json）：
 ```bash
 # 查询调用新模块的现有模块（示例：新模块为 CommentService）
-grep -A 5 "CommentService" .claude/context/knowledge.grap | grep "called_by" || echo "[Info] 未找到直接调用关系"
+cd "$ROOT" && graphify path "CommentService" "PostService" 2>/dev/null | head -20 || echo "[Info] 未找到直接调用关系"
 # 查询向新模块提供数据的模块
-grep -B 5 "CommentRepository" .claude/context/knowledge.grap | grep "depends_on" || echo "[Info] 未找到数据依赖"
+cd "$ROOT" && graphify query "what depends on CommentRepository" 2>/dev/null | head -20 || echo "[Info] 未找到数据依赖"
 ```
 
 
@@ -142,7 +142,7 @@ grep -B 5 "CommentRepository" .claude/context/knowledge.grap | grep "depends_on"
 
 > 为了适配新功能，哪些现有模块需要扩展
 
-**分析来源**：knowledge.grap 查询结果
+**分析来源**：graph.json 查询结果
 
 **输出格式**（对应 ADR 第 6.2 节）：
 | 现有模块 | 扩展类型 | 扩展内容 | 兼容性影响 | 变更原因 |
@@ -150,14 +150,14 @@ grep -B 5 "CommentRepository" .claude/context/knowledge.grap | grep "depends_on"
 | Post Entity | 字段扩展 | 增加 commentCount 字段 | 需数据库迁移 | 数据变更 |
 | PostService | 方法扩展 | 增加 getPostWithComments() | 无影响（新增方法） | 业务变更 |
 
-**使用 knowledge.grap 识别**：
+**使用 graph.json 识别**：
 1. 哪些现有模块需要扩展功能
 2. 哪些数据模型需要扩展字段
 
-**knowledge.grap 查询策略**：
+**graph.json 查询策略**（用 graphify CLI，不用 grep graph.json）：
 ```bash
 # 查询需要扩展的模块（查找与新实体有关联的现有实体）
-grep -A 10 "@ManyToOne|@OneToMany|@ManyToMany" .claude/context/knowledge.grap | grep "Post|User" || echo "[Info] 未找到关联关系"
+cd "$ROOT" && graphify query "Post User entity relationships" 2>/dev/null | head -20 || echo "[Info] 未找到关联关系"
 ```
 
 
@@ -168,11 +168,11 @@ grep -A 10 "@ManyToOne|@OneToMany|@ManyToMany" .claude/context/knowledge.grap | 
 **优先级顺序**（按 Skill 引用六步优先级）：
 1. 参考 requirements.md 中的"相似功能模块分析"（最高优先级）
 2. 强制复用 requirements.md 中的"复用功能模块"
-3. 从 knowledge.grap 发现可复用的基础模块
+3. 从 graph.json 发现可复用的基础模块
 
 **分析来源**：
 1. requirements.md 中各 US 的"复用功能模块"表格（最高优先级）
-2. knowledge.grap 发现的可复用基础模块
+2. graph.json 发现的可复用基础模块
 
 **判定标准**：满足以下任一条件即属于"小改动复用"
 
@@ -202,7 +202,7 @@ grep -A 10 "@ManyToOne|@OneToMany|@ManyToMany" .claude/context/knowledge.grap | 
 
 > 新模块与现有模块的集成方式
 
-**分析来源**：knowledge.grap 查询结果
+**分析来源**：graph.json 查询结果
 
 **输出格式**（对应 ADR 第 6.4 节）：
 | 集成点 | 集成方式 | 技术实现 | 注意事项 |
@@ -210,7 +210,7 @@ grep -A 10 "@ManyToOne|@OneToMany|@ManyToMany" .claude/context/knowledge.grap | 
 | CommentService ↔ PostService | 同步调用 | Service 层直接注入 | 注意循环依赖 |
 | CommentService ↔ NotificationService | 异步事件 | Spring Event | 失败需重试机制 |
 
-**使用 knowledge.grap 识别**：
+**使用 graph.json 识别**：
 1. 新模块与现有模块的数据交互点（事务、缓存、消息队列）
 2. 新模块与现有模块的调用链（同步调用 vs 异步事件）
 
@@ -894,7 +894,7 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤完成" "更
 | requirements 主文档 | `.claude/iterations/sprint-latest/requirements.md` | 生成 ADR 的基础 |
 | tech-stack-profile.md | `.claude/context/tech-stack-profile.md` | 技术栈参考 |
 | consistency-baseline.md | `.claude/context/consistency-baseline.md` | 代码风格参考 |
-| knowledge.grap | `.claude/context/knowledge.grap` | 受影响模块分析 |
+| graph.json | `graphify-out/graph.json` | 受影响模块分析 |
 
 #### 7.2 输出（Outputs）
 
@@ -947,7 +947,7 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "等待" "Human Gat
 | 异常场景 | 处理方式 |
 |---------|---------|
 | requirements.md 不存在 | 报错退出 |
-| knowledge.grap 不可用 | 标注"手动分析"继续执行 |
+| graph.json 不可用 | 标注"手动分析"继续执行 |
 | 自检不通过 | 修复后重新自检 |
 | 设计冲突 | 按 conflict-resolution.md 升级给 PM |
 
@@ -961,5 +961,5 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "等待" "Human Gat
 | ADR 模板 | `.claude/templates/adr-template.md` | ADR 文档模板 |
 | tech-stack-profile.md | `.claude/context/tech-stack-profile.md` | 技术栈参考 |
 | consistency-baseline.md | `.claude/context/consistency-baseline.md` | 代码风格参考 |
-| knowledge.grap | `.claude/context/knowledge.grap` | 知识图谱 |
+| graph.json | `graphify-out/graph.json` | 知识图谱 |
 | mf-upgrade:02-arch-qa.md | `.claude/commands/mf-upgrade:02-arch-qa.md` | 阶段 2 playbook |

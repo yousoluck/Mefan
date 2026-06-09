@@ -81,6 +81,8 @@
 ### 2.1 阶段 3 完成状态检查
 
 ```bash
+source "$(dirname "${BASH_SOURCE[0]}")/../snippets/source-root.sh"
+
 # 检查 session-status.md 中阶段 3 状态
 if ! grep -q "阶段 03.*✅" "$ROOT/.claude/iterations/session-status.md" 2>/dev/null; then
   echo "[Error] 阶段 3 尚未完成，阶段 4 无法开始"

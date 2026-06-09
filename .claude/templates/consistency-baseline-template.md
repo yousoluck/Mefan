@@ -423,55 +423,36 @@
 
 > **用途**：供 Arch-Stage2 生成 Task 伪代码时引用，为 Dev Agent 提供完整的 Skill 索引
 >
-> **Skill 分类体系**：
-> 1. **Naming Convention / 项目目录组织架构类** - 命名规范、目录结构
-> 2. **开发工作流类** - Git 操作、Build、部署
-> 3. **功能元素类** - 项目功能开发，来源于 feature-elements.md
+> **Skill 分类体系（方案 B 混合分类）**：
+> 1. **通用规范类** - 跨层通用（Naming、Workflow 等）
+> 2. **L1 基础设施类** - 来自 FE-I-*
+> 3. **L2 领域模型类** - 来自 FE-D-*
+> 4. **L3 应用服务类** - 来自 FE-A-*
+> 5. **L4 接口组件类** - 来自 FE-F-*
+> 6. **L5 业务场景类** - 来自 BS-*
+> 7. **框架特定类** - frontend-*/backend-*
 >
 > **更新时机**：阶段 0 初始化时生成，Skill 目录变化时更新
 
-### 5.1 Naming Convention / 项目目录组织架构类
+### 5.1 通用规范类（跨层）
 
-> **说明**：项目的命名规范和目录结构约定，供 Dev Agent 遵守
-
-| Skill 文件 | 描述 | 适用范围 | 关键要点 |
-|-----------|------|---------|---------|
-| project-naming-convention.md | 命名规范 | 所有代码文件 | 文件命名、变量命名、函数命名 |
-| project-directory-structure.md | 目录结构 | 项目目录 | 各目录职责、层级关系 |
-| project-module-organization.md | 模块组织 | 模块划分 | 模块边界、依赖关系 |
-
-### 5.2 开发工作流类
-
-> **说明**：开发过程中的工作流程规范
-
-#### 5.2.1 开发工作流
+> **说明**：所有项目成员必须遵守的通用规范，适用范围 L1-L5
 
 | Skill 文件 | 描述 | 适用范围 | 关键要点 |
 |-----------|------|---------|---------|
-| project-git-workflow.md | Git 工作流 | 版本控制 | 分支策略、提交规范 |
-| project-tdd-pattern.md | TDD 开发流程 | 测试驱动 | RED-GREEN-REFACTOR |
-| project-code-review-checklist.md | Code Review 标准 | 代码审查 | 命名、复杂度、安全检查 |
-| project-commit-convention.md | 提交规范 | Git 提交 | conventional commit 格式 |
+| project-naming-convention.md | 命名规范 | L1-L5 | 文件命名、变量命名、函数命名、数据库命名、API命名、全局配置 |
+| project-directory-structure.md | 目录结构 | L1-L5 | 各目录职责、层级关系 |
+| project-git-workflow.md | Git 工作流 | L1-L5 | 分支策略、提交规范 |
+| project-tdd-pattern.md | TDD 开发流程 | L1-L5 | RED-GREEN-REFACTOR |
+| project-code-review-checklist.md | Code Review 标准 | L1-L5 | 命名、复杂度、安全检查 |
+| project-commit-convention.md | 提交规范 | L1-L5 | conventional commit 格式 |
+| project-build.md | 构建规范 | L1-L5 | 构建命令、产物管理 |
+| project-deploy.md | 部署规范 | L1-L5 | 环境配置、部署步骤 |
+| project-docker.md | Docker 规范 | L1-L5 | Dockerfile、docker-compose |
 
-#### 5.2.2 部署工作流
+### 5.2 L1 基础设施类（FE-I-*）
 
-| Skill 文件 | 描述 | 适用范围 | 关键要点 |
-|-----------|------|---------|---------|
-| project-build.md | 构建规范 | 项目构建 | 构建命令、产物管理 |
-| project-deploy.md | 部署规范 | 部署流程 | 环境配置、部署步骤 |
-| project-docker.md | Docker 规范 | 容器化 | Dockerfile、docker-compose |
-
-### 5.3 功能元素类
-
-> **说明**：来源于 PM-Stage0 生成的 feature-elements.md，由 Architect-Agent 扫描项目代码后生成
->
-> **分类**：
-> - **底层基础类**：L1 基础设施（数据库、缓存、文件系统、网络通信等）
-> - **框架/中间件类**：L2-L3 领域/应用层（ORM、框架封装、中间件）
-> - **工具类**：工具函数、配置管理、日志等
-> - **业务应用层类**：L5 业务场景（从 l5-scenes清单.md 获取）
-
-#### 5.3.1 底层基础类（FE-I-*）
+> **说明**：来源于 feature-elements.md L1 层基础设施类别
 
 | Skill 文件 | 对应 FE | 描述 | 关键模式 |
 |-----------|---------|------|---------|
@@ -479,51 +460,96 @@
 | project-infra-cache.md | FE-I-002 | 缓存基础设施 | Redis/Memcached 使用 |
 | project-infra-filesystem.md | FE-I-003 | 文件系统 | 文件读写、存储抽象 |
 | project-infra-network.md | FE-I-004 | 网络通信 | HTTP 客户端、API 调用 |
-| project-infra-mq.md | FE-I-005 | 消息队列 | RabbitMQ/Kafka 使用 |
+| project-infra-message-queue.md | FE-I-005 | 消息队列 | RabbitMQ/Kafka 使用 |
 | project-infra-security.md | FE-I-006 | 安全认证 | JWT、OAuth、加密 |
 | project-infra-logging.md | FE-I-007 | 日志 | 日志配置、格式规范 |
 | project-infra-config.md | FE-I-008 | 配置管理 | 环境配置、参数管理 |
 
-#### 5.3.2 框架/中间件类
+### 5.3 L2 领域模型类（FE-D-*）
 
-| Skill 文件 | 描述 | 关键模式 |
-|-----------|------|---------|
-| project-framework-*.md | 按检测到的框架生成 | 框架特定开发规范 |
-| project-middleware-*.md | 按检测到的中间件生成 | 中间件使用规范 |
+> **说明**：来源于 feature-elements.md L2 层领域模型，定义业务实体、值对象、聚合根
 
-#### 5.3.3 工具类
-
-| Skill 文件 | 描述 | 关键模式 |
-|-----------|------|---------|
-| project-utils.md | 工具函数规范 | 公共函数组织 |
-| project-types.md | 类型定义规范 | TypeScript/Java 类型 |
-
-#### 5.3.4 业务应用层类（从 L5 场景生成）
-
-| Skill 文件 | 对应场景 | 描述 | 核心元素 |
+| Skill 文件 | 对应 FE | 描述 | 核心元素 |
 |-----------|---------|------|---------|
-| project-feature-*.md | BS-001, BS-002... | 业务功能开发规范 | 实体、服务、接口 |
+| project-domain-{entity}.md | FE-D-001 | 用户领域模型 | User 实体、属性、方法 |
+| project-domain-{entity}.md | FE-D-002 | 产品领域模型 | Product 实体、值对象 |
+| ... | FE-D-*** | 其他领域模型 | 按项目实际检测结果 |
 
-**说明**：如果某功能元素尚无对应的 Skill 文件，Arch-Stage2 在 Task 伪代码中标注"无对应 Skill"，由 Dev Agent 自行参考 consistency-baseline 的通用规范。
+### 5.4 L3 应用服务类（FE-A-*）
 
----
+> **说明**：来源于 feature-elements.md L3 层应用服务，定义用例服务、工作流编排、事件处理
 
-### 5.4 Skills 索引表（汇总）
+| Skill 文件 | 对应 FE | 描述 | 核心服务 |
+|-----------|---------|------|---------|
+| project-service-auth.md | FE-A-001 | 认证服务 | 登录、注册、Token 刷新 |
+| project-service-order.md | FE-A-002 | 订单服务 | 创建、查询、取消 |
+| ... | FE-A-*** | 其他应用服务 | 按项目实际检测结果 |
 
-| Skill 文件 | 类别 | 描述 | 优先级 |
-|-----------|------|------|--------|
-| project-naming-convention.md | 命名规范 | 命名规范 | P0 |
-| project-directory-structure.md | 目录结构 | 目录规范 | P0 |
-| project-git-workflow.md | 开发工作流 | Git 工作流 | P0 |
-| project-tdd-pattern.md | 开发工作流 | TDD 开发 | P1 |
-| project-code-review-checklist.md | 开发工作流 | Code Review | P1 |
-| project-commit-convention.md | 开发工作流 | 提交规范 | P1 |
-| project-build.md | 部署工作流 | 构建规范 | P2 |
-| project-deploy.md | 部署工作流 | 部署规范 | P2 |
-| project-docker.md | 部署工作流 | Docker 规范 | P2 |
-| project-infra-*.md | 底层基础 | 基础设施 | P3 |
-| project-framework-*.md | 框架中间件 | 框架规范 | P4 |
-| project-feature-*.md | 业务应用 | 业务功能 | P5 |
+### 5.5 L4 接口组件类（FE-F-*）
+
+> **说明**：来源于 feature-elements.md L4 层接口层，定义 API 端点、UI 组件
+
+#### 5.5.1 API 接口
+
+| Skill 文件 | 对应 FE | 描述 | 端点 |
+|-----------|---------|------|------|
+| project-api-user.md | FE-F-001 | 用户 API | GET/POST /api/users |
+| project-api-order.md | FE-F-002 | 订单 API | GET/POST /api/orders |
+| ... | FE-F-*** | 其他 API | 按项目实际检测结果 |
+
+#### 5.5.2 UI 组件
+
+| Skill 文件 | 对应 FE | 描述 | 组件类型 |
+|-----------|---------|------|---------|
+| project-ui-button.md | FE-F-*** | 按钮组件 | atomic |
+| project-ui-form.md | FE-F-*** | 表单组件 | molecular |
+| ... | FE-F-*** | 其他 UI 组件 | 按项目实际检测结果 |
+
+### 5.6 L5 业务场景类（BS-*）
+
+> **说明**：来源于 feature-elements.md L5 层业务场景，横跨 L1-L4 的完整业务流程
+
+| Skill 文件 | 对应场景 | 描述 | 涉及层次 |
+|-----------|---------|------|---------|
+| project-feature-checkout.md | BS-001 | 结账流程 | L2用户+L3订单+L4接口+L1支付 |
+| project-feature-search.md | BS-002 | 商品搜索 | L4接口+L3搜索服务+L2商品+L1数据库 |
+| ... | BS-*** | 其他业务场景 | 按项目实际检测结果 |
+
+### 5.7 框架特定类
+
+> **说明**：来源于检测到的技术栈，由对应 Framework Skill 填充
+
+| Skill 文件 | 描述 | 关键模式 |
+|-----------|------|---------|
+| frontend-react.md | 前端 React 规范 | 组件编写、Hooks、State 管理 |
+| frontend-vue.md | 前端 Vue 规范 | 组件编写、Composition API |
+| backend-django.md | 后端 Django 规范 | View、Model、ORM |
+| backend-fastapi.md | 后端 FastAPI 规范 | 路由、依赖注入、Schema |
+| backend-flask.md | 后端 Flask 规范 | 路由、Blueprint、SQLAlchemy |
+
+### 5.8 Skills 索引表（汇总）
+
+> **说明**：下表中 Skill 文件路径表示目录（如 `project-infra-database/`），实际使用时引用其中的 `SKILL.md`
+
+| Skill 文件 | Layer | Category | 描述 | 优先级 |
+|-----------|-------|----------|------|--------|
+| project-naming-convention/ | 通用 | General | 命名规范 | P0 |
+| project-directory-structure/ | 通用 | General | 目录规范 | P0 |
+| project-git-workflow/ | 通用 | General | Git 工作流 | P0 |
+| project-tdd-pattern/ | 通用 | General | TDD 开发 | P1 |
+| project-code-review-checklist/ | 通用 | General | Code Review | P1 |
+| project-commit-convention/ | 通用 | General | 提交规范 | P1 |
+| project-build/ | 通用 | General | 构建规范 | P2 |
+| project-deploy/ | 通用 | General | 部署规范 | P2 |
+| project-docker/ | 通用 | General | Docker 规范 | P2 |
+| project-infra-*/ | L1 | Infrastructure | 基础设施 | P3 |
+| project-domain-*/ | L2 | Domain | 领域模型 | P3 |
+| project-service-*/ | L3 | Application | 应用服务 | P3 |
+| project-api-*/ | L4 | Interface/API | API 规范 | P3 |
+| project-ui-*/ | L4 | Interface/UI | UI 组件 | P3 |
+| project-feature-*/ | L5 | Business Scene | 业务功能 | P3 |
+| frontend-*/ | 框架 | Frontend | 前端框架 | P4 |
+| backend-*/ | 框架 | Backend | 后端框架 | P4 |
 
 ---
 

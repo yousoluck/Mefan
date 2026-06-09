@@ -1,192 +1,59 @@
-# Skill 模板
-
-> **路径**：`.claude/skills/<category>-<framework>/SKILL.md`
-> **用途**：当 Architect Agent 检测到对应框架时，调用此 Skill 进行深度调查
-> **触发条件**：自动检测（package.json扫描） + 人工确认
-
+---
+name: skill-template
+description: Use when architect-stage0 needs to determine which template to use for generating a new project skill, or when no other template matches the feature element under analysis - tier-3 fallback
 ---
 
-## Skill 元数据
+# Skill Template (Skeleton)
 
-```yaml
-name: frontend-redux
-name_zh: 前端 Redux 框架调查
-category: frontend
-framework: redux
-version: 1.0.0
-author: Architect Agent
-created: 2026-05-22
-trigger: auto-detect
-trigger_files:
-  - package.json (contains "redux")
-  - src/store/index.ts
-  - src/reducers/
-```
+> This is NOT a real skill. It is the meta-template used by architect-stage0 when:
+> - No `project-{type}-{exact-name}/` template exists (tier 1 miss)
+> - No `project-{type}-generic/` template exists (tier 2 miss)
+> - Architect must construct a skill from raw graphify queries alone (tier 3 fallback)
 
----
+## Template Selection Three-Tier Fallback
 
-## 1. 框架概述
+| Tier | Path | When Used |
+|------|------|-----------|
+| 1 | `.claude/skills/_templates/project-{type}-{exact-name}/` | Exact feature-element name match |
+| 2 | `.claude/skills/_templates/project-{type}-generic/` | Type-only match (api/domain/service/ui/feature/infra) |
+| 3 | This file (skill-template) | No match — AI improvises from graphify queries |
 
-> 此框架在项目中的定位和技术选型理由
+## When This Tier-3 Fallback Applies
 
-| 项目 | 内容 |
-|------|------|
-| **框架版本** | React 18.x + Redux Toolkit |
-| **核心作用** | 统一状态管理，支持复杂前端应用的数据流 |
-| **为什么选型** | [从 knowledge.grap 或人工访谈获取] |
-| **替代方案对比** | Redux vs MobX vs Zustand vs Context API |
+Architect-stage0 falls through to this template when:
+- The feature element under analysis has no specific template
+- AND no generic template covers its `type`
+- Example: a project using an unusual technology stack with no `project-infra-{name}` template
 
----
+## Output Requirements (for AI generating from this template)
 
-## 2. 目录结构规范
+When architect-stage0 falls through to this template, the AI MUST:
 
-> 框架相关代码的目录组织
+1. Load the standard: invoke `Skill(skill="superpowers:writing-skills")`
+2. Design 5-10 investigation points based on the feature element name
+3. For each investigation point, write one `graphify query` and one `bash fallback`
+4. Execute the queries, collect real evidence (`file:line` references)
+5. Write SKILL.md with:
+   - Real YAML frontmatter (`name` + `description` "Use when...")
+   - Sections determined by the data, NOT by this template
+   - Every fact cited with `path/to/file:line` evidence
+   - Missing-data sections marked `[需人工补充]`, never silent fabrication
 
-```
-src/
-├── store/                 # Redux Store 配置
-│   ├── index.ts          # Store 入口
-│   ├── configureStore.ts # Store 创建
-│   └── rootReducer.ts    # Root Reducer
-├── reducers/             # Reducer 目录（按模块划分）
-│   ├── index.ts          # Reducer 合并
-│   └── {feature}/
-│       └── {feature}Slice.ts  # RTK Slice
-├── actions/              # Action Creators（传统方式）
-│   └── {feature}Actions.ts
-├── sagas/                # Redux Saga（如果使用）
-│   └── {feature}Saga.ts
-├── selectors/            # Memoized Selectors
-│   └── {feature}Selectors.ts
-├── types/                # TypeScript 类型定义
-│   └── redux.ts          # Redux 全局类型
-└── middleware/           # 中间件
-    └── {custom}Middleware.ts
-```
+## Iron Law
 
----
+**NO SKILL WITHOUT EVIDENCE** — A skill section without a `file:line` citation is fabrication. The Iron Law applies at three levels:
+- No template section copied verbatim into the output
+- No "应该怎样" or "should" phrasing substituted for actual project data
+- No code from `_templates/.trash/` (historical hardcoded Spring Boot / Redux snippets) reused
 
-## 3. 核心元素调查清单
+## Red Flags
 
-### 3.1 Store 配置
+- Generating a skill that looks like a tutorial or template fill-in
+- Including code samples without `path/to/file:line` evidence
+- Using "应该怎样" or "should" phrasing in the output
+- Frontmatter description that starts with "包含..." or lists contents
+- No investigation-points table in the AI's working notes before writing
 
-| 调查项 | 文件位置 | 行号 | 说明 |
-|--------|---------|------|------|
-| Store 创建方式 | `src/store/index.ts` | : | configureStore vs legacy createStore |
-| 中间件配置 | `src/store/index.ts` | : | thunk/saga/observable |
-| DevTools 配置 | `src/store/index.ts` | : | 是否启用 |
+## Companion Files (none)
 
-### 3.2 Action 定义
-
-| 调查项 | 文件位置 | 行号 | 说明 |
-|--------|---------|------|------|
-| Action Type 常量定义 | `src/actions/` | : | 命名规范（FIXME_ / feature/action） |
-| Action Creator 模式 | `src/actions/` | : | createAction vs 函数 |
-| Payload 结构 | `src/actions/` | : | 是否使用 Immer |
-
-### 3.3 Reducer 编写
-
-| 调查项 | 文件位置 | 行号 | 说明 |
-|--------|---------|------|------|
-| Reducer 组织方式 | `src/reducers/` | : | combineReducers vs createSlice |
-| State 结构 | `src/reducers/` | : | 嵌套 vs 扁平 |
-| Immer 使用 | `src/reducers/` | : | 是否启用 |
-
-### 3.4 异步处理
-
-| 调查项 | 文件位置 | 行号 | 说明 |
-|--------|---------|------|------|
-| 异步方案 | `src/` | : | thunk vs saga vs RTK Query |
-| 异步 Action 命名 | `src/` | : | pending/fulfilled/rejected 约定 |
-| Error 处理 | `src/` | : | rejected action 处理 |
-
----
-
-## 4. 代码样例索引
-
-> Dev Agent 需要引用的关键代码位置
-
-| 模式 | 文件 | 行号 | 说明 |
-|------|------|------|------|
-| Store 创建 | `src/store/index.ts` | 1-20 | 完整示例 |
-| Slice 定义 | `src/reducers/user/userSlice.ts` | 1-30 | RTK slice 模板 |
-| Selector | `src/selectors/userSelectors.ts` | 1-15 | createSelector 示例 |
-| API 调用 | `src/api/userApi.ts` | 1-40 | RTK Query 定义 |
-
----
-
-## 5. 命名约定
-
-| 元素 | 规范 | 示例 |
-|------|------|------|
-| Action Type | `feature/action` 小写下划线 | `user/login` |
-| Action Creator | `use` 前缀或动词 | `loginUser()` |
-| Reducer | 名词，`Slice` 后缀 | `userSlice` |
-| Selector | `use` 前缀 | `useSelectUser()` |
-| State | 驼峰名词 | `currentUser` |
-
----
-
-## 6. 禁止做法
-
-| 禁止 | 原因 | 正确做法 |
-|------|------|---------|
-| 在组件内直接 dispatch | 违反单一数据流 | 使用 useDispatch hook |
-| 直接修改 state | Immer 不可变更新 | 使用 spread 或 produce |
-| 在 reducer 内调用 API | 副作用 | 使用 thunk/saga |
-
----
-
-## 7. 依赖版本清单
-
-| 库 | 版本 | 文件证据 |
-|----|------|---------|
-| react | | package.json |
-| react-redux | | package.json |
-| @reduxjs/toolkit | | package.json |
-| redux-thunk | | package.json |
-
----
-
-## 8. 常见问题与解决
-
-| 问题 | 解决方案 | 证据文件 |
-|------|---------|---------|
-| 异步状态管理 | RTK Query / createAsyncThunk | |
-| 范式化 state | normalize state with entityAdapter | |
-| 重置 store | store.reset() | |
-| 持久化 | redux-persist 配置 | |
-
----
-
-## 9. Reference（参考文档）
-
-| 文档 | 路径 |
-|------|------|
-| Redux 官方文档 | https://redux.js.org |
-| RTK 官方文档 | https://redux-toolkit.js.org |
-| TypeScript 集成 | https://redux.js.org/tutorials/typescript-quick-start |
-
----
-
-## Scripts（执行脚本）
-
-> 此 Skill 相关的自动化脚本
-
-| 脚本名 | 路径 | 说明 |
-|--------|------|------|
-| detect-redux.sh | `scripts/detect-redux.sh` | 检测项目是否使用 Redux |
-| extract-redux-patterns.sh | `scripts/extract-redux-patterns.sh` | 提取 Redux 代码模式 |
-
----
-
-## 与其他 Skill 的关系
-
-```yaml
-depends_on:
-  - frontend-common  # 前端公共调查能力
-  - api-contract    # API 契约调查能力
-provides_to:
-  - architect-stage0  # 为 Architect Agent 提供框架知识
-  - dev-stage4        # 为 Dev Agent 提供代码规范
-```
+This template produces Pattern A (self-contained) skills by default. The AI may promote to Pattern B (with `scripts/`) or Pattern C (with companion `*.md` files at top level) only when the data warrants it.

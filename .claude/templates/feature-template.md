@@ -67,12 +67,12 @@
 
 ##### 2.2 现有项目是否已实现此需求？
 
-> 检查 knowledge.grap 或现有需求文档
+> 检查 `graphify-out/graph.json`（已重构，原 `graph.json` 废弃）或现有需求文档
 
 | 检查项 | 结果 | 证据 |
 |--------|------|------|
-| 知识图谱节点 | 是/否 | `.claude/context/knowledge.grap` 中的对应节点 |
-| 现有需求文档 | 是/否 | 文档名称和位置 |
+| 知识图谱节点 | 是/否 | `graphify-out/graph.json` 中 `graphify query "是否已实现 {功能}"` 的输出 |
+| 现有需求文档 | 是/否 | `.claude/iterations/sprint-*/requirements.md` 中的对应章节 |
 
 **如果已实现**：描述已实现的功能和与新需求的差异
 
@@ -263,7 +263,7 @@
 | 文档类型 | 文档名称 | 路径 |
 |---------|---------|------|
 | 项目概述 | project.md | `.claude/context/project.md` |
-| 知识图谱 | knowledge.grap | `.claude/context/knowledge.grap` (TODO: 路径待确认) |
+| 知识图谱 | `graphify-out/graph.json` | 现有项目知识图谱（**已重构**，原 `.claude/context/graph.json` 废弃） |
 | 一致性基线 | consistency-baseline.md | `.claude/context/consistency-baseline.md` |
 | Tech Stack | tech-stack-profile.md | `.claude/context/tech-stack-profile.md` |
 

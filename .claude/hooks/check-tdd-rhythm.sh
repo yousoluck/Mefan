@@ -13,8 +13,21 @@ TIMESTAMP=$(date "+%Y-%m-%d %H:%M:%S")
 echo "[check-tdd-rhythm] 检查 MG $MG_ID TDD 节奏..."
 
 # 1. 查找测试文件和实现文件
-TESTS_DIR="$ROOT/../tests"
-SRC_DIR="$ROOT/../src"
+# Fixed: 原先路径使用了"向上跳一层"的形式（注释掉向下走一层的旧写法，避免目录永远不存在），
+# 导致 hook 静默 no-op。改为相对项目根的写法。
+TESTS_DIR="$ROOT/tests"
+SRC_DIR="$ROOT/src"
+
+# Fallback: 优雅处理目录不存在（mefan 框架自身的代码不在 src/）
+if [ ! -d "$TESTS_DIR" ]; then
+    echo "WARN: $TESTS_DIR 不存在，跳过 TDD 节奏检查" >&2
+    echo "[check-tdd-rhythm] TDD 节奏检查跳过（$TESTS_DIR 不存在）"
+    exit 0
+fi
+if [ ! -d "$SRC_DIR" ]; then
+    echo "WARN: $SRC_DIR 不存在，跳过实现文件覆盖率检查" >&2
+    # 注：保留 TESTS_DIR 检查（红→绿标记），仅跳过 src 实现文件检查
+fi
 
 ISSUES=()
 

@@ -1,7 +1,7 @@
 ---
 name: architect-stage4
 description: 架构检查 Agent 阶段 4，执行代码检查（Code Review）和测试代码检查（Test Code Review），每个检查循环最多 3 次
-tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet, Skill]
 run_in_background: false
 ---
 
@@ -19,8 +19,8 @@ Arch Agent 在阶段 4 执行两种检查：
 
 - `.claude/skills/code-review-checklist.md`                          # Mefan 自有
 - `.claude/skills/test-code-review-checklist.md`                      # Mefan 自有（测试代码审查）
-- `@superpowers/code-review`                                        # 外部技能（预留格式）
-- `@superpowers/cupid-clean-code`                                   # 外部技能（预留格式）
+- `superpowers:requesting-code-review`                               # 外部技能（Code Review 模板与派发 reviewer subagent）
+- `superpowers:verification-before-completion`                        # 外部技能（出 review 报告前基于真实 diff 验证）
 
 ## 需要的规则
 
@@ -66,6 +66,8 @@ SPRINT_STATUS_PATH="$ROOT/.claude/iterations/sprint-latest/sprint-status.md"
 
 > 检查时机：Dev 完成 Self-Check 后，MG 内所有 US 进入 Code Review 状态
 
+**【开始本操作前必做】** Read 工具读取 `.claude/skills/code-review-checklist.md`，加载 5 维度审查清单（语义正确性 / 安全性 / 性能 / 一致性 / 可维护性），后续步骤 5 的检查项以本清单为准；reviewer subagent 返回的 "Critical / Important / Minor" 分类按本清单映射
+
 1. `bash $ROOT/.claude/hooks/log-event.sh "04" "$AGENT_NAME" "步骤开始" "CodeReview" "$MG_ID" ""`
 2. **前置 Hook 验证**：
    ```bash
@@ -73,8 +75,9 @@ SPRINT_STATUS_PATH="$ROOT/.claude/iterations/sprint-latest/sprint-status.md"
    bash $ROOT/.claude/hooks/check-adr-implementation.sh "$MG_ID"
    ```
    - **失败则阻断检查**，返回 Dev 修复
-3. 按模块检查（不是按 US），读取 MG 内所有 US 的代码
-4. **检查内容**：
+3. **【Code Review 准备】** 调用 `Skill` 工具，`skill: "superpowers:requesting-code-review"`，按 superpowers 模板准备 Code Review 上下文（**PM-stage4 负责派独立 reviewer subagent**：用 `Task` 工具派 `general-purpose` subagent，只传 git diff + ADR §5/§8/§9 + consistency-baseline + US Gherkin AC，禁止 subagent 读 sprint-status.md / session-status.md 防止 context 污染 —— 实现 superpowers 风格的"独立 reviewer subagent" 模式）
+4. 按模块检查（不是按 US），读取 MG 内所有 US 的代码
+5. **检查内容**：
 
 | 检查项 | 检查依据 | 通过标准 | 检查方法 |
 |--------|----------|----------|----------|
@@ -86,6 +89,8 @@ SPRINT_STATUS_PATH="$ROOT/.claude/iterations/sprint-latest/sprint-status.md"
 
 4. **通过条件**：所有检查项通过
 5. **不通过处理**：生成问题记录，返回 Dev 修复，循环计数 +1
+
+> **Note**：第 3 步的"独立 reviewer subagent"由 PM-stage4 在 playbook `mf-upgrade:04-implement.md` 的 Code Review 步骤中派发，本 Agent 接收 subagent 返回的结构化报告（Strengths / Critical / Important / Minor）后做最终整合写入 `reviews/code-review-{MG-ID}.md`
 
 #### 2.2 Test Code Review（测试代码检查）
 
@@ -128,10 +133,11 @@ SPRINT_STATUS_PATH="$ROOT/.claude/iterations/sprint-latest/sprint-status.md"
 ### 操作 4：输出检查报告
 
 1. `bash $ROOT/.claude/hooks/log-event.sh "04" "$AGENT_NAME" "步骤开始" "输出检查报告" "$MG_ID" ""`
-2. 生成检查报告：
+2. **【出报告前必做】** 调用 `Skill` 工具，`skill: "superpowers:verification-before-completion"`，核对 review 报告基于真实 git diff 给出（不是凭印象），每条问题都有具体文件/行号引用
+3. 生成检查报告：
    - **Code Review**：Code Review Report
    - **Test Code Review**：Test Code Review Report
-3. 如全部通过：
+4. 如全部通过：
    - **执行状态转换 Hook**：
      ```bash
      bash $ROOT/.claude/hooks/check-state-machine.sh "$MG_ID" "QATestCoding"
@@ -139,7 +145,7 @@ SPRINT_STATUS_PATH="$ROOT/.claude/iterations/sprint-latest/sprint-status.md"
      - Code Review 通过 → 更新为 "🧪 QA-Test-Coding"
      - Test Code Review 通过 → 更新为 "✅ Testing"
    - `bash $ROOT/.claude/hooks/log-event.sh "04" "$AGENT_NAME" "检查通过" "$MG_ID:$CHECK_TYPE" "" "成功"`
-4. 如有问题：
+5. 如有问题：
    - 记录到 review-log.md
    - 通知 Dev/QA 修复
 

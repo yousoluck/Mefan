@@ -1,7 +1,7 @@
 ---
 name: pm-stage0
 description: 项目经理阶段 0，负责环境初始化、技术栈分析、session-status 初始化
-tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet]
+tools: [Read, Write, Bash, Grep, Glob, Edit, TaskCreate, TaskUpdate, TaskList, TaskGet, Skill]
 run_in_background: false
 ---
 
@@ -11,7 +11,6 @@ run_in_background: false
 项目总控，负责阶段 0 的环境初始化和上下文建立。
 
 ## 需要的技能
-- `.claude/skills/pattern-extraction-from-logs.md`
 
 ## 需要的规则
 - `.claude/rules/global/session-init.md`
@@ -29,7 +28,7 @@ elif [ -f "$(dirname "${BASH_SOURCE[0]}")/../project.conf" ]; then
 else
     export ROOT="/mnt/d/pycharmprojects/Mefan"
 fi
-# SCENARIO 从 CLaUDE.md 中读取（框架自动加载）
+# SCENARIO 从 CLAUDE.md 中读取（框架自动加载）
 # 本文件不重复定义 SCENARIO，由调用环境提供
 ```
 
@@ -93,584 +92,581 @@ else
 fi
 ```
 
-#### 2.3 创建 session-status.md
-1. 检查 `.claude/iterations/session-status.md` 是否存在
-2. 若不存在，使用模板生成：
-   ```bash
-   cp $ROOT/.claude/templates/session-status-template.md $ROOT/.claude/iterations/session-status.md
-   ```
-   ```
+#### 2.3 生成 session-status.md（直接生成，不复制模板）
+> **模板用途**：仅用于参考格式和字段结构，**不复制**模板文件
+
+```bash
+echo "[PM-Stage0] 生成 session-status.md..."
+TODAY=$(date +%Y-%m-%d)
+SESSION_FILE="$ROOT/.claude/iterations/session-status.md"
+
+# 直接生成完整文件（参考模板格式，但不复制模板）
+cat > "$SESSION_FILE" << 'SESSION_EOF'
+# Session Status Template
+
+> 文件路径：`.claude/iterations/session-status.md`
+> 更新时机：每个阶段完成后由 PM 更新
+> **作用**：跨 sprint 全局追踪，记录所有 sprint 的状态和产出
+
+---
+
+## 迭代概览
+
+| 字段 | 内容 |
+|------|------|
+| **迭代名称** | sprint-latest |
+| **开始日期** | {start_date} |
+| **预期结束日期** | |
+| **场景** | upgrade |
+| **目标描述** | |
+
+---
+
+## 自动推进状态
+
+| 字段 | 内容 |
+|------|------|
+| **当前阶段** | 0 |
+| **已完成阶段** | [] |
+| **阻塞标记** | 无 |
+
+---
+
+## 阶段完成记录
+
+> 每个阶段完成后，PM 必须更新此表
+
+| 阶段 | 阶段名称 | 完成时间 | 产出物状态 | 备注 |
+|------|---------|---------|-----------|------|
+| 00 | 会话初始化 | {completion_time} | ⏳ 进行中 | |
+| 01 | 需求澄清 | | ⏳ 待处理 | |
+| 02 | 架构设计 | | ⏳ 待处理 | |
+| 03 | 迭代计划 | | ⏳ 待处理 | |
+| 04 | 迭代实现 | | ⏳ 待处理 | |
+| 05 | 质量测试 | | ⏳ 待处理 | |
+| 06 | 迭代总结 | | ⏳ 待处理 | |
+
+**状态说明**：✅ 已完成 | ⏳ 进行中/待处理 | ❌ 失败/缺失
+
+**阶段 00 详细追踪说明**：
+> 阶段 00（会话初始化）由多个 Agent 串行执行完成，各 Agent 的工作记为子任务：
+> - PM Agent：环境初始化、上下文建立
+> - Architect Agent：技术栈分析（作为阶段 00 的一部分）
+> - Analyst Agent：需求澄清（作为阶段 00 的一部分）
+>
+> 各 Agent 完成时，在 **产出物追踪表** 中更新对应的产出物状态，在 **阶段完成记录** 中统一记录为阶段 00 完成。
+
+---
+
+## User Story 高层状态追踪
+
+> 高层视图：快速了解各 US 的整体状态
+> 详细追踪见 `sprint-status.md` 的 User Story 进度汇总
+
+| User Story | US 状态 | 备注 |
+|------------|---------|------|
+| US-01 | ⏳ To Do | |
+| US-02 | ⏳ To Do | |
+
+**US 状态流转**：To Do → In Progress → Done
+**更新时机**：sprint-status 中 task 状态变更时，由 PM 同步更新
+
+---
+
+## 产出物追踪表
+
+> 每个阶段完成后，PM 更新对应条目状态
+
+| 阶段 | 产出物 | 路径 | 状态 | 完成时间 |
+|------|--------|------|------|---------|
+| 00 | tech-stack-profile.md | `.claude/context/` | ⏳ 待生成 | |
+| 00 | consistency-baseline.md | `.claude/context/` | ⏳ 待生成 | |
+| 01 | requirements.md | `.claude/iterations/sprint-latest/requirements.md` | ⏳ 待生成 | |
+| 02 | ADR.md | `.claude/iterations/sprint-latest/ADR.md` | ⏳ 待生成 | |
+| 02 | test-plan.md | `.claude/iterations/sprint-latest/test-plan.md` | ⏳ 待生成 | |
+| 03 | iteration-plan.md | `.claude/iterations/sprint-latest/` | ⏳ 待生成 | |
+| 03 | sprint-status.md | `.claude/iterations/sprint-latest/` | ⏳ 待生成 | |
+| 04 | task-summary/T{NNN}.md | `.claude/iterations/sprint-latest/task-summary/` | ⏳ 待生成 | |
+| 05 | quality-report.md | `.claude/iterations/sprint-latest/test-results/` | ⏳ 待生成 | |
+| 06 | iteration-retrospective.md | `.claude/iterations/sprint-latest/` | ⏳ 待生成 | |
+
+---
+
+## 历史 Sprint 索引
+
+> 归档已完成迭代，由 PM 在每次新 sprint 创建时更新
+> **路径基准**：`.claude/iterations/`
+
+| Sprint 名称 | 开始日期 | 结束日期 | 状态 | 关键产出 |
+|------------|---------|---------|------|---------|
+| sprint-1 | | | ✅ Done | |
+
+**更新时机**：每次新 sprint 创建时，将上一个 sprint 追加到此表，并从 sprint-latest 重命名归档
+
+---
+
+## 异常记录
+
+> 核心冲突、边缘冲突、处理决策
+
+| 类型 | 描述 | 决策 | 时间 |
+|------|------|------|------|
+| 核心冲突 | | | |
+| 边缘冲突 | | | |
+
+---
+
+## 实验规则/技能加载记录
+
+> 来自 rules-proposed/ 和 skills-proposed/
+
+| 类型 | 加载数 | 冲突处理 |
+|------|--------|---------|
+| 实验规则 | N | 稳定规则优先 |
+| 实验技能 | N | 稳定技能优先 |
+
+---
+
+## PM 阶段完成报告（标准化格式）
+
+> 每个阶段完成后，PM 必须按此格式填写并更新 session-status
+
+```markdown
+### 阶段 0 完成报告：会话初始化
+- **完成时间**：{timestamp}
+- **执行摘要**：完成知识图谱验证、迭代目录初始化、session-status.md 创建
+- **关键产出**：
+  - [session-status.md]：[.claude/iterations/session-status.md] - ✅
+  - [sprint-latest/]：[.claude/iterations/sprint-latest/] - ✅
+- **与上阶段的衔接**：首次运行，无前置阶段
+- **发现的问题**：无
+- **下一步**：进入阶段 1 的前置条件：tech-stack-profile.md + consistency-baseline.md
+- **需要 Human Gate 确认的事项**：无
+```
+
+---
+
+## 更新规则
+
+| 操作 | 更新者 | 更新时机 |
+|------|-------|---------|
+| 阶段完成报告 | PM | 每个阶段完成后 |
+| User Story 高层状态 | PM | sprint-status 中 task 状态变更时同步 |
+| 产出物状态 | PM | 阶段产出确认时 |
+| 异常记录 | PM | 冲突/问题发生时 |
+| 阻塞标记 | PM/Auto | 阶段失败或恢复时 |
+
+---
+
+## 关联文档
+
+| 文档 | 路径 | 说明 |
+|------|------|------|
+| Sprint 看板 | `sprint-status.md` | 详细 task 状态 + US 进度汇总 |
+| 迭代计划 | `iteration-plan.md` | 任务拆解详情 |
+| 任务详情 | `task-summary/T{NNN}.md` | 单任务实现详情 |
+SESSION_EOF
+
+# 替换占位符
+sed -i "s/{start_date}/$TODAY/g" "$SESSION_FILE"
+sed -i "s/{completion_time}/$TODAY/g" "$SESSION_FILE"
+sed -i "s/{timestamp}/$(date -Iseconds)/g" "$SESSION_FILE"
+
+echo "[PM-Stage0] session-status.md 已生成：$SESSION_FILE"
+```
 
 ```bash
 bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "产出物" "生成 session-status.md" ".claude/iterations/session-status.md" "成功"
 ```
 
-#### 2.4 更新 session-status.md 中的迭代概览
-> **注意**：历史 Sprint 归档功能已移至 stage 06，此处只更新当前迭代概览
-
-**更新步骤**：
-1. 读取当前 `session-status.md` 文件
-2. 找到 `## 迭代概览` 表格，更新以下字段：
-   - **迭代名称**：`sprint-latest`
-   - **开始日期**：当天日期 `$(date +%Y-%m-%d)`
-
-> **历史索引更新**：历史 Sprint 索引的归档更新在 stage 06 执行
-
-```bash
-bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤完成" "迭代目录初始化" "" "成功"
-```
-
 ---
 
-### 操作 0.3：生成或更新 project.md
-> **目的**：建立项目全局视图，记录项目基本信息和技术背景
+### 操作 0.3：阶段 A — 模板解析与查询计划设计
+> **模式 C 将项目/技术栈/功能元素 "AI 读模板 → 设计 query → 本地执行 → AI 组装"。
 
 ```bash
-bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤开始" "生成/更新 project.md" "" ""
+bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤开始" "阶段 A：解析 3 个 PM context 模板" "" ""
 ```
 
-#### 3.1 检查并更新 project.md 中的迭代历史
-> 不管 project.md 是否存在，都需要在迭代历史版块中添加或更新迭代部分
-
-**3.1.1 创建/读取 project.md**：
-1. 如果 `.claude/context/project.md` 不存在：
-   - 使用模板生成：
-     ```bash
-     cp $ROOT/.claude/templates/project-template.md $ROOT/.claude/context/project.md
-     ```
-2. 如果存在：读取现有内容
-
-**3.1.2 计算现有 sprint 数量**：
-```bash
-# 计算 .claude/iterations/ 下除 sprint-latest 外的 sprint-* 目录数量
-SPRINT_COUNT=$(ls -d $ROOT/.claude/iterations/sprint-* 2>/dev/null | grep -v "sprint-latest" | wc -l)
-echo "现有 sprint 归档数量: $SPRINT_COUNT"
-NEXT_SPRINT_NUM=$((SPRINT_COUNT + 1))
-```
-
-**3.1.3 处理迭代历史版块**：
-
-> **注意**：sprint-latest 的归档重命名已移至 stage 06，此处只负责创建或确保 sprint-latest 章节存在
-
-| 情况 | 处理方式 |
-|------|---------|
-| **project.md 中没有迭代历史版块** | 在 `## 迭代历史` 下添加新的 `### 迭代 sprint-latest` |
-| **project.md 中已有 `### 迭代 sprint-latest`** | 保持不变（归档由 stage 06 处理） |
-| **project.md 中有其他迭代名称** | 保持不变，新建 `### 迭代 sprint-latest` |
-
-**更新步骤**：
-1. 打开 `.claude/context/project.md`
-2. 找到 `## 迭代历史` 章节
-3. 检查是否存在 `### 迭代 sprint-latest`
-4. **如果存在**：保持不变，不做任何修改
-5. **如果不存在**：在 `## 迭代历史` 末尾追加新章节
-6. 添加新的 `### 迭代 sprint-latest`：
-   ```markdown
-   ### 迭代 sprint-latest
-
-   | 字段 | 内容 |
-   |------|------|
-   | **迭代时间** | $(date +%Y-%m-%d) - |
-   | **迭代功能概述** | |
-   | **功能要点数** | |
-   | **状态** | 🔍 进行中 |
-
-   #### 详细文档（TODO 占位符）
-
-   | 文档类型 | 文档名称 | 状态 | 路径 |
-   |---------|---------|------|------|
-   | 功能需求文档 | feature.md | ⏳ 待创建 | `.claude/iterations/sprint-latest/feature.md` |
-   | 软件设计文档 | software-design.md | ⏳ 待创建 | `.claude/iterations/sprint-latest/software-design.md` |
-   | 需求详细分析 | requirements.md | ⏳ 待创建 | `.claude/iterations/sprint-latest/requirements.md` |
-   | 测试用例 | test-cases.md | ⏳ 待创建 | `.claude/iterations/sprint-latest/test-cases.md` |
-   | Sprint 状态 | sprint-status.md | ⏳ 待创建 | `.claude/iterations/sprint-latest/sprint-status.md` |
-   | 迭代回顾 | iteration-retrospective.md | ⏳ 待创建 | `.claude/iterations/sprint-latest/iteration-retrospective.md` |
-   ```
-
-> **归档处理**：如果 project.md 中已有旧的 `### 迭代 sprint-latest`（来自上一轮迭代），stage 06 会负责将其重命名为 `### 迭代 sprint-N` 并标记为已完成
-
-#### 3.2 Graphify 项目信息采集
-> 使用 graphify query 查询项目信息：
-
-| 信息类别 | 查询命令 | 输出 |
-|---------|---------|------|
-| **项目总体介绍** | `graphify query "What is the project name and type"` | 项目名称、类型 |
-| | `graphify query "What does this project do"` | 核心功能概述 |
-| **Tech Stack** | `graphify query "What programming languages and frameworks are used"` | 技术栈信息 |
-| **前端框架** | `graphify query "What frontend framework is used"` | 前端框架信息 |
-| **后端框架** | `graphify query "What backend framework is used"` | 后端框架信息 |
-| **数据库** | `graphify query "What database configuration exists"` | 数据库配置 |
-
-#### 3.3 填充 project.md 内容
-> 打开已创建/存在的 project.md，逐字段从 Graphify 查询结果填充：
-
-1. **执行 Graphify 查询**：
-```bash
-cd "$ROOT"
-PROJECT_OVERVIEW=$(graphify query "What is the project name and main functionality" 2>/dev/null | head -30 || echo "")
-TECH_STACK=$(graphify query "What programming languages and frameworks are used" 2>/dev/null | head -30 || echo "")
-```
-
-2. **逐字段填充**：
-   - 打开 `.claude/context/project.md`
-   - 将 Graphify 查询结果填充到对应字段
-
-3. **无法从 Graphify 获取的字段**：
-   - 标记为 `[人工补充]`
-   - 在 `待补充项` 表格中记录
-
-3. **迭代历史版块已在 3.1 中更新**，此处无需重复操作。
+#### 3.1 前置检查（exit 1 on miss）
+> 仿 arch-stage0 §2.4.1，4 个文件必须存在
 
 ```bash
-bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "产出物" "生成 project.md" ".claude/context/project.md" "成功"
-bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤完成" "project.md 生成" "" "成功"
-```
+# 1. 知识图谱
+if [ ! -f "$ROOT/graphify-out/graph.json" ]; then
+    echo "[PM-Stage0] ❌ graphify-out/graph.json 不存在，请先跑 /graphify ."
+    exit 1
+fi
 
----
-
-### 操作 0.4：生成或更新 tech-stack-profile.md
-> **目的**：建立详细的技术栈档案，为后续架构设计提供依据
-
-```bash
-bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤开始" "生成/更新 tech-stack-profile.md" "" ""
-```
-
-#### 4.1 检查 tech-stack-profile.md 是否存在
-1. 检查 `.claude/context/tech-stack-profile.md` 是否存在
-2. **如果不存在**：
-   - 使用模板 `.claude/templates/tech-stack-profile-template.md` 生成文件
-3. **如果存在**：
-   - 读取现有内容，评估是否需要更新
-
-#### 4.2 检测项目依赖文件
-> **目的**：动态检测项目使用的技术栈配置文件，据此确定如何采集信息
-
-```bash
-echo "[PM-Stage0] 检测项目依赖配置文件..."
-
-# 初始化检测结果
-DETECTED_FRONTEND=""
-DETECTED_BACKEND=""
-
-# 检测前端配置
-if [ -f "$ROOT/package.json" ]; then
-    echo "检测到: package.json (Node.js前端)"
-    DETECTED_FRONTEND="nodejs"
-    # 读取前端依赖
-    FRONTEND_DEPS=$(cat "$ROOT/package.json" 2>/dev/null | grep -E '"name"|"version"|"dependencies"|"devDependencies"' | head -30 || echo "")
-elif [ -f "$ROOT/package.json" ] && grep -q '"react"\|"vue"\|"angular"' "$ROOT/package.json" 2>/dev/null; then
-    if grep -q '"react"' "$ROOT/package.json"; then
-        echo "检测到: React 框架"
-        DETECTED_FRONTEND="react"
-    elif grep -q '"vue"' "$ROOT/package.json"; then
-        echo "检测到: Vue 框架"
-        DETECTED_FRONTEND="vue"
+# 2. 3 个 PM context 模板
+for tpl in project-template.md tech-stack-profile-template.md feature-elements-template.md; do
+    if [ ! -f "$ROOT/.claude/templates/$tpl" ]; then
+        echo "[PM-Stage0] ❌ 模板缺失：.claude/templates/$tpl"
+        exit 1
     fi
+done
+
+# 3. query 设计参考（arch-stage0 共享）
+if [ ! -f "$ROOT/.claude/templates/query-dsl-cheatsheet.md" ]; then
+    echo "[PM-Stage0] ❌ 缺少 query-dsl-cheatsheet.md（arch-stage0 共享）"
+    exit 1
 fi
-
-# 检测后端配置
-if [ -f "$ROOT/requirements.txt" ]; then
-    echo "检测到: requirements.txt (Python后端)"
-    DETECTED_BACKEND="python"
-    # 读取后端依赖
-    BACKEND_DEPS=$(cat "$ROOT/requirements.txt" 2>/dev/null || echo "")
-elif [ -f "$ROOT/pyproject.toml" ]; then
-    echo "检测到: pyproject.toml (Python后端)"
-    DETECTED_BACKEND="python"
-elif [ -f "$ROOT/pom.xml" ]; then
-    echo "检测到: pom.xml (Java/Maven)"
-    DETECTED_BACKEND="java-maven"
-elif [ -f "$ROOT/go.mod" ]; then
-    echo "检测到: go.mod (Go)"
-    DETECTED_BACKEND="go"
-fi
-
-echo "[PM-Stage0] 检测结果：前端=$DETECTED_FRONTEND 后端=$DETECTED_BACKEND"
 ```
 
-#### 4.3 Graphify 技术栈信息采集
-> 基于检测到的技术栈，使用正确的 graphify query 命令获取信息
-
-**Graphify 可用查询**（来自 SKILL.md）：
-```bash
-graphify query "<question>"    # BFS 遍历查
-graphify path "A" "B"          # 最短路径
-graphify explain "NODE_NAME"   # 节点解释
-```
-
-**根据检测结果动态采集**：
-
-```bash
-cd "$ROOT"
-
-# 采集项目基本信息（使用通用 query）
-PROJECT_INFO=$(graphify query "What is the project name and main functionality" 2>/dev/null | head -20 || echo "[Graphify不可用]")
-TECH_STACK=$(graphify query "What programming languages and frameworks are used" 2>/dev/null | head -20 || echo "[Graphify不可用]")
-
-# 根据检测到的前端框架采集特定信息
-case "$DETECTED_FRONTEND" in
-    react)
-        FRONTEND_INFO=$(graphify query "React components Redux state management" 2>/dev/null | head -30 || echo "[Graphify不可用]")
-        ;;
-    vue)
-        FRONTEND_INFO=$(graphify query "Vue components Vuex Pinia state management" 2>/dev/null | head -30 || echo "[Graphify不可用]")
-        ;;
-    *)
-        FRONTEND_INFO=$(graphify query "frontend framework components" 2>/dev/null | head -30 || echo "[Graphify不可用]")
-        ;;
-esac
-
-# 根据检测到的后端框架采集特定信息
-case "$DETECTED_BACKEND" in
-    python)
-        BACKEND_INFO=$(graphify query "Python Flask FastAPI Django API endpoints" 2>/dev/null | head -30 || echo "[Graphify不可用]")
-        DATABASE_INFO=$(graphify query "SQLAlchemy database models ORM" 2>/dev/null | head -20 || echo "[Graphify不可用]")
-        ;;
-    java-maven)
-        BACKEND_INFO=$(graphify query "Java Spring Boot Maven API" 2>/dev/null | head -30 || echo "[Graphify不可用]")
-        DATABASE_INFO=$(graphify query "Java JPA database models" 2>/dev/null | head -20 || echo "[Graphify不可用]")
-        ;;
-    go)
-        BACKEND_INFO=$(graphify query "Go Gin Echo API endpoints" 2>/dev/null | head -30 || echo "[Graphify不可用]")
-        DATABASE_INFO=$(graphify query "Go GORM database models" 2>/dev/null | head -20 || echo "[Graphify不可用]")
-        ;;
-    *)
-        BACKEND_INFO=$(graphify query "backend API framework" 2>/dev/null | head -30 || echo "[Graphify不可用]")
-        DATABASE_INFO=$(graphify query "database configuration" 2>/dev/null | head -20 || echo "[Graphify不可用]")
-        ;;
-esac
-```
-
-#### 4.4 更新 tech-stack-profile.md 内容
-> 使用模板生成文件后，逐字段填充采集到的信息
-
-1. **复制模板到目标位置**：
-   ```bash
-   cp $ROOT/.claude/templates/tech-stack-profile-template.md $ROOT/.claude/context/tech-stack-profile.md
-   ```
-
-2. **逐字段填充**：将检测到的信息和 Graphify 查询结果填充到 tech-stack-profile.md 的对应表格
-
-3. **依赖完整清单**：
-   - 前端依赖：直接读取 `package.json` 内容
-   - 后端依赖：直接读取 `requirements.txt` 或 `pyproject.toml` 内容
-
-4. **无法从 Graphify 获取的字段**：
-   - 标记为 `[人工补充]`
-   - 在 `待填充` 列中记录
-
-```bash
-bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "产出物" "生成 tech-stack-profile.md" ".claude/context/tech-stack-profile.md" "成功"
-bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤完成" "tech-stack-profile.md 生成" "" "成功"
-```
-
----
-
-### 操作 0.5：生成或更新 feature-elements.md
-> **目的**：建立系统功能元素清单（包括 L1-L4 各层元素 + L5 业务场景），为阶段 2 生成 ADR 提供基础
-
-**分层理念**：采用 DDD/Clean Architecture 的五层划分：
-- **L5 Scene（业务场景层）**：横跨 L1-L4 的完整业务流程（动态发现，不写死）
-- **L4 Interface（接口层）**：REST API、GraphQL、Web UI、CLI、外部集成
-- **L3 Application（应用层）**：用例服务、事件处理、工作流、第三方适配
-- **L2 Domain（领域层）**：业务实体、值对象、领域服务、聚合根
-- **L1 Infrastructure（基础设施层）**：数据库、缓存、消息队列、文件存储、网络通信
-
-```bash
-bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤开始" "生成 feature-elements.md" "" ""
-```
-
-#### 5.1 检查 feature-elements.md 是否存在
-1. 检查 `.claude/context/feature-elements.md` 是否存在
-2. **如果不存在**：
-   - 使用模板生成：
-     ```bash
-     cp $ROOT/.claude/templates/feature-elements-template.md $ROOT/.claude/context/feature-elements.md
-     ```
-3. **如果存在**：
-   - 读取现有内容，评估是否需要更新
-
-#### 5.2 Layer 1 基础设施层检测
-> 静态基础类别 + 动态检测相结合
+#### 3.2 AI 解析 3 个 PM context 模板（核心 AI 操作）
+> 仿 arch-stage0 §2.4.2~§2.4.5，AI 逐模板解析章节 + 设计 query
 >
-> **基础类别**（每个系统都有，不写死具体技术）：
-> - 数据库（DB）
-> - 缓存（Cache）
-> - 文件系统（FileSystem）
-> - 网络通信（Network）
-> - 消息队列（MessageQueue）
-> - 安全认证（Security）
-> - 日志（Logging）
-> - 配置管理（Config）
+> **N-rows 重构 2026-06-06 关键约定**（PM-Stage0 专属）：
+> - **`doc_project_s_*` 和 `doc_tech_s_*` 章节**：每个章节的**每个原子 question 拆 1 行**（如 §1 项目介绍有 3 个子问题：name/type/description → 3 行）
+> - **`doc_feature_s_*` 章节**：**1 FE/章节 = 1 行**（保持 1:1，避免 N×M 爆炸）；FE 内的元数据通过 1 个 graphify query 整体拿
+> - 9 列 schema：目标 ID / 章节 / 调查项 / Graphify Query / Bash Fallback / 期望结果 / 优先级 / doc_type / 父章节 ID / 问题序号
+
+**AI 操作步骤**：
+
+1. **读取 project-template.md**（112 行）
+   - 解析每个 `##` 章节（§1 项目总体介绍、§2 项目功能介绍、§3 项目性质、§4 tech stack 前端/后端/数据库、§5 其他关键信息、§6 迭代历史、§7 待补充项）
+   - **N-rows 拆解**：对每个章节的**每个原子 question** 生成一行 `doc_project_s_{section}_q{N}` 记录
+   - 例：§1 项目总体介绍有 3 个问题（name/type/description）→ 3 行（`doc_project_s_1_q1` / `_q2` / `_q3`）
+   - doc_type=`project`，优先级按 P0/P1/P2 标注
+   - `parent_section_id` = 去掉 `_qN` 后缀的 ID（`doc_project_s_1`），`question_index` = 1-based 序号
+
+2. **读取 tech-stack-profile-template.md**（184 行）
+   - 解析每个 `##`/`###` 章节（前端 6 子节 + 后端 4 子节 + 数据库 3 子节 + DevOps 3 子节 + 测试 3 子节 + 版本 2 子节 + 债务 + 参考链接）
+   - **N-rows 拆解**：每个子节的每个独立组件/中间件/工具生成一行 `doc_tech_s_{sub_section}_q{N}` 记录
+   - 例：§2.2 中间件有 4 个独立中间件（CORS/Helmet/Compression/Logging）→ 4 行
+   - doc_type=`tech_stack`
+
+3. **读取 feature-elements-template.md**（360 行）
+   - 解析 7 个一级章节（§1 架构图、§2 层次说明、§3 FE 清单 L1-L5、§4 FE 详情 L1-L5、§5 依赖矩阵、§6 Graphify 模板、§7 L5 流程）
+   - **保持 1:1（不 N×M 拆解）**：每章生成一行 `doc_feature_s_*_q1` 记录（每章的元数据通过 1 个 graphify query 整体拿）
+   - doc_type=`feature_elements`
+   - `parent_section_id` = 去掉 `_q1` 后缀的 ID，`question_index` = 1
+
+4. **Graphify Query 设计**（核心约束）：
+   - 每个 query 的 token 必须能在 `graphify-out/.vocab.txt` 中找到（阶段 B 步骤 1 重新生成）
+   - query 长度 ≤ 12 token
+   - **N-rows 重构后**：1 个 question = 1 个独立 query（不要再 1 个 query 回答 4 个问题）
+   - 优先复用 `.claude/templates/query-dsl-cheatsheet.md` 的 query 模式
+   - 参考示例：
+     - `graphify query "project name"`（N-rows 后从宽 query 拆为窄 query）
+     - `graphify query "React Vue Angular frontend framework"`
+     - `graphify query "database cache message queue"`
+     - `graphify query "domain entity aggregate root"`
+
+5. **Bash Fallback 设计**：
+   - graphify 失败时执行可执行 shell 命令
+   - 优先 `grep -E "<keyword>" <dependency_file>`（package.json / pyproject.toml / requirements.txt）
+   - 不可执行时写 `n/a`（纯静态章节如 §1 架构图、§5 依赖矩阵、§6 Graphify 模板）
+   - **N-rows 重构后**：每个 question 独立配 bash fallback
+
+#### 3.3 输出 query_plan.md
 
 ```bash
-echo "[PM-Stage0] 检测 L1 基础设施层（静态类别 + 动态检测）..."
+# AI 用 Write 工具写入 .claude/context/query_plan.md
+# 格式沿用 query-plan-template.md（SCHEMA_VERSION 2.1.0），新增 doc_type + 父章节 ID + 问题序号 共 3 列
+# 目标 ID 前缀：doc_project_s_{section}_q{N} / doc_tech_s_{sub_section}_q{N} / doc_feature_s_{section}_q1
 
-# =============================================
-# 第一步：定义所有系统都有的基础类别（静态）
-# =============================================
-declare -A L1_CATEGORIES
-L1_CATEGORIES=(
-    ["FE-I-001"]="数据库|DB"
-    ["FE-I-002"]="缓存|Cache"
-    ["FE-I-003"]="文件系统|FileSystem"
-    ["FE-I-004"]="网络通信|Network"
-    ["FE-I-005"]="消息队列|MessageQueue"
-    ["FE-I-006"]="安全认证|Security"
-    ["FE-I-007"]="日志|Logging"
-    ["FE-I-008"]="配置管理|Config"
-)
+# 预期条目数：
+#   改前：~30-40 行（3 模板的所有 ## 章节，1 行 per section）
+#   改后：~110-130 行（project ~20 + tech ~50 + feature ~40，N-rows 拆 question 后）
+```
 
-# 初始化检测结果数组
-declare -A L1_DETECTED
-for key in "${!L1_CATEGORIES[@]}"; do
-    L1_DETECTED[$key]=""
-done
+#### 3.4 Human Gate：PM 审查覆盖率
+> 仿 arch-stage0 §2.4.6
 
-# =============================================
-# 第二步：从依赖文件动态检测实际技术栈
-# =============================================
-for DEP_FILE in "$ROOT/requirements.txt" "$ROOT/package.json" "$ROOT/pom.xml" "$ROOT/go.mod" "$ROOT/Gemfile" "$ROOT/build.gradle" "$ROOT/Cargo.toml"; do
-    if [ -f "$DEP_FILE" ]; then
-        echo "[PM-Stage0] 检测依赖文件: $DEP_FILE"
-
-        case "$DEP_FILE" in
-            *requirements.txt*)
-                # Python 项目
-                _detect() { grep -oE "$1" "$DEP_FILE" 2>/dev/null | head -1 || echo ""; }
-                [ -z "${L1_DETECTED[FE-I-001]}" ] && L1_DETECTED[FE-I-001]=$(_detect "mysql|postgresql|mongodb|sqlite|sqlalchemy|pymongo|aiomysql")
-                [ -z "${L1_DETECTED[FE-I-002]}" ] && L1_DETECTED[FE-I-002]=$(_detect "redis|memcached|aiocache")
-                [ -z "${L1_DETECTED[FE-I-003]}" ] && L1_DETECTED[FE-I-003]=$(_detect "boto3|aiofiles|shutil")
-                [ -z "${L1_DETECTED[FE-I-004]}" ] && L1_DETECTED[FE-I-004]=$(_detect "requests|httpx|aiohttp|urllib")
-                [ -z "${L1_DETECTED[FE-I-005]}" ] && L1_DETECTED[FE-I-005]=$(_detect "rabbitmq|kafka|pika|aiokafka")
-                [ -z "${L1_DETECTED[FE-I-006]}" ] && L1_DETECTED[FE-I-006]=$(_detect "jwt|pyjwt|bcrypt|passlib")
-                [ -z "${L1_DETECTED[FE-I-007]}" ] && L1_DETECTED[FE-I-007]=$(_detect "logging|loguru|python-json-logger")
-                [ -z "${L1_DETECTED[FE-I-008]}" ] && L1_DETECTED[FE-I-008]=$(_detect "pydantic|python-dotenv|configparser")
-                ;;
-            *package.json*)
-                # Node.js 项目
-                _detect() { grep -oE "$1" "$DEP_FILE" 2>/dev/null | head -1 || echo ""; }
-                [ -z "${L1_DETECTED[FE-I-001]}" ] && L1_DETECTED[FE-I-001]=$(_detect "mongoose|prisma|mongodb|mysql2|pg|sequelize")
-                [ -z "${L1_DETECTED[FE-I-002]}" ] && L1_DETECTED[FE-I-002]=$(_detect "redis|ioredis|memcached")
-                [ -z "${L1_DETECTED[FE-I-003]}" ] && L1_DETECTED[FE-I-003]=$(_detect "fs-extra|glob|chokidar")
-                [ -z "${L1_DETECTED[FE-I-004]}" ] && L1_DETECTED[FE-I-004]=$(_detect "axios|node-fetch|got|request")
-                [ -z "${L1_DETECTED[FE-I-005]}" ] && L1_DETECTED[FE-I-005]=$(_detect "amqp|rabbitmq|kafka|rsmq")
-                [ -z "${L1_DETECTED[FE-I-006]}" ] && L1_DETECTED[FE-I-006]=$(_detect "jsonwebtoken|bcrypt|crypto-js")
-                [ -z "${L1_DETECTED[FE-I-007]}" ] && L1_DETECTED[FE-I-007]=$(_detect "winston|bunyan|pino|log4js")
-                [ -z "${L1_DETECTED[FE-I-008]}" ] && L1_DETECTED[FE-I-008]=$(_detect "dotenv|config|yargs")
-                ;;
-            *pom.xml*)
-                # Java 项目
-                _detect() { grep -oE "$1" "$DEP_FILE" 2>/dev/null | head -1 || echo ""; }
-                [ -z "${L1_DETECTED[FE-I-001]}" ] && L1_DETECTED[FE-I-001]=$(_detect "mysql|postgresql|mongodb|jpa|hibernate")
-                [ -z "${L1_DETECTED[FE-I-002]}" ] && L1_DETECTED[FE-I-002]=$(_detect "redis|ehcache|caffeine")
-                [ -z "${L1_DETECTED[FE-I-003]}" ] && L1_DETECTED[FE-I-003]=$(_detect "java.io|java.nio|commons-io")
-                [ -z "${L1_DETECTED[FE-I-004]}" ] && L1_DETECTED[FE-I-004]=$(_detect "okhttp|webclient|resttemplate|apache-httpclient")
-                [ -z "${L1_DETECTED[FE-I-005]}" ] && L1_DETECTED[FE-I-005]=$(_detect "rabbitmq|kafka|jms|activemq")
-                [ -z "${L1_DETECTED[FE-I-006]}" ] && L1_DETECTED[FE-I-006]=$(_detect "spring-security|jwt|shiro")
-                [ -z "${L1_DETECTED[FE-I-007]}" ] && L1_DETECTED[FE-I-007]=$(_detect "logback|log4j|slf4j")
-                [ -z "${L1_DETECTED[FE-I-008]}" ] && L1_DETECTED[FE-I-008]=$(_detect "application.properties|application.yml|spring-boot-configuration")
-                ;;
-            *go.mod*)
-                # Go 项目
-                _detect() { grep -oE "$1" "$DEP_FILE" 2>/dev/null | head -1 || echo ""; }
-                [ -z "${L1_DETECTED[FE-I-001]}" ] && L1_DETECTED[FE-I-001]=$(_detect "gorm|xorm|mongo-go-driver|pgx")
-                [ -z "${L1_DETECTED[FE-I-002]}" ] && L1_DETECTED[FE-I-002]=$(_detect "redis|go-redis|memcached")
-                [ -z "${L1_DETECTED[FE-I-003]}" ] && L1_DETECTED[FE-I-003]=$(_detect "os|io|ioutil|filepath")
-                [ -z "${L1_DETECTED[FE-I-004]}" ] && L1_DETECTED[FE-I-004]=$(_detect "net/http|fasthttp|gorequest")
-                [ -z "${L1_DETECTED[FE-I-005]}" ] && L1_DETECTED[FE-I-005]=$(_detect "amqp|rabbitmq|kafka|sarama")
-                [ -z "${L1_DETECTED[FE-I-006]}" ] && L1_DETECTED[FE-I-006]=$(_detect "jwt|bcrypt|golang.org/x/crypto")
-                [ -z "${L1_DETECTED[FE-I-007]}" ] && L1_DETECTED[FE-I-007]=$(_detect "log|logur|slog")
-                [ -z "${L1_DETECTED[FE-I-008]}" ] && L1_DETECTED[FE-I-008]=$(_detect "envconfig|viper|godotenv")
-                ;;
-            *Cargo.toml*)
-                # Rust 项目
-                _detect() { grep -oE "$1" "$DEP_FILE" 2>/dev/null | head -1 || echo ""; }
-                [ -z "${L1_DETECTED[FE-I-001]}" ] && L1_DETECTED[FE-I-001]=$(_detect "sqlx|diesel|mongodb|postgres|rust-postgres")
-                [ -z "${L1_DETECTED[FE-I-002]}" ] && L1_DETECTED[FE-I-002]=$(_detect "redis|deadpool|moka")
-                [ -z "${L1_DETECTED[FE-I-003]}" ] && L1_DETECTED[FE-I-003]=$(_detect "std::fs|tokio::fs|async-std::fs")
-                [ -z "${L1_DETECTED[FE-I-004]}" ] && L1_DETECTED[FE-I-004]=$(_detect "reqwest|hyper|actix-web")
-                [ -z "${L1_DETECTED[FE-I-005]}" ] && L1_DETECTED[FE-I-005]=$(_detect "lapin|kafka-rust|rmp")
-                [ -z "${L1_DETECTED[FE-I-006]}" ] && L1_DETECTED[FE-I-006]=$(_detect "jsonwebtoken|bcrypt|rpassword")
-                [ -z "${L1_DETECTED[FE-I-007]}" ] && L1_DETECTED[FE-I-007]=$(_detect "log|tracing|env_logger")
-                [ -z "${L1_DETECTED[FE-I-008]}" ] && L1_DETECTED[FE-I-008]=$(_detect "config|serde|dotenv")
-                ;;
-        esac
-    fi
-done
-
-# =============================================
-# 第三步：输出检测结果
-# =============================================
+```bash
+echo "[PM-Stage0] 阶段 A 完成，请审查 query_plan.md 覆盖率..."
+echo "目标：3 份文档的 ## 章节数 ≈ query_plan.md 的 doc_* 条目数（允许 ±20%）"
 echo ""
-echo "=== L1 基础设施层检测结果 ==="
-for key in $(echo "${!L1_CATEGORIES[@]}" | tr ' ' '\n' | sort); do
-    CATEGORY=$(echo "${L1_CATEGORIES[$key]}" | cut -d'|' -f1)
-    TECH="${L1_DETECTED[$key]}"
-    if [ -n "$TECH" ]; then
-        echo "$key|$CATEGORY|$TECH|detected"
-    else
-        echo "$key|$CATEGORY|N/A|not-detected"
-    fi
-done
+echo "请选择："
+echo "  继续 - 进入阶段 B 执行"
+echo "  补充 - 列出需要补充的章节/query"
+echo "  暂停 - 暂停阶段 0"
+read -p "[继续/补充/暂停]: " GATE_A
+case "$GATE_A" in
+    补充|pause) exit 1 ;;
+    暂停|stop) exit 1 ;;
+esac
+bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "Human Gate" "阶段 A 审查" "" "通过"
 ```
 
-#### 5.3 Layer 2 领域层发现
-> 使用 Graphify query 分析（动态发现，不写死）
+---
+
+### 操作 0.4：阶段 B — 本地执行查询（生成 results.json）
+> **完全复用** architect-stage0 §2.5 全部 6 步
 
 ```bash
-cd "$ROOT"
-echo "[PM-Stage0] 使用 Graphify 分析 L2 领域层..."
-
-# 动态查询，不写死具体实体名
-DOMAIN_ENTITIES=$(graphify query "What are the main domain entities or business objects in this project" 2>/dev/null | head -50 || echo "[Graphify不可用]")
-DOMAIN_SERVICES=$(graphify query "What domain services or business logic classes exist" 2>/dev/null | head -30 || echo "")
-AGGREGATES=$(graphify query "What aggregates or aggregate roots are defined in the domain layer" 2>/dev/null | head -30 || echo "")
-
-echo "[PM-Stage0] L2 Graphify 分析完成"
-echo "--- 领域实体 ---"
-echo "$DOMAIN_ENTITIES"
-echo "--- 领域服务 ---"
-echo "$DOMAIN_SERVICES"
-echo "--- 聚合根 ---"
-echo "$AGGREGATES"
+bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤开始" "阶段 B：执行 query → results.json" "" ""
 ```
 
-#### 5.4 Layer 3 应用层发现
-> 使用 Graphify query 分析（动态发现，不写死）
+#### 4.1 提取词表（arch-stage0 §2.5.1，复制 Python 脚本）
+> 复用 arch-stage0 词表提取脚本，生成 graphify-out/.vocab.txt
 
 ```bash
-cd "$ROOT"
-echo "[PM-Stage0] 使用 Graphify 分析 L3 应用层..."
+# 复用 arch-stage0 词表逻辑
+if [ ! -f "$ROOT/graphify-out/graph.json" ]; then
+    echo "[PM-Stage0] ❌ graph.json 缺失，无法提取词表"
+    exit 1
+fi
 
-# 动态查询，不写死具体服务名
-USE_CASE_SERVICES=$(graphify query "What use case services or application services exist" 2>/dev/null | head -40 || echo "")
-EVENT_HANDLERS=$(graphify query "What event handlers or pub/sub patterns exist" 2>/dev/null | head -30 || echo "")
-WORKFLOWS=$(graphify query "What workflows or business process orchestration exist" 2>/dev/null | head -30 || echo "")
-ADAPTERS=$(graphify query "What third-party integrations or adapter classes exist" 2>/dev/null | head -30 || echo "")
-
-echo "[PM-Stage0] L3 Graphify 分析完成"
-echo "--- 用例服务 ---"
-echo "$USE_CASE_SERVICES"
-echo "--- 事件处理 ---"
-echo "$EVENT_HANDLERS"
-echo "--- 工作流 ---"
-echo "$WORKFLOWS"
-echo "--- 第三方适配 ---"
-echo "$ADAPTERS"
+$(cat $ROOT/graphify-out/.graphify_python) -c "
+import json, re
+from pathlib import Path
+data = json.loads(Path('graphify-out/graph.json').read_text())
+vocab = set()
+for n in data['nodes']:
+    for c in re.findall(r'[^\W\d_]+', n.get('label','') or '', re.UNICODE):
+        parts = re.findall(r'[A-Z]+(?=[A-Z][a-z])|[A-Z]?[a-z]+|[A-Z]+', c) or [c]
+        for p in parts:
+            t = p.lower()
+            if 3 <= len(t) <= 30:
+                vocab.add(t)
+Path('graphify-out/.vocab.txt').write_text('\n'.join(sorted(vocab)))
+print(f'vocab: {len(vocab)} tokens')
+"
 ```
 
-#### 5.5 Layer 4 接口层发现
-> 使用 Graphify query 分析（动态发现，不写死）
+#### 4.2 解析 query_plan.md（arch-stage0 §2.5.2）
+> AI 读 .claude/context/query_plan.md，持有 doc_project_* / doc_tech_* / doc_feature_* 队列
+>
+> **N-rows 重构 2026-06-06 关键变更**：
+> - 解析 9 列 schema（增加 父章节 ID / 问题序号 2 列）
+> - **按 `parent_section_id` + `question_index` 顺序执行**（同章节内从 `_q1` 到 `_qN`）
+> - 在内存中维护 `parent_section_id → [questions]` 分组（同一 `parent_section_id` 的 N 行将聚合到 results.json 同一个 item 的 `data.questions[]` 数组）
+
+#### 4.3 执行 graphify query（arch-stage0 §2.5.3）
+> 逐行执行，3 级降级（graphify → bash fallback → [NO_DATA]）
+>
+> **N-rows 重构后**：1 个 question = 1 个独立执行单位，per-question 独立判定 status
 
 ```bash
-cd "$ROOT"
-echo "[PM-Stage0] 使用 Graphify 分析 L4 接口层..."
-
-# 动态查询，不写死具体API名
-REST_APIS=$(graphify query "What REST endpoints or API routes are defined" 2>/dev/null | head -40 || echo "")
-GRAPHQL_APIS=$(graphify query "What GraphQL endpoints or schemas are defined" 2>/dev/null | head -20 || echo "")
-UI_COMPONENTS=$(graphify query "What UI components, pages, or views exist" 2>/dev/null | head -30 || echo "")
-CLI_COMMANDS=$(graphify query "What CLI commands or batch jobs are defined" 2>/dev/null | head -20 || echo "")
-EXTERNAL_INTEGRATIONS=$(graphify query "What external integrations, webhooks, or SDK usage exist" 2>/dev/null | head -30 || echo "")
-
-echo "[PM-Stage0] L4 Graphify 分析完成"
-echo "--- REST API ---"
-echo "$REST_APIS"
-echo "--- GraphQL ---"
-echo "$GRAPHQL_APIS"
-echo "--- UI 组件 ---"
-echo "$UI_COMPONENTS"
-echo "--- CLI ---"
-echo "$CLI_COMMANDS"
-echo "--- 外部集成 ---"
-echo "$EXTERNAL_INTEGRATIONS"
+# AI 伪代码（**N-rows 重构后，per-question 粒度**）：
+# for each row in query_plan.md (已按 parent_section_id + question_index 排序):
+#   1. eval $row.graphify_query
+#   2. if 失败: eval $row.bash_fallback
+#   3. if 失败: 标 [NO_DATA]
+#   4. 收集 status: success / fallback / no_data / failed（per question）
+#   5. 收集 data: 单 question 的字段值（per question）
+#   6. 收集 evidence: file:line 列表（per question）
+#   7. **将同 parent_section_id 的 N 个 question 聚合到 results.json 同一个 item 的 data.questions[] 数组**
 ```
 
-#### 5.6 展示发现结果给用户
-> 将 L1-L4 的分析结果展示给用户，等待用户确认
+#### 4.4 bash fallback（arch-stage0 §2.5.4）
+> graphify 失败时执行；本步与 4.3 配合实现 3 级降级
 
 ```bash
-echo "========================================="
-echo "L1 基础设施层检测结果"
-echo "========================================="
-echo "$L1_ITEMS"
-echo ""
-echo "========================================="
-echo "L2 领域层发现结果"
-echo "========================================="
-echo "$DOMAIN_ENTITIES"
-echo "$DOMAIN_SERVICES"
-echo "$AGGREGATES"
-echo ""
-echo "========================================="
-echo "L3 应用层发现结果"
-echo "========================================="
-echo "$USE_CASE_SERVICES"
-echo "$EVENT_HANDLERS"
-echo "$WORKFLOWS"
-echo "$ADAPTERS"
-echo ""
-echo "========================================="
-echo "L4 接口层发现结果"
-echo "========================================="
-echo "$REST_APIS"
-echo "$GRAPHQL_APIS"
-echo "$UI_COMPONENTS"
-echo "$CLI_COMMANDS"
-echo "$EXTERNAL_INTEGRATIONS"
+# AI 伪代码：for each row where graphify returned empty/errored:
+#   1. eval $row.bash_fallback
+#   2. if success: 标 status="fallback"，note 标记 [BASH_FALLBACK]
+#   3. if failed: 标 status="no_data"
+#   4. 即使 bash 成功，evidence 也应引用 file:line（不引用 graphify 节点）
+#
+# 关键约束（来自 arch-stage0 §2.5.4）：
+#   - graphify 失败原因可能是：词表无匹配 token / graph.json 损坏 / 返回 0 节点
+#   - bash fallback 必须真实可执行（不要写伪命令）
+#   - 若 graphify 返回 0 节点但 bash 成功，evidence 仍要 file:line 引用
+#   - **N-rows 重构后**：每个 question 独立配 bash fallback，独立判定
 ```
 
-#### 5.7 用户访谈：确认 L1-L4 + 识别 L5 业务场景
-> 不写死业务场景名称，从 Graphify 分析结果 + 用户确认来动态发现
-
-**用户访谈问题**：
-
-```
-根据代码分析，我们发现以下内容：
-
-L1 基础设施层：{动态检测到的内容}
-L2 领域层：{动态发现的实体/服务/聚合根}
-L3 应用层：{动态发现的服务/事件/工作流}
-L4 接口层：{动态发现的API/UI/外部集成}
-
-请确认：
-1. 以上 L1-L4 的发现是否准确？
-2. 是否有遗漏？
-3. 能否识别出 L5 业务场景？（横跨 L1-L4 的完整业务流程）
-   - 提示：可以按"从哪个API进入 → 经过哪个服务 → 操作哪个实体 → 调用哪个基础设施"来识别
-   - 例如：场景A = POST /api/orders → OrderService → Order → PostgreSQL
-   - 例如：场景B = POST /api/payments → PaymentService → Payment → Alipay SDK
-
-请描述你发现的业务场景（可以用自然语言，不需要预先定义格式）
-```
-
-#### 5.8 记录用户确认的 L5 业务场景
-> 根据用户回复，动态生成 L5 业务场景清单
+#### 4.5 写入 results.json（arch-stage0 §2.5.5）
+> 写入 .claude/context/results.json，遵循 results-json-schema.md（含 3 个新 type，SCHEMA_VERSION 2.1.0，N-rows 重构后）
+>
+> **N-rows 重构后关键约定**：
+> - items 数量 = query_plan.md **去重后的 parent_section_id 数**（不再 = 行数）
+> - 每个 item 的 `data.questions[]` 数组装 N 个原子 question 的执行结果
+> - `data.fields` / `data.elements` 作为**可选聚合视图**（AI 阶段 C 直接消费）
 
 ```bash
-# 用户回复后，解析并记录确认的业务场景
-# 每个场景记录：场景名称、涉及的 L2 实体、L3 服务、L4 接口、L1 依赖
+# AI 用 Write 工具写入 .claude/context/results.json
+# 包含 type: project_section / tech_stack_section / feature_elements_section 三种
+# 每个 item 必含 data.questions 数组（length >= 1）
 
-CONFIRMED_SCENARIOS="{用户的回复}"
-
-echo "[PM-Stage0] 用户确认的业务场景："
-echo "$CONFIRMED_SCENARIOS"
+# 示例结构（**N-rows 重构后**）：
+# {
+#   "schema_version": "2.1.0",
+#   "items": {
+#     "doc_project_s_1": {                           # 1 个章节 = 1 个 item
+#       "type": "project_section",
+#       "data": {
+#         "section_id": "1",
+#         "section_title": "项目总体介绍",
+#         "questions": [                              # 3 个 question 的独立结果
+#           {"key": "doc_project_s_1_q1", "status": "success", "data": {"项目名称": "Mefan"}, "evidence": ["package.json:5"]},
+#           {"key": "doc_project_s_1_q2", "status": "success", "data": {"项目类型": "二次开发"}, "evidence": ["pyproject.toml:3"]},
+#           {"key": "doc_project_s_1_q3", "status": "fallback", "data": {"核心功能概述": "..."}, "evidence": ["README.md:1-30"]}
+#         ],
+#         "fields": {                                 # 可选聚合视图
+#           "项目名称": "Mefan", "项目类型": "二次开发", "核心功能概述": "..."
+#         }
+#       }
+#     }
+#   }
+# }
 ```
 
-#### 5.9 确认 L5 业务场景已记录
-> L5 业务场景已记录在 feature-elements.md 中，Architect Agent 将从该文件读取
+#### 4.6 阶段 B 验证（arch-stage0 §2.5.6）
+> 复用 jq 校验逻辑（**N-rows 重构后加强**）
 
 ```bash
-echo "[PM-Stage0] 确认 L5 业务场景已记录在 feature-elements.md"
-echo "[PM-Stage0] Architect-Agent 将从 feature-elements.md 读取 L5 场景并生成业务 Skills"
+FAILED=$(jq '[.items[] | select(.status == "failed")] | length' $ROOT/.claude/context/results.json 2>/dev/null || echo 0)
+NO_DATA=$(jq '[.items[] | select(.status == "no_data")] | length' $ROOT/.claude/context/results.json 2>/dev/null || echo 0)
+TOTAL=$(jq '.items | length' $ROOT/.claude/context/results.json 2>/dev/null || echo 0)
+TOTAL_Q=$(jq '[.items[].data.questions // [] | length] | add // 0' $ROOT/.claude/context/results.json 2>/dev/null || echo 0)
+
+# **N-rows 重构新增**：每 item 的 data.questions.length >= 1
+EMPTY_Q=$(jq '[.items[] | select((.data.questions // []) | length == 0)] | length' $ROOT/.claude/context/results.json 2>/dev/null || echo 0)
+if [ "$EMPTY_Q" -gt 0 ]; then
+    echo "[PM-Stage0] ⚠️ N-rows 不变量违反：$EMPTY_Q 个 item 的 data.questions 为空"
+fi
+
+if [ $((FAILED + NO_DATA)) -gt $((TOTAL / 5)) ]; then
+    echo "[PM-Stage0] ⚠️ 失败率超过 20%：failed=$FAILED no_data=$NO_DATA total=$TOTAL"
+    echo "[PM-Stage0] 建议：回阶段 A 调整 query 或检查 graph.json 完整性"
+fi
+bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤完成" "阶段 B：results.json 生成" "$ROOT/.claude/context/results.json" "成功"
 ```
 
-#### 5.10 产出记录
+---
+
+### 操作 0.5：阶段 C — AI 组装 3 份 context 文档
+> **模式 C 重构核心**：AI 用 **Write 工具**基于 results.json 组装 3 份文档（不再用 bash heredoc）
+
 ```bash
+bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤开始" "阶段 C：AI 组装 3 份 context 文档" "" ""
+```
+
+#### 5.1 组装顺序与原则
+
+**生成顺序**：project.md → tech-stack-profile.md → feature-elements.md
+- 依据：依赖性递减（project 元信息最少，feature-elements 最复杂）
+
+**AI 装配硬约束**（来自 arch-stage0 §2.6.2/§2.7.1）：
+- 每个章节**必须基于 results.json 的 data 字段**撰写
+- 数据缺失 → 写 `[需人工补充]`，**禁止编造**（不允许"React/FastAPI/SQLite"等 fallback）
+- 每个数据点**必须引用 evidence 数组的 file:line**
+- AI 用 **Write 工具**直接写 markdown 文件（**不在 heredoc 中**）
+
+#### 5.2 AI 组装 project.md
+
+```bash
+# AI 操作（伪代码，**N-rows 重构后**）：
+#   1. Read .claude/context/results.json
+#   2. 过滤 items | where(.type == "project_section")
+#   3. Read .claude/templates/project-template.md（结构参考）
+#   4. 对每个 ## 章节：
+#      a. 取对应 item（item key = parent_section_id，如 doc_project_s_1）
+#      b. **遍历 item.data.questions[]**，每个 question 独立贡献字段值：
+#         - status=success/fallback → 用其 data 字段填模板对应字段
+#         - status=no_data/failed → 写 [需人工补充]
+#      c. （可选）便捷聚合：item.data.fields 已是 questions[*].data 合并去重后的视图，可直接消费
+#   5. Write 工具写入 .claude/context/project.md
+
+echo "[PM-Stage0] 阶段 C/5.2：组装 project.md..."
+# AI 实际执行（用 Write 工具）
+bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "产出物" "生成 project.md" ".claude/context/project.md" "成功"
+```
+
+**预期章节**（对照 project-template.md）：
+- §1 项目总体介绍（~3-4 字段，由 3-4 个 question 聚合）
+- §2 项目功能介绍（~4 字段）
+- §3 项目性质（~3 字段）
+- §4 tech stack 前端/后端/数据库（共 ~10 字段）
+- §5 其他关键信息（~3 字段）
+- §6 迭代历史（动态填入）
+- §7 待补充项（缺失字段列表 = no_data 状态的 questions 列表）
+
+#### 5.3 AI 组装 tech-stack-profile.md
+
+```bash
+echo "[PM-Stage0] 阶段 C/5.3：组装 tech-stack-profile.md..."
+# AI 操作（伪代码，**N-rows 重构后**）：
+#   对每个 ## 子节：
+#     1. 取对应 item（item key = parent_section_id，如 doc_tech_s_2_2 中间件）
+#     2. **遍历 item.data.questions[]**，每个 question 贡献一个独立组件/中间件
+#        - 例：doc_tech_s_2_2 4 个 questions → 4 行（CORS / Helmet / Compression / Logging）
+#        - status=success/fallback → 填组件名 + 版本
+#        - status=no_data/failed → 写 [需人工补充]
+# AI 实际执行（用 Write 工具）
+bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "产出物" "生成 tech-stack-profile.md" ".claude/context/tech-stack-profile.md" "成功"
+```
+
+**预期章节**（对照 tech-stack-profile-template.md）：
+- §1 前端技术栈（6 子节：核心框架/UI 组件库/状态管理/路由/构建工具/依赖清单）
+- §2 后端技术栈（4 子节：核心框架/中间件/运行时/依赖清单）
+- §3 数据库层（3 子节：主数据库/缓存/消息队列）
+- §4 DevOps 与基础设施（3 子节：容器化/CI-CD/监控日志）
+- §5 测试技术栈（3 子节：单元/集成/E2E）
+- §6 版本清单汇总（2 子节：核心依赖/系统环境）
+- §7 技术债务备注
+- §8 参考链接
+
+#### 5.4 AI 组装 feature-elements.md
+
+```bash
+echo "[PM-Stage0] 阶段 C/5.4：组装 feature-elements.md..."
+# AI 操作（伪代码，**N-rows 重构后保持 1:1**）：
+#   对每个 ## 章节（**1 章节 = 1 item = 1 question**，保持 1:1 不展开）：
+#     1. 取对应 item（item key = parent_section_id，如 doc_feature_s_3_1）
+#     2. **取 item.data.questions[0]**（仅 1 个 question）
+#     3. 该 question 的 data.elements 数组 = 该章节的 FE 清单
+#        - status=success/fallback → 用 elements 填 FE 表格
+#        - status=no_data/failed → 写 [需人工补充]（章节级）
+#     4. 便捷聚合：item.data.elements 已是 questions[0].data.elements 视图，可直接消费
+# AI 实际执行（用 Write 工具）
 bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "产出物" "生成 feature-elements.md" ".claude/context/feature-elements.md" "成功"
-bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤完成" "feature-elements.md 生成" "" "成功"
 ```
+
+**预期章节**（对照 feature-elements-template.md）：
+- §1 系统架构图（mermaid 块，5 层结构）—— 1 question（query 静态/不可执行 → 标 n/a）
+- §2 层次说明（5 行表）—— 1 question
+- §3 FE 清单 L1-L5（5 个子表，~21 行）—— **1 question**（FE 内的元数据字段不 N×M 拆，整体拿）
+- **§4 FE 详情 L1-L5（5 个子节，~13 张表，每张 8-10 字段）** —— 1 question
+- **§5 依赖关系矩阵（5x5 矩阵）** —— 1 question
+- **§6 Graphify 查询模板（11 个 query 示例）** —— 1 question
+- **§7 L5 业务场景识别流程（流程图 + 访谈问题）** —— 1 question
+
+**N-rows 重构不变量（feature-elements 专属）**：
+- 1 个章节 = 1 个 item = 1 个 question（`data.questions.length == 1`）
+- 不为"FE-I-001 数据库"的"name/version/host/port/..." 8 个字段拆 8 行——避免 40 FE × 8 字段 = 320 行爆炸
+- FE 内的元数据通过 1 个 graphify query 整体拿，AI 阶段 C 一次性消费 `question.data.elements[]`
+
+#### 5.5 阶段 D 验证（arch-stage0 §2.8 复用）
+
+```bash
+echo "[PM-Stage0] 阶段 D 验证..."
+ERRORS=0
+
+# 1. 章节数检查：生成文档 ≥ 模板
+for doc in project tech-stack-profile feature-elements; do
+    GEN=$(grep -cE "^## " $ROOT/.claude/context/${doc}.md 2>/dev/null || echo 0)
+    TMPL=$(grep -cE "^## " $ROOT/.claude/templates/${doc}-template.md 2>/dev/null || echo 0)
+    if [ "$GEN" -lt "$TMPL" ]; then
+        echo "[PM-Stage0] ⚠️ $doc: 生成 $GEN < 模板 $TMPL（章节缺失）"
+        ERRORS=$((ERRORS + 1))
+    fi
+done
+
+# 2. evidence 引用检查
+EVIDENCE_TOTAL=$(grep -cE "\.md:[0-9]+|:[0-9]+-[0-9]+|\.py:[0-9]+|\.ts:[0-9]+|\.toml:[0-9]+|\.json:[0-9]+" $ROOT/.claude/context/project.md $ROOT/.claude/context/tech-stack-profile.md $ROOT/.claude/context/feature-elements.md 2>/dev/null | awk -F: '{s+=$2} END {print s}')
+if [ "${EVIDENCE_TOTAL:-0}" -lt 10 ]; then
+    echo "[PM-Stage0] ⚠️ evidence 引用过少：$EVIDENCE_TOTAL（期望 ≥ 10）"
+fi
+
+# 3. [需人工补充] 占比警告
+NO_DATA_COUNT=$(grep -c "\[需人工补充\]" $ROOT/.claude/context/*.md 2>/dev/null | awk -F: '{s+=$2} END {print s}')
+TOTAL_FIELDS=$(grep -cE "^\| \*\*" $ROOT/.claude/context/*.md 2>/dev/null | awk -F: '{s+=$2} END {print s}')
+if [ "${TOTAL_FIELDS:-0}" -gt 0 ] && [ $((NO_DATA_COUNT * 100 / TOTAL_FIELDS)) -gt 30 ]; then
+    echo "[PM-Stage0] ⚠️ [需人工补充] 占比 > 30%（$NO_DATA_COUNT/$TOTAL_FIELDS），建议人工审查"
+fi
+
+if [ "$ERRORS" -gt 0 ]; then
+    echo "[PM-Stage0] ❌ 阶段 D 验证发现 $ERRORS 项问题"
+fi
+
+bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤完成" "阶段 C/D：3 份 context 文档 AI 组装" "" "成功"
+```
+
+---
 
 ---
 
@@ -768,6 +764,102 @@ bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤完成" "session
 
 ```bash
 bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "产出物" "更新 project.md 迭代历史" ".claude/context/project.md" "成功"
+```
+
+---
+
+### 操作 0.7：读取 Stage 6 闭环产物（Stage 6→Stage 0 主循环）
+> **目的**：建立 Stage 6 → 下一迭代 Stage 0 的显式闭环。读取 4 类历史产物，避免迭代知识丢失。
+
+```bash
+bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤开始" "读取 Stage 6 闭环产物" "" ""
+```
+
+#### 7.1 读取 evolution-proposals（教练提案 + PM 审批）
+> 来自阶段 6（coach-stage6 + pm-stage6）的进化提案。若有 Approved 状态，本迭代需落地。
+
+```bash
+# 1. 列出所有 evolution-proposals 文件
+EVOLUTION_FILES=$(ls $ROOT/.claude/evolution-proposals/*.md 2>/dev/null || echo "")
+
+# 2. 若有提案，PM 必须在 session-status.md 记录"本迭代进化项"小节
+if [ -n "$EVOLUTION_FILES" ]; then
+    echo "[PM-Stage0] 发现 $(echo "$EVOLUTION_FILES" | wc -l) 个 evolution-proposal"
+    for f in $EVOLUTION_FILES; do
+        STATUS=$(grep -E "^- \[ \]|^- \[x\]" "$f" | head -3)
+        echo "[PM-Stage0] 提案：$(basename $f) | 状态：$STATUS"
+    done
+fi
+```
+
+**AI 操作**：
+1. Read 工具 `.claude/evolution-proposals/*.md`（教练提案 + PM 审批）
+2. 识别 Approved 状态的提案
+3. 在 session-status.md 的 `## 实验规则/技能加载记录` 章节追加"本迭代进化项"小节
+4. 把待落地的实验项纳入本迭代的迭代计划
+
+#### 7.2 读取上一迭代 retrospective（复盘 + 改进模式）
+> 来自 pm-stage6 的迭代复盘，含技术债务、缺陷趋势、改进建议
+
+```bash
+# 读取 sprint-latest 的复盘
+RETRO_FILE="$ROOT/.claude/iterations/sprint-latest/iteration-retrospective.md"
+if [ -f "$RETRO_FILE" ]; then
+    echo "[PM-Stage0] 读取上一迭代复盘：$RETRO_FILE"
+    # 提取关键章节
+    grep -E "^## " "$RETRO_FILE" | head -20
+else
+    echo "[PM-Stage0] ⚠️ 暂无 sprint-latest/iteration-retrospective.md（首次迭代或未完成 stage 6）"
+fi
+
+# 读取最近归档 sprint 的复盘
+LATEST_SPRINT=$(ls -dt $ROOT/.claude/iterations/sprint-* 2>/dev/null | head -1)
+if [ -n "$LATEST_SPRINT" ] && [ -f "$LATEST_SPRINT/iteration-retrospective.md" ]; then
+    echo "[PM-Stage0] 读取最近归档复盘：$LATEST_SPRINT/iteration-retrospective.md"
+    grep -E "^## " "$LATEST_SPRINT/iteration-retrospective.md" | head -20
+fi
+```
+
+**AI 操作**：
+1. Read 工具 `.claude/iterations/sprint-latest/iteration-retrospective.md`（本迭代复盘，可能不存在）
+2. Read 工具 `.claude/iterations/sprint-*/iteration-retrospective.md`（最近归档的 sprint 复盘）
+3. 提取"待改进模式"和"技术债务"章节
+4. 把改进项纳入 session-status.md 的 `## 异常记录` 或本迭代的 feature 列表
+
+#### 7.3 读取 PROJECT_STATUS.md（全局视角）
+> 来自 pm-stage6 步骤 4 的全局状态报告
+
+```bash
+STATUS_FILE="$ROOT/reports/PROJECT_STATUS.md"
+if [ -f "$STATUS_FILE" ]; then
+    echo "[PM-Stage0] 读取项目状态：$STATUS_FILE"
+    grep -E "^## " "$STATUS_FILE" | head -20
+else
+    echo "[PM-Stage0] ⚠️ 暂无 reports/PROJECT_STATUS.md（首次迭代或未完成 stage 6）"
+fi
+```
+
+**AI 操作**：
+1. Read 工具 `reports/PROJECT_STATUS.md`（项目全局状态）
+2. 提取"项目健康度"、"技术债务总览"、"下一迭代建议"章节
+3. 把建议纳入本迭代的 feature 优先级
+
+#### 7.4 记录闭环读取结果
+
+在 `session-status.md` 追加：
+
+```markdown
+## Stage 6 闭环读取记录
+
+| 产物 | 路径 | 状态 | 关键摘要 |
+|------|------|------|---------|
+| evolution-proposals | `.claude/evolution-proposals/*.md` | ✅/⏳ N 项 | （摘要） |
+| iteration-retrospective | `.claude/iterations/sprint-*/iteration-retrospective.md` | ✅/⏳ | （摘要） |
+| PROJECT_STATUS | `reports/PROJECT_STATUS.md` | ✅/⏳ | （摘要） |
+```
+
+```bash
+bash $ROOT/.claude/hooks/log-event.sh "00" "$AGENT_NAME" "步骤完成" "读取 Stage 6 闭环产物" "" "成功"
 ```
 
 ---

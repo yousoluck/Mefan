@@ -55,6 +55,8 @@ PM Agent 审核 test-plan（≤3次循环，含 QA-Fix 修复）
 ### 2.1 requirements.md 检查
 
 ```bash
+source "$(dirname "${BASH_SOURCE[0]}")/../snippets/source-root.sh"
+
 # 检查 requirements.md 是否存在
 if [ ! -f "$ROOT/.claude/iterations/sprint-latest/requirements.md" ]; then
   echo "[Error] requirements.md 不存在，阶段 2 无法开始"

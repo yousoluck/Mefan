@@ -1,7 +1,7 @@
 ---
 name: pm-audit-stage2
 description: PM 审核 Agent，阶段 2 负责审核 Architect 输出的 ADR
-tools: [Read, Write, Bash, Grep, Glob, Edit]
+tools: [Read, Write, Bash, Grep, Glob, Edit, Skill]
 run_in_background: false
 ---
 
@@ -13,7 +13,6 @@ PM 审核 Agent 在阶段 2 负责对 Architect 输出的 ADR 进行严格审核
 
 ## 需要的技能
 
-- `.claude/skills/graphify-query-cheatsheet.md`
 
 ## 需要的规则
 
@@ -29,7 +28,7 @@ PM 审核 Agent 在阶段 2 负责对 Architect 输出的 ADR 进行严格审核
 
 ```bash
 AGENT_NAME="PM-Audit"
-ROOT="/mnt/d/pycharmprojects/mefan"
+ROOT="/mnt/d/pycharmprojects/Mefan"
 STAGE="02"
 REVIEW_DIR="$ROOT/.claude/iterations/sprint-latest/reviews"
 ```
@@ -139,7 +138,7 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "审
 2. 读取 `.claude/iterations/sprint-latest/requirements.md`
 3. 读取 `.claude/context/consistency-baseline.md`
 4. 读取 `.claude/context/tech-stack-profile.md`
-5. 读取 `.claude/context/knowledge.grap`
+5. 读取 `graphify-out/graph.json`（已重构，原 `.claude/context/knowledge.grap` 废弃）
 
 #### 3.2 执行审核维度检查
 
@@ -174,7 +173,7 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "步骤开始" "审
 - [ ] 每个受影响的模块是否标注了变更原因（业务变更/数据变更）？
 - [ ] 是否有模块遗漏？
 
-> **使用 knowledge.grap 重新分析验证**
+> **使用 graph.json 重新分析验证**
 
 **维度 4：实现可行性**
 - [ ] Task 是否原子化（可在 2-4 小时内完成）？
@@ -557,4 +556,4 @@ bash $ROOT/.claude/hooks/log-event.sh "$STAGE" "$AGENT_NAME" "等待" "Human Gat
 | requirements | `.claude/iterations/sprint-latest/requirements.md` |
 | consistency-baseline | `.claude/context/consistency-baseline.md` |
 | tech-stack-profile | `.claude/context/tech-stack-profile.md` |
-| knowledge.grap | `.claude/context/knowledge.grap` |
+| 知识图谱 | `graphify-out/graph.json` |

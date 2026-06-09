@@ -261,7 +261,7 @@ flowchart LR
 
 ---
 
-##### 8. 受影响范围（来自 knowledge.grap 分析）
+##### 8. 受影响范围（来自 graph.json 分析）
 
 > 必须明确：本 US 是**新增**、**改动** 还是**删除**？
 
@@ -334,7 +334,7 @@ flowchart LR
 | 所有 US 都已拆分 Sub-feature | ✅/❌ |
 | 所有 US 的 Gherkin 验收标准已填写 | ✅/❌ |
 | 所有 US 的错误/边界/异常场景已填写 | ✅/❌ |
-| 所有 US 的受影响范围已通过 knowledge.grap 分析 | ✅/❌ |
+| 所有 US 的受影响范围已通过 graph.json 分析 | ✅/❌ |
 | 所有 US 的风险评估已填写 | ✅/❌ |
 | 所有非功能需求已填写（如有） | ✅/❌ |
 | Sub-feature 之间依赖关系已标注 | ✅/❌ |
@@ -350,7 +350,7 @@ flowchart LR
 | 文档 | 路径 |
 |------|------|
 | 功能需求文档 | `.claude/iterations/sprint-latest/feature.md` |
-| 知识图谱 | `.claude/context/knowledge.grap` |
+| 知识图谱 | `graphify-out/graph.json` |
 | 项目上下文 | `.claude/context/project.md` |
 | 技术栈（不作为需求输入，仅作实现参考） | `.claude/context/tech-stack-profile.md` |
 | 一致性基线（不作为需求输入，仅作实现参考） | `.claude/context/consistency-baseline.md` |
